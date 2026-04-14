@@ -1,20 +1,87 @@
 <!DOCTYPE html>
-<html>
-<body style="background:#0f172a;color:white;font-family:Arial;padding:20px;">
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard</title>
 
-<h2>🧪 Teste Supabase</h2>
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+}
 
-<button onclick="testar()" style="padding:10px;border:none;border-radius:8px;background:#22c55e;">
-  Testar conexão
-</button>
+.container {
+  padding: 20px;
+}
 
-<div id="log" style="margin-top:20px;background:#020617;padding:10px;border-radius:10px;"></div>
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: none;
+}
 
+button {
+  background: #22c55e;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  width: 100%;
+  margin-top: 5px;
+}
+
+.card {
+  background: #1e293b;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 10px;
+}
+
+.delete {
+  background: red;
+}
+
+#logs {
+  margin-top: 20px;
+  background: #020617;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>📦 Dashboard</h2>
+
+  <input id="nome" placeholder="Nome do item">
+  <textarea id="descricao" placeholder="Descrição"></textarea>
+  <input id="preco" placeholder="Preço">
+
+  <button onclick="publicar()">Publicar</button>
+
+  <h3>📋 Itens:</h3>
+  <div id="lista"></div>
+
+  <div id="logs"></div>
+</div>
+
+<!-- SUPABASE V2 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 function log(msg) {
-  document.getElementById("log").innerHTML += msg + "<br>";
+  const el = document.getElementById("logs");
+  el.innerHTML += msg + "<br>";
+  el.scrollTop = el.scrollHeight;
 }
 
 log("🚀 Página carregada");
@@ -26,21 +93,85 @@ const client = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicWxleWNkcmtkaHhyb3pzbXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzYwOTQsImV4cCI6MjA5MTc1MjA5NH0.KWT_IMxwmD_fcAf1Xg9c8oE5m682_BNo_vjSZlZtZNA"
 );
 
-log("🔗 Cliente criado");
+log("✅ Supabase conectado");
 
-async function testar() {
-  log("📡 Testando conexão...");
+async function carregar() {
+  log("📥 Carregando itens...");
 
   const { data, error } = await client
     .from("produtos")
-    .select("*");
+    .select("*")
+    .order("criado_em", { ascending: false });
 
   if (error) {
-    log("❌ ERRO: " + error.message);
+    log("❌ Erro ao carregar: " + error.message);
+    return;
+  }
+
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  data.forEach(item => {
+    lista.innerHTML += `
+      <div class="card">
+        <b>${item.nome}</b><br>
+        ${item.descricao}<br>
+        💰 R$ ${item.preco}<br>
+        <button class="delete" onclick="deletar('${item.id}')">Excluir</button>
+      </div>
+    `;
+  });
+
+  log("✅ Itens carregados");
+}
+
+async function publicar() {
+  log("🟡 Publicando...");
+
+  const nome = document.getElementById("nome").value;
+  const descricao = document.getElementById("descricao").value;
+  const preco = document.getElementById("preco").value;
+
+  if (!nome || !descricao || !preco) {
+    log("❌ Preencha tudo");
+    return;
+  }
+
+  const { error } = await client
+    .from("produtos")
+    .insert([{ nome, descricao, preco }]);
+
+  if (error) {
+    log("❌ Erro ao salvar: " + error.message);
   } else {
-    log("✅ Conectado! Dados: " + JSON.stringify(data));
+    log("✅ Item salvo!");
+
+    document.getElementById("nome").value = "";
+    document.getElementById("descricao").value = "";
+    document.getElementById("preco").value = "";
+
+    carregar();
   }
 }
+
+async function deletar(id) {
+  log("🗑️ Deletando...");
+
+  const { error } = await client
+    .from("produtos")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    log("❌ Erro ao deletar: " + error.message);
+  } else {
+    log("✅ Item deletado!");
+    carregar();
+  }
+}
+
+// carregar ao abrir
+carregar();
 </script>
 
 </body>
