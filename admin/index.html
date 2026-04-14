@@ -6,73 +6,18 @@
 <title>Painel Admin</title>
 
 <style>
-    body { 
-        margin:0; 
-        font-family: Arial, sans-serif; 
-        background:#0f172a; 
-        color:#e2e8f0; 
-    }
-    .container { 
-        max-width: 900px; 
-        margin: 0 auto; 
-        padding:20px; 
-    }
-    input, textarea { 
-        width:100%; 
-        padding:14px; 
-        margin:10px 0; 
-        border-radius:10px; 
-        border:none; 
-        background:#1e2937; 
-        color:white; 
-        font-size:16px; 
-    }
-    button { 
-        padding:14px 20px; 
-        border:none; 
-        border-radius:10px; 
-        cursor:pointer; 
-        margin:8px 0; 
-        font-weight:600; 
-        font-size:16px; 
-    }
-    .add { 
-        background:#22c55e; 
-        width:100%; 
-        font-size:18px; 
-    }
+    body { margin:0; font-family: Arial, sans-serif; background:#0f172a; color:#e2e8f0; }
+    .container { max-width: 900px; margin: 0 auto; padding:20px; }
+    input, textarea { width:100%; padding:14px; margin:10px 0; border-radius:10px; border:none; background:#1e2937; color:white; font-size:16px; }
+    button { padding:14px 20px; border:none; border-radius:10px; cursor:pointer; margin:8px 0; font-weight:600; font-size:16px; }
+    .add { background:#22c55e; width:100%; font-size:18px; }
     .delete { background:#ef4444; color:white; }
     .star { background:#eab308; color:black; }
-    .card { 
-        background:#1e2937; 
-        padding:15px; 
-        margin-top:15px; 
-        border-radius:12px; 
-    }
-    img { 
-        max-width:100%; 
-        border-radius:10px; 
-        margin:10px 0; 
-    }
-    #preview { 
-        margin:15px 0; 
-        text-align:center; 
-    }
-    #preview img { 
-        max-height:250px; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
-    }
-    #logs { 
-        margin-top:30px; 
-        background:#020617; 
-        padding:15px; 
-        border-radius:10px; 
-        font-family:monospace; 
-        font-size:13px; 
-        max-height:300px; 
-        overflow-y:auto; 
-        line-height:1.4;
-    }
+    .card { background:#1e2937; padding:15px; margin-top:15px; border-radius:12px; }
+    img { max-width:100%; border-radius:10px; margin:10px 0; }
+    #preview { margin:15px 0; text-align:center; }
+    #preview img { max-height:250px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+    #logs { margin-top:30px; background:#020617; padding:15px; border-radius:10px; font-family:monospace; font-size:13px; max-height:320px; overflow-y:auto; line-height:1.4; }
 </style>
 </head>
 <body>
@@ -116,7 +61,7 @@
         el.scrollTop = el.scrollHeight;
     }
 
-    // Preview da imagem selecionada da galeria
+    // Preview da imagem
     document.getElementById('imagemInput').addEventListener('change', (e) => {
         imagemFile = e.target.files[0];
         if (!imagemFile) return;
@@ -125,14 +70,13 @@
         reader.onload = function(ev) {
             document.getElementById('preview').innerHTML = `
                 <img src="${ev.target.result}" alt="Pré-visualização">
-                <small style="color:#86efac; display:block; margin-top:8px;">
-                    Imagem selecionada da galeria ✓
-                </small>
+                <small style="color:#86efac; display:block; margin-top:8px;">Imagem selecionada da galeria ✓</small>
             `;
         };
         reader.readAsDataURL(imagemFile);
     });
 
+    // === FUNÇÃO CORRIGIDA DO UPLOAD ===
     async function uploadImagem() {
         if (!imagemFile) return null;
 
@@ -150,14 +94,11 @@
 
         if (uploadError) {
             log("Erro no upload: " + uploadError.message, "error");
-            console.error("Upload error:", uploadError);
+            console.error(uploadError);
             return null;
         }
 
-        const { data: urlData } = client.storage
-            .from('produtos')
-            .getPublicUrl(fileName);
-
+        const { data: urlData } = client.storage.from('produtos').getPublicUrl(fileName);
         log("✅ Imagem enviada com sucesso", "success");
         return urlData.publicUrl;
     }
@@ -165,10 +106,10 @@
     async function publicar() {
         const nome = document.getElementById("nome").value.trim();
         const descricao = document.getElementById("descricao").value.trim();
-        const preco = document.getElementById("preco").value.trim();
+        const precoStr = document.getElementById("preco").value.trim();
         const whatsapp = document.getElementById("whatsapp").value.trim();
 
-        if (!nome || !descricao || !preco) {
+        if (!nome || !descricao || !precoStr) {
             log("❌ Nome, descrição e preço são obrigatórios", "error");
             return;
         }
@@ -176,24 +117,24 @@
         let imagemUrl = null;
         if (imagemFile) {
             imagemUrl = await uploadImagem();
-            if (!imagemUrl) return;   // para se der erro no upload
+            if (!imagemUrl) return;
         }
 
         const { error } = await client.from("produtos").insert([{
             nome,
             descricao,
-            preco: parseFloat(preco),
+            preco: parseFloat(precoStr),
             whatsapp: whatsapp || null,
             imagem: imagemUrl,
             destaque: false
         }]);
 
         if (error) {
-            log("Erro ao publicar produto: " + error.message, "error");
+            log("Erro ao publicar: " + error.message, "error");
         } else {
             log(`✅ Produto "${nome}" publicado com sucesso!`, "success");
             
-            // Limpa formulário
+            // Limpa tudo
             document.getElementById("nome").value = "";
             document.getElementById("descricao").value = "";
             document.getElementById("preco").value = "";
@@ -252,7 +193,7 @@
     }
 
     async function deletar(id) {
-        if (!confirm("Tem certeza que deseja excluir este produto?")) return;
+        if (!confirm("Excluir este produto?")) return;
         await client.from("produtos").delete().eq("id", id);
         log("🗑️ Produto excluído", "success");
         carregar();
@@ -264,10 +205,9 @@
         carregar();
     }
 
-    // Inicialização
-    log("✅ Painel carregado - Toque em 'Imagem do produto' para escolher da galeria", "success");
+    // Inicia
+    log("✅ Painel carregado - Escolha a imagem da galeria", "success");
     carregar();
 </script>
-
 </body>
 </html>
