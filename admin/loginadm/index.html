@@ -26,10 +26,6 @@ body{
     text-align:center;
 }
 
-h2{
-    margin-bottom:15px;
-}
-
 button{
     width:100%;
     padding:12px;
@@ -68,22 +64,27 @@ button{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabase = window.supabase.createClient(
+const supabaseClient = supabase.createClient(
   "https://dbqleycdrkdhxrozsmup.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicWxleWNkcmtkaHhyb3pzbXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzYwOTQsImV4cCI6MjA5MTc1MjA5NH0.KWT_IMxwmD_fcAf1Xg9c8oE5m682_BNo_vjSZlZtZNA"
 );
 
-// LOGIN GOOGLE
 async function loginGoogle(){
-    const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-            redirectTo: "https://definya-sells.vercel.app/admin"
-        }
-    });
+    try {
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: "https://definya-sells.vercel.app/admin/loginadm/"
+            }
+        });
 
-    if(error){
-        document.getElementById("erro").innerText = error.message;
+        if(error){
+            document.getElementById("erro").innerText = error.message;
+            console.log(error);
+        }
+    } catch (err) {
+        document.getElementById("erro").innerText = "Erro inesperado";
+        console.log(err);
     }
 }
 </script>
