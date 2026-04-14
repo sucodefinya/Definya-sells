@@ -70,7 +70,6 @@ button {
   <div id="logs"></div>
 </div>
 
-<!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
@@ -84,10 +83,9 @@ log("🚀 Página carregada");
 
 const supabase = window.supabase.createClient(
   "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "SUA_ANON_KEY_AQUI"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicWxleWNkcmtkaHhyb3pzbXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzYwOTQsImV4cCI6MjA5MTc1MjA5NH0.KWT_IMxwmD_fcAf1Xg9c8oE5m682_BNo_vjSZlZtZNA"
 );
 
-log("🔗 Conectando ao Supabase...");
 log("✅ Supabase conectado");
 
 async function publicar() {
@@ -105,7 +103,7 @@ async function publicar() {
 
   log("📤 Enviando dados...");
 
-  const { data, error } = await supabase.from("produtos").insert([
+  const { error } = await supabase.from("produtos").insert([
     { nome, descricao, preco }
   ]);
 
