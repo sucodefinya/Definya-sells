@@ -1,102 +1,17 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard</title>
-
-<style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #0f172a;
-  color: white;
-}
-
-header {
-  background: #020617;
-  padding: 15px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.container {
-  padding: 20px;
-}
-
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 8px;
-  border: none;
-}
-
-button {
-  background: #22c55e;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-top: 5px;
-}
-
-.card {
-  background: #1e293b;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 10px;
-}
-
-.delete {
-  background: red;
-}
-
-#logs {
-  margin-top: 20px;
-  background: #020617;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 13px;
-  max-height: 150px;
-  overflow-y: auto;
-}
-</style>
-</head>
-
+<html>
 <body>
 
-<header>
-  <h2>📦 Dashboard</h2>
-  <button onclick="location.href='/'">Voltar</button>
-</header>
+<h2>Teste Supabase</h2>
+<button onclick="testar()">Testar conexão</button>
 
-<div class="container">
+<div id="log"></div>
 
-  <input id="nome" placeholder="Nome do item">
-  <textarea id="descricao" placeholder="Descrição"></textarea>
-  <input id="preco" placeholder="Preço (R$)">
-
-  <button onclick="publicar()">Publicar</button>
-
-  <h3>📋 Itens cadastrados:</h3>
-  <div id="lista"></div>
-
-  <div id="logs"></div>
-
-</div>
-  
-<script>
-alert("JS CARREGOU");
-</script>
-  
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
-function log(msg) {
-  const logs = document.getElementById("logs");
-  logs.innerHTML += msg + "<br>";
-  logs.scrollTop = logs.scrollHeight;
+const log = (msg) => {
+  document.getElementById("log").innerHTML += msg + "<br>";
 }
 
 log("🚀 Página carregada");
@@ -106,85 +21,21 @@ const supabase = window.supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicWxleWNkcmtkaHhyb3pzbXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzYwOTQsImV4cCI6MjA5MTc1MjA5NH0.KWT_IMxwmD_fcAf1Xg9c8oE5m682_BNo_vjSZlZtZNA"
 );
 
-log("✅ Supabase conectado");
+log("🔗 Supabase criado");
 
-async function carregar() {
-  log("📥 Buscando itens...");
+async function testar() {
+  log("📡 Testando conexão...");
 
   const { data, error } = await supabase
     .from("produtos")
-    .select("*")
-    .order("criado_em", { ascending: false });
+    .select("*");
 
   if (error) {
-    log("❌ Erro ao carregar");
-    return;
-  }
-
-  const lista = document.getElementById("lista");
-  lista.innerHTML = "";
-
-  data.forEach(item => {
-    lista.innerHTML += `
-      <div class="card">
-        <strong>${item.nome}</strong><br>
-        ${item.descricao}<br>
-        💰 R$ ${item.preco}<br>
-        <button class="delete" onclick="deletar('${item.id}')">Excluir</button>
-      </div>
-    `;
-  });
-
-  log("✅ Itens carregados");
-}
-
-async function publicar() {
-  log("🟡 Publicando...");
-
-  const nome = document.getElementById("nome").value;
-  const descricao = document.getElementById("descricao").value;
-  const preco = document.getElementById("preco").value;
-
-  if (!nome || !descricao || !preco) {
-    log("❌ Preencha tudo");
-    return;
-  }
-
-  const { error } = await supabase.from("produtos").insert([
-    { nome, descricao, preco }
-  ]);
-
-  if (error) {
-    log("❌ Erro ao salvar");
+    log("❌ ERRO: " + error.message);
   } else {
-    log("✅ Item salvo");
-
-    document.getElementById("nome").value = "";
-    document.getElementById("descricao").value = "";
-    document.getElementById("preco").value = "";
-
-    carregar();
+    log("✅ Conectou! Dados: " + JSON.stringify(data));
   }
 }
-
-async function deletar(id) {
-  log("🗑️ Deletando item...");
-
-  const { error } = await supabase
-    .from("produtos")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    log("❌ Erro ao deletar");
-  } else {
-    log("✅ Item deletado");
-    carregar();
-  }
-}
-
-// carregar ao abrir
-carregar();
 </script>
 
 </body>
