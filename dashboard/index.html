@@ -58,8 +58,16 @@ button {
   <button onclick="publicar()">Publicar</button>
 </div>
 
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
 <script>
-function publicar() {
+const supabase = window.supabase.createClient(
+  "https://dbqleycdrkdhxrozsmup.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicWxleWNkcmtkaHhyb3pzbXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzYwOTQsImV4cCI6MjA5MTc1MjA5NH0.KWT_IMxwmD_fcAf1Xg9c8oE5m682_BNo_vjSZlZtZNA"
+);
+
+async function publicar() {
   const nome = document.getElementById("nome").value;
   const descricao = document.getElementById("descricao").value;
   const preco = document.getElementById("preco").value;
@@ -69,7 +77,24 @@ function publicar() {
     return;
   }
 
-  alert("Item publicado (em breve vai salvar no banco 😏)");
+  const { error } = await supabase.from("produtos").insert([
+    {
+      nome: nome,
+      descricao: descricao,
+      preco: preco
+    }
+  ]);
+
+  if (error) {
+    alert("Erro ao publicar: " + error.message);
+  } else {
+    alert("Item publicado com sucesso!");
+    
+    // limpar campos
+    document.getElementById("nome").value = "";
+    document.getElementById("descricao").value = "";
+    document.getElementById("preco").value = "";
+  }
 }
 </script>
 
