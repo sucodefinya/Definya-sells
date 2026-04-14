@@ -1,39 +1,44 @@
 <!DOCTYPE html>
 <html>
-<body>
+<body style="background:#0f172a;color:white;font-family:Arial;padding:20px;">
 
-<h2>Teste Supabase</h2>
-<button onclick="testar()">Testar conexão</button>
+<h2>🧪 Teste Supabase</h2>
 
-<div id="log"></div>
+<button onclick="testar()" style="padding:10px;border:none;border-radius:8px;background:#22c55e;">
+  Testar conexão
+</button>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<div id="log" style="margin-top:20px;background:#020617;padding:10px;border-radius:10px;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const log = (msg) => {
+function log(msg) {
   document.getElementById("log").innerHTML += msg + "<br>";
 }
 
 log("🚀 Página carregada");
 
-const supabase = window.supabase.createClient(
+const { createClient } = supabase;
+
+const client = createClient(
   "https://dbqleycdrkdhxrozsmup.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicWxleWNkcmtkaHhyb3pzbXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzYwOTQsImV4cCI6MjA5MTc1MjA5NH0.KWT_IMxwmD_fcAf1Xg9c8oE5m682_BNo_vjSZlZtZNA"
 );
 
-log("🔗 Supabase criado");
+log("🔗 Cliente criado");
 
 async function testar() {
   log("📡 Testando conexão...");
 
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from("produtos")
     .select("*");
 
   if (error) {
     log("❌ ERRO: " + error.message);
   } else {
-    log("✅ Conectou! Dados: " + JSON.stringify(data));
+    log("✅ Conectado! Dados: " + JSON.stringify(data));
   }
 }
 </script>
