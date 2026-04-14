@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel Admin</title>
+<title>Admin Debug</title>
 
 <style>
 body{
@@ -16,10 +16,8 @@ body{
 .topbar{
     display:flex;
     justify-content:space-between;
-    align-items:center;
-    padding:15px 20px;
+    padding:15px;
     background:#0b1220;
-    border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
 .container{
@@ -30,53 +28,42 @@ body{
 
 input, textarea{
     width:100%;
-    padding:14px;
-    margin:8px 0;
-    border-radius:10px;
-    border:none;
+    padding:12px;
+    margin:6px 0;
     background:#111827;
+    border:none;
     color:#fff;
+    border-radius:10px;
 }
 
 button{
-    padding:12px 16px;
+    padding:10px;
     border:none;
     border-radius:10px;
     cursor:pointer;
 }
 
-.add{
-    width:100%;
-    background:#22c55e;
-    color:#000;
-    font-weight:bold;
-    margin-top:10px;
-}
-
-.logout{
-    background:#ef4444;
-    color:#fff;
-}
+.add{ background:#22c55e; width:100%; }
+.logout{ background:#ef4444; color:#fff; }
 
 .card{
     background:#0b1220;
-    padding:15px;
-    margin-top:15px;
-    border-radius:12px;
+    padding:12px;
+    margin-top:12px;
+    border-radius:10px;
     border:1px solid rgba(255,255,255,0.05);
 }
 
-img{
-    width:100%;
+#logs{
+    margin-top:20px;
+    background:#000;
+    padding:10px;
+    font-family:monospace;
+    font-size:12px;
+    height:180px;
+    overflow:auto;
     border-radius:10px;
-    margin:10px 0;
-}
-
-.delete{ background:#ef4444; color:#fff; margin-right:5px; }
-.star{ background:#eab308; color:#000; }
-
-#preview img{
-    max-height:200px;
+    border:1px solid #222;
 }
 </style>
 </head>
@@ -84,25 +71,24 @@ img{
 <body>
 
 <div class="topbar">
-    <h3>🔐 Admin</h3>
+    <h3>🔐 Admin Debug</h3>
     <button class="logout" onclick="logout()">Sair</button>
 </div>
 
 <div class="container">
 
-    <input id="nome" placeholder="Nome do produto">
+    <input id="nome" placeholder="Nome">
     <textarea id="descricao" placeholder="Descrição"></textarea>
-    <input id="preco" type="number" placeholder="Preço">
-    <input id="whatsapp" placeholder="WhatsApp">
+    <input id="preco" placeholder="Preço">
 
-    <input id="imagemInput" type="file">
-
-    <div id="preview"></div>
-
-    <button class="add" onclick="publicar()">🚀 Publicar</button>
+    <button class="add" onclick="publicar()">Publicar</button>
 
     <h3>📦 Produtos</h3>
     <div id="lista"></div>
+
+    <h3>📜 Logs</h3>
+    <div id="logs"></div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -113,159 +99,107 @@ const supabase = supabase.createClient(
   "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-// 🔐 LOGIN CHECK
-const ADMIN_EMAIL = "claudiogg270@gmail.com";
+// LOG SYSTEM
+function log(msg){
+    const el = document.getElementById("logs");
+    const time = new Date().toLocaleTimeString();
 
+    el.innerHTML += `[${time}] ${msg}<br>`;
+    el.scrollTop = el.scrollHeight;
+}
+
+// ALERT LOG
+function alertLog(msg){
+    alert(msg);
+    log(msg);
+}
+
+// INIT
+log("📡 Inicializando Supabase...");
+log("🌐 Conectando...");
+
+setTimeout(() => {
+    log("✅ Supabase conectado");
+    alertLog("Supabase conectado");
+}, 800);
+
+// LOGIN CHECK
 async function checkAuth(){
     const { data } = await supabase.auth.getSession();
-
     const user = data?.session?.user;
 
-    if(!user){
+    if(user){
+        log(`🔐 Admin logado: ${user.email}`);
+    } else {
+        log("❌ Não logado");
         window.location.href = "/loginadm/";
+    }
+}
+
+// CARREGAMENTO
+async function carregar(){
+    log("📦 Carregando produtos...");
+
+    const { data, error } = await supabase
+        .from("produtos")
+        .select("*");
+
+    if(error){
+        log("❌ Erro ao carregar: " + error.message);
+        alert(error.message);
         return;
     }
 
-    if(user.email !== ADMIN_EMAIL){
-        await supabase.auth.signOut();
-        alert("Acesso negado");
-        window.location.href = "/loginadm/";
-    }
+    log(`📊 ${data.length} produtos carregados`);
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    data.forEach(p=>{
+        lista.innerHTML += `
+            <div class="card">
+                <b>${p.nome}</b><br>
+                ${p.descricao}<br>
+                💰 ${p.preco}
+            </div>
+        `;
+    });
 }
 
-checkAuth();
-
-// logout
-async function logout(){
-    await supabase.auth.signOut();
-    window.location.href = "/loginadm/";
-}
-
-// upload imagem
-let imagemFile = null;
-
-document.getElementById("imagemInput").addEventListener("change",(e)=>{
-    imagemFile = e.target.files[0];
-
-    const reader = new FileReader();
-    reader.onload = (ev)=>{
-        document.getElementById("preview").innerHTML =
-        `<img src="${ev.target.result}">`;
-    };
-    reader.readAsDataURL(imagemFile);
-});
-
-async function uploadImagem(){
-    if(!imagemFile) return null;
-
-    const fileName = `produto-${Date.now()}.${imagemFile.name.split('.').pop()}`;
-
-    const { error } = await supabase.storage
-        .from("produtos")
-        .upload(fileName, imagemFile, { upsert:true });
-
-    if(error){
-        alert(error.message);
-        return null;
-    }
-
-    const { data } = supabase.storage
-        .from("produtos")
-        .getPublicUrl(fileName);
-
-    return data.publicUrl;
-}
-
-// publicar
+// PUBLICAR
 async function publicar(){
+    log("🚀 Publicando produto...");
+
     const nome = document.getElementById("nome").value;
     const descricao = document.getElementById("descricao").value;
     const preco = document.getElementById("preco").value;
-    const whatsapp = document.getElementById("whatsapp").value;
-
-    let img = await uploadImagem();
 
     const { error } = await supabase.from("produtos").insert([{
         nome,
         descricao,
-        preco,
-        whatsapp,
-        imagem: img,
-        destaque:false
+        preco
     }]);
 
     if(error){
+        log("❌ Erro: " + error.message);
         alert(error.message);
         return;
     }
 
-    document.getElementById("nome").value = "";
-    document.getElementById("descricao").value = "";
-    document.getElementById("preco").value = "";
-    document.getElementById("whatsapp").value = "";
-    document.getElementById("preview").innerHTML = "";
-    imagemFile = null;
-
+    log("✅ Produto publicado");
     carregar();
 }
 
-// carregar produtos
-async function carregar(){
-    const { data, error } = await supabase
-        .from("produtos")
-        .select("*")
-        .order("id", { ascending:false });
-
-    if(error){
-        alert(error.message);
-        return;
-    }
-
-    const lista = document.getElementById("lista");
-
-    if(!data || data.length === 0){
-        lista.innerHTML = "<p style='opacity:0.6'>Nenhum produto ainda</p>";
-        return;
-    }
-
-    lista.innerHTML = "";
-
-    data.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "card";
-
-        card.innerHTML = `
-            <b>${p.nome}</b><br>
-
-            ${p.imagem ? `<img src="${p.imagem}">` : ""}
-
-            <p>${p.descricao}</p>
-
-            💰 R$ ${Number(p.preco || 0).toFixed(2)}<br><br>
-
-            <button class="delete" onclick="del('${p.id}')">Excluir</button>
-            <button class="star" onclick="star('${p.id}',${p.destaque})">
-                ${p.destaque ? "Remover destaque" : "Destacar"}
-            </button>
-        `;
-
-        lista.appendChild(card);
-    });
+// LOGOUT
+async function logout(){
+    await supabase.auth.signOut();
+    log("🚪 Logout feito");
+    window.location.href = "/loginadm/";
 }
 
-// delete
-async function del(id){
-    await supabase.from("produtos").delete().eq("id",id);
-    carregar();
-}
-
-// destaque
-async function star(id,val){
-    await supabase.from("produtos")
-    .update({destaque:!val}).eq("id",id);
-    carregar();
-}
-
+// START
+log("📄 Página carregada");
+checkAuth();
 carregar();
 </script>
 
