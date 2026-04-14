@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anunciar Item</title>
+<title>Dashboard</title>
 
 <style>
 body {
@@ -38,7 +38,18 @@ button {
   padding: 10px;
   border-radius: 8px;
   cursor: pointer;
-  width: 100%;
+  margin-top: 5px;
+}
+
+.card {
+  background: #1e293b;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 10px;
+}
+
+.delete {
+  background: red;
 }
 
 #logs {
@@ -47,7 +58,7 @@ button {
   padding: 10px;
   border-radius: 10px;
   font-size: 13px;
-  max-height: 200px;
+  max-height: 150px;
   overflow-y: auto;
 }
 </style>
@@ -56,24 +67,25 @@ button {
 <body>
 
 <header>
-  <h2>📦 Anunciar Item</h2>
+  <h2>📦 Dashboard</h2>
   <button onclick="location.href='/'">Voltar</button>
 </header>
 
 <div class="container">
+
   <input id="nome" placeholder="Nome do item">
   <textarea id="descricao" placeholder="Descrição"></textarea>
   <input id="preco" placeholder="Preço (R$)">
 
   <button onclick="publicar()">Publicar</button>
 
+  <h3>📋 Itens cadastrados:</h3>
+  <div id="lista"></div>
+
   <div id="logs"></div>
+
 </div>
-  
-<script>
-alert("JS CARREGOU");
-</script>
-  
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
@@ -92,37 +104,83 @@ const supabase = window.supabase.createClient(
 
 log("✅ Supabase conectado");
 
+async function carregar() {
+  log("📥 Buscando itens...");
+
+  const { data, error } = await supabase
+    .from("produtos")
+    .select("*")
+    .order("criado_em", { ascending: false });
+
+  if (error) {
+    log("❌ Erro ao carregar");
+    return;
+  }
+
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  data.forEach(item => {
+    lista.innerHTML += `
+      <div class="card">
+        <strong>${item.nome}</strong><br>
+        ${item.descricao}<br>
+        💰 R$ ${item.preco}<br>
+        <button class="delete" onclick="deletar('${item.id}')">Excluir</button>
+      </div>
+    `;
+  });
+
+  log("✅ Itens carregados");
+}
+
 async function publicar() {
-  log("🟡 Botão clicado");
+  log("🟡 Publicando...");
 
   const nome = document.getElementById("nome").value;
   const descricao = document.getElementById("descricao").value;
   const preco = document.getElementById("preco").value;
 
   if (!nome || !descricao || !preco) {
-    log("❌ Campos vazios");
-    alert("Preencha tudo!");
+    log("❌ Preencha tudo");
     return;
   }
-
-  log("📤 Enviando dados...");
 
   const { error } = await supabase.from("produtos").insert([
     { nome, descricao, preco }
   ]);
 
   if (error) {
-    log("❌ ERRO: " + error.message);
-    alert("Erro ao publicar");
+    log("❌ Erro ao salvar");
   } else {
-    log("✅ Item salvo com sucesso!");
-    alert("Publicado com sucesso!");
+    log("✅ Item salvo");
 
     document.getElementById("nome").value = "";
     document.getElementById("descricao").value = "";
     document.getElementById("preco").value = "";
+
+    carregar();
   }
 }
+
+async function deletar(id) {
+  log("🗑️ Deletando item...");
+
+  const { error } = await supabase
+    .from("produtos")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    log("❌ Erro ao deletar");
+  } else {
+    log("✅ Item deletado");
+    carregar();
+  }
+}
+
+// carregar ao abrir
+carregar();
 </script>
 
 </body>
