@@ -69,24 +69,43 @@ const supabaseClient = supabase.createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicWxleWNkcmtkaHhyb3pzbXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzYwOTQsImV4cCI6MjA5MTc1MjA5NH0.KWT_IMxwmD_fcAf1Xg9c8oE5m682_BNo_vjSZlZtZNA"
 );
 
+// 🔐 LOGIN GOOGLE
 async function loginGoogle(){
-    try {
-        const { data, error } = await supabaseClient.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-                redirectTo: "https://definya-sells.vercel.app/admin/loginadm/"
-            }
-        });
-
-        if(error){
-            document.getElementById("erro").innerText = error.message;
-            console.log(error);
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: window.location.origin + "/admin/loginadm/"
         }
-    } catch (err) {
-        document.getElementById("erro").innerText = "Erro inesperado";
-        console.log(err);
+    });
+
+    if(error){
+        document.getElementById("erro").innerText = error.message;
+        console.log(error);
     }
 }
+
+// 🔒 CHECAR SESSÃO
+async function checkSession(){
+    const { data } = await supabaseClient.auth.getSession();
+
+    const user = data?.session?.user;
+
+    if(!user){
+        return;
+    }
+
+    const allowedEmail = "claudiogg270@gmail.com";
+
+    if(user.email === allowedEmail){
+        window.location.href = "/admin/";
+    } else {
+        await supabaseClient.auth.signOut();
+        document.getElementById("erro").innerText = "Acesso negado";
+    }
+}
+
+// roda ao abrir página
+window.addEventListener("load", checkSession);
 </script>
 
 </body>
