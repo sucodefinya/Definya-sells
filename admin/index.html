@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Debug FIX</title>
+<title>Admin Final</title>
 
 <style>
 body{
@@ -16,6 +16,7 @@ body{
 .topbar{
     display:flex;
     justify-content:space-between;
+    align-items:center;
     padding:15px;
     background:#0b1220;
     border-bottom:1px solid rgba(255,255,255,0.05);
@@ -27,25 +28,23 @@ body{
     padding:20px;
 }
 
-input, textarea{
-    width:100%;
-    padding:12px;
-    margin:6px 0;
-    background:#111827;
-    border:none;
-    color:#fff;
-    border-radius:10px;
-}
-
 button{
     padding:10px;
     border:none;
-    border-radius:10px;
+    border-radius:8px;
     cursor:pointer;
 }
 
-.add{ background:#22c55e; width:100%; }
-.logout{ background:#ef4444; color:#fff; }
+.logout{
+    background:#ef4444;
+    color:#fff;
+}
+
+.add{
+    background:#22c55e;
+    width:100%;
+    margin-top:10px;
+}
 
 .card{
     background:#0b1220;
@@ -61,16 +60,31 @@ img{
     margin-top:8px;
 }
 
+.actions{
+    margin-top:10px;
+    display:flex;
+    gap:8px;
+}
+
+.delBtn{
+    background:#ef4444;
+    color:#fff;
+}
+
+.favBtn{
+    background:#facc15;
+    color:#000;
+}
+
 #logs{
     margin-top:15px;
     background:#000;
     padding:10px;
     font-family:monospace;
     font-size:12px;
-    height:180px;
+    height:160px;
     overflow:auto;
     border-radius:10px;
-    border:1px solid #222;
 }
 </style>
 </head>
@@ -78,20 +92,11 @@ img{
 <body>
 
 <div class="topbar">
-    <h3>🔐 Admin Debug</h3>
-    <button class="logout" onclick="logout()">Sair</button>
+    <h3>🔐 Admin Panel</h3>
+    <button class="logout" onclick="logout()">🚪 Sair</button>
 </div>
 
 <div class="container">
-
-    <input id="nome" placeholder="Nome">
-    <textarea id="descricao" placeholder="Descrição"></textarea>
-    <input id="preco" placeholder="Preço">
-    <input id="whatsapp" placeholder="WhatsApp">
-
-    <input type="file" id="imagemInput">
-
-    <button class="add" onclick="publicar()">Publicar</button>
 
     <h3>📦 Produtos</h3>
     <div id="lista"></div>
@@ -104,106 +109,25 @@ img{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-/* =======================
-   SUPABASE (CORRETO)
-======================= */
 const client = supabase.createClient(
   "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
+  "SUA_ANON_KEY_AQUI"
 );
 
-/* =======================
-   LOG SYSTEM
-======================= */
+/* ================= LOGS ================= */
 function log(msg){
     const el = document.getElementById("logs");
-    const time = new Date().toLocaleTimeString();
-    el.innerHTML += `[${time}] ${msg}<br>`;
+    const t = new Date().toLocaleTimeString();
+    el.innerHTML += `[${t}] ${msg}<br>`;
     el.scrollTop = el.scrollHeight;
 }
 
-/* start logs */
-log("📄 Página carregada");
-log("⚡ Inicializando sistema...");
+log("📄 Admin carregado");
 
-/* =======================
-   IMAGE
-======================= */
-let imagemFile = null;
-
-document.getElementById("imagemInput").addEventListener("change",(e)=>{
-    imagemFile = e.target.files[0];
-    log("🖼️ Imagem selecionada");
-});
-
-/* =======================
-   UPLOAD IMAGEM
-======================= */
-async function uploadImagem(){
-    if(!imagemFile){
-        log("⚠️ Sem imagem");
-        return null;
-    }
-
-    const fileName = `produto-${Date.now()}.${imagemFile.name.split('.').pop()}`;
-
-    log("📤 Enviando imagem...");
-
-    const { error } = await client.storage
-        .from("produtos")
-        .upload(fileName, imagemFile, { upsert:true });
-
-    if(error){
-        log("❌ Erro upload: " + error.message);
-        return null;
-    }
-
-    const { data } = client.storage
-        .from("produtos")
-        .getPublicUrl(fileName);
-
-    log("✅ Imagem enviada");
-
-    return data.publicUrl;
-}
-
-/* =======================
-   PUBLICAR
-======================= */
-async function publicar(){
-    log("🚀 Publicando produto...");
-
-    const nome = document.getElementById("nome").value;
-    const descricao = document.getElementById("descricao").value;
-    const preco = document.getElementById("preco").value;
-    const whatsapp = document.getElementById("whatsapp").value;
-
-    const img = await uploadImagem();
-
-    const { error } = await client.from("produtos").insert([{
-        nome,
-        descricao,
-        preco,
-        whatsapp,
-        imagem: img,
-        destaque:false
-    }]);
-
-    if(error){
-        log("❌ Erro: " + error.message);
-        return;
-    }
-
-    log("✅ Produto publicado");
-
-    carregar();
-}
-
-/* =======================
-   CARREGAR
-======================= */
+/* ================= CARREGAR ================= */
 async function carregar(){
-    log("📦 Carregando produtos...");
+
+    log("📦 carregando produtos...");
 
     const { data, error } = await client
         .from("produtos")
@@ -211,16 +135,20 @@ async function carregar(){
         .order("id",{ascending:false});
 
     if(error){
-        log("❌ Erro load: " + error.message);
+        log("❌ erro: " + error.message);
         return;
     }
-
-    log(`📊 ${data.length} produtos encontrados`);
 
     const lista = document.getElementById("lista");
     lista.innerHTML = "";
 
-    data.forEach(p=>{
+    if(!data || data.length === 0){
+        lista.innerHTML = "<p>Nenhum produto ainda</p>";
+        return;
+    }
+
+    data.forEach(p => {
+
         const div = document.createElement("div");
         div.className = "card";
 
@@ -230,25 +158,83 @@ async function carregar(){
             ${p.imagem ? `<img src="${p.imagem}">` : ""}
 
             <p>${p.descricao}</p>
-            💰 ${p.preco}
+            💰 R$ ${p.preco || 0}
+
+            <div class="actions">
+                <button class="delBtn" onclick="del('${p.id}')">🗑 Excluir</button>
+
+                <button class="favBtn" onclick="fav('${p.id}', ${p.destaque})">
+                    ⭐ ${p.destaque ? "Remover" : "Favoritar"}
+                </button>
+            </div>
         `;
 
         lista.appendChild(div);
     });
+
+    log("✅ produtos carregados: " + data.length);
 }
 
-/* =======================
-   LOGOUT
-======================= */
+/* ================= DELETE ================= */
+async function del(id){
+
+    log("🗑 deletando...");
+
+    const { error } = await client
+        .from("produtos")
+        .delete()
+        .eq("id", id);
+
+    if(error){
+        log("❌ erro delete: " + error.message);
+        return;
+    }
+
+    log("✅ deletado");
+    carregar();
+}
+
+/* ================= FAVORITO (3 LIMITES) ================= */
+async function fav(id, atual){
+
+    const { data } = await client
+        .from("produtos")
+        .select("*")
+        .eq("destaque", true);
+
+    const total = data?.length || 0;
+
+    if(!atual && total >= 3){
+        alert("Limite de 3 favoritos atingido");
+        log("❌ limite 3 favoritos");
+        return;
+    }
+
+    const { error } = await client
+        .from("produtos")
+        .update({ destaque: !atual })
+        .eq("id", id);
+
+    if(error){
+        log("❌ erro fav: " + error.message);
+        return;
+    }
+
+    log("⭐ atualizado favorito");
+    carregar();
+}
+
+/* ================= LOGOUT ================= */
 async function logout(){
+
+    log("🚪 saindo...");
+
     await client.auth.signOut();
-    log("🚪 Logout");
-    window.location.href = "/loginadm/";
+
+    window.location.href = "/index.html";
 }
 
-/* =======================
-   INIT
-======================= */
+/* ================= INIT ================= */
 carregar();
 </script>
 
