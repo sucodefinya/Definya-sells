@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Debug</title>
+<title>Admin Debug FIX</title>
 
 <style>
 body{
@@ -18,6 +18,7 @@ body{
     justify-content:space-between;
     padding:15px;
     background:#0b1220;
+    border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
 .container{
@@ -54,8 +55,14 @@ button{
     border:1px solid rgba(255,255,255,0.05);
 }
 
+img{
+    width:100%;
+    border-radius:10px;
+    margin-top:8px;
+}
+
 #logs{
-    margin-top:20px;
+    margin-top:15px;
     background:#000;
     padding:10px;
     font-family:monospace;
@@ -80,6 +87,9 @@ button{
     <input id="nome" placeholder="Nome">
     <textarea id="descricao" placeholder="Descrição"></textarea>
     <input id="preco" placeholder="Preço">
+    <input id="whatsapp" placeholder="WhatsApp">
+
+    <input type="file" id="imagemInput">
 
     <button class="add" onclick="publicar()">Publicar</button>
 
@@ -94,112 +104,151 @@ button{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabase = supabase.createClient(
+/* =======================
+   SUPABASE (CORRETO)
+======================= */
+const client = supabase.createClient(
   "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
+  "SUA_ANON_KEY_AQUI"
 );
 
-// LOG SYSTEM
+/* =======================
+   LOG SYSTEM
+======================= */
 function log(msg){
     const el = document.getElementById("logs");
     const time = new Date().toLocaleTimeString();
-
     el.innerHTML += `[${time}] ${msg}<br>`;
     el.scrollTop = el.scrollHeight;
 }
 
-// ALERT LOG
-function alertLog(msg){
-    alert(msg);
-    log(msg);
-}
+/* start logs */
+log("📄 Página carregada");
+log("⚡ Inicializando sistema...");
 
-// INIT
-log("📡 Inicializando Supabase...");
-log("🌐 Conectando...");
+/* =======================
+   IMAGE
+======================= */
+let imagemFile = null;
 
-setTimeout(() => {
-    log("✅ Supabase conectado");
-    alertLog("Supabase conectado");
-}, 800);
+document.getElementById("imagemInput").addEventListener("change",(e)=>{
+    imagemFile = e.target.files[0];
+    log("🖼️ Imagem selecionada");
+});
 
-// LOGIN CHECK
-async function checkAuth(){
-    const { data } = await supabase.auth.getSession();
-    const user = data?.session?.user;
-
-    if(user){
-        log(`🔐 Admin logado: ${user.email}`);
-    } else {
-        log("❌ Não logado");
-        window.location.href = "/loginadm/";
+/* =======================
+   UPLOAD IMAGEM
+======================= */
+async function uploadImagem(){
+    if(!imagemFile){
+        log("⚠️ Sem imagem");
+        return null;
     }
-}
 
-// CARREGAMENTO
-async function carregar(){
-    log("📦 Carregando produtos...");
+    const fileName = `produto-${Date.now()}.${imagemFile.name.split('.').pop()}`;
 
-    const { data, error } = await supabase
+    log("📤 Enviando imagem...");
+
+    const { error } = await client.storage
         .from("produtos")
-        .select("*");
+        .upload(fileName, imagemFile, { upsert:true });
 
     if(error){
-        log("❌ Erro ao carregar: " + error.message);
-        alert(error.message);
-        return;
+        log("❌ Erro upload: " + error.message);
+        return null;
     }
 
-    log(`📊 ${data.length} produtos carregados`);
+    const { data } = client.storage
+        .from("produtos")
+        .getPublicUrl(fileName);
 
-    const lista = document.getElementById("lista");
-    lista.innerHTML = "";
+    log("✅ Imagem enviada");
 
-    data.forEach(p=>{
-        lista.innerHTML += `
-            <div class="card">
-                <b>${p.nome}</b><br>
-                ${p.descricao}<br>
-                💰 ${p.preco}
-            </div>
-        `;
-    });
+    return data.publicUrl;
 }
 
-// PUBLICAR
+/* =======================
+   PUBLICAR
+======================= */
 async function publicar(){
     log("🚀 Publicando produto...");
 
     const nome = document.getElementById("nome").value;
     const descricao = document.getElementById("descricao").value;
     const preco = document.getElementById("preco").value;
+    const whatsapp = document.getElementById("whatsapp").value;
 
-    const { error } = await supabase.from("produtos").insert([{
+    const img = await uploadImagem();
+
+    const { error } = await client.from("produtos").insert([{
         nome,
         descricao,
-        preco
+        preco,
+        whatsapp,
+        imagem: img,
+        destaque:false
     }]);
 
     if(error){
         log("❌ Erro: " + error.message);
-        alert(error.message);
         return;
     }
 
     log("✅ Produto publicado");
+
     carregar();
 }
 
-// LOGOUT
+/* =======================
+   CARREGAR
+======================= */
+async function carregar(){
+    log("📦 Carregando produtos...");
+
+    const { data, error } = await client
+        .from("produtos")
+        .select("*")
+        .order("id",{ascending:false});
+
+    if(error){
+        log("❌ Erro load: " + error.message);
+        return;
+    }
+
+    log(`📊 ${data.length} produtos encontrados`);
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    data.forEach(p=>{
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `
+            <b>${p.nome}</b><br>
+
+            ${p.imagem ? `<img src="${p.imagem}">` : ""}
+
+            <p>${p.descricao}</p>
+            💰 ${p.preco}
+        `;
+
+        lista.appendChild(div);
+    });
+}
+
+/* =======================
+   LOGOUT
+======================= */
 async function logout(){
-    await supabase.auth.signOut();
-    log("🚪 Logout feito");
+    await client.auth.signOut();
+    log("🚪 Logout");
     window.location.href = "/loginadm/";
 }
 
-// START
-log("📄 Página carregada");
-checkAuth();
+/* =======================
+   INIT
+======================= */
 carregar();
 </script>
 
