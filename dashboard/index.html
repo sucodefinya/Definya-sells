@@ -14,46 +14,51 @@ body{
     overflow-x:hidden;
 }
 
-/* 🌌 glow leve */
+/* 🌌 glow base */
 body::before{
     content:"";
     position:fixed;
-    width:500px;
-    height:500px;
+    width:600px;
+    height:600px;
     background: radial-gradient(circle, rgba(0,255,255,0.06), transparent 60%);
     top:-200px;
     left:-200px;
     z-index:-3;
 }
 
-/* 💜 glow roxo */
 body::after{
     content:"";
     position:fixed;
-    width:500px;
-    height:500px;
-    background: radial-gradient(circle, rgba(160,0,255,0.10), transparent 60%);
+    width:600px;
+    height:600px;
+    background: radial-gradient(circle, rgba(160,0,255,0.12), transparent 60%);
     bottom:-200px;
     right:-200px;
     z-index:-3;
 }
 
-/* 💜 partículas roxas */
+/* 💜 PARTÍCULAS MELHORADAS */
 .particle{
     position:fixed;
-    width:3px;
-    height:3px;
-    background:#a855f7;
-    box-shadow:0 0 8px #a855f7;
     border-radius:50%;
-    opacity:0.6;
+    background:#b026ff;
+    box-shadow:0 0 10px #b026ff, 0 0 20px rgba(176,38,255,0.5);
+    opacity:0.7;
     animation: floatUp linear infinite;
     z-index:-2;
 }
 
 @keyframes floatUp{
-    from{ transform:translateY(100vh); }
-    to{ transform:translateY(-10vh); }
+    0%{
+        transform:translateY(110vh) translateX(0);
+        opacity:0;
+    }
+    10%{ opacity:0.7; }
+    50%{ transform:translateY(50vh) translateX(20px); }
+    100%{
+        transform:translateY(-10vh) translateX(-20px);
+        opacity:0;
+    }
 }
 
 .container{
@@ -70,43 +75,40 @@ body::after{
 
 h1{
     color:#00ffff;
-    font-size:22px;
-}
-
-/* botão voltar */
-.back-btn{
-    padding:8px 14px;
-    border:1px solid #00ffff;
-    color:#00ffff;
-    text-decoration:none;
-    border-radius:10px;
 }
 
 /* títulos */
 .section-title{
-    margin-top:30px;
     text-align:center;
+    margin-top:30px;
     color:#ff4d00;
-    text-shadow:0 0 6px rgba(255,80,0,0.3);
+    text-shadow:0 0 8px rgba(255,80,0,0.3);
 }
 
-/* CARD + ANIMAÇÃO */
+/* 🧊 CARD MAIS VIVO */
 .card{
     background:#0a0a0f;
     padding:15px;
     margin:15px 0;
     border-radius:12px;
     border:1px solid rgba(255,255,255,0.06);
+
     opacity:0;
-    transform:translateY(20px);
-    animation: fadeIn 0.5s forwards;
+    transform:translateY(40px) scale(0.95);
+    animation: cardIn 0.6s forwards;
 }
 
-@keyframes fadeIn{
+@keyframes cardIn{
     to{
         opacity:1;
-        transform:translateY(0);
+        transform:translateY(0) scale(1);
     }
+}
+
+/* leve “respiração” */
+.card:hover{
+    transform:translateY(-5px) scale(1.01);
+    box-shadow:0 0 15px rgba(176,38,255,0.15);
 }
 
 img{
@@ -146,7 +148,6 @@ img{
 
     <div class="header">
         <h1>📦 CATÁLOGO NEON</h1>
-        <a class="back-btn" href="/">Home</a>
     </div>
 
     <h2 class="section-title">🔥 MAIS PROCURADOS</h2>
@@ -165,16 +166,21 @@ const supabaseAnonKey = "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis";
 
 const client = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-/* 💜 partículas roxas */
+/* 💜 PARTÍCULAS AGORA FUNCIONANDO DE VERDADE */
 function createParticles(){
-    for(let i=0;i<25;i++){
+    for(let i=0;i<35;i++){
         let p = document.createElement("div");
         p.classList.add("particle");
 
+        let size = Math.random()*4 + 2;
+
+        p.style.width = size + "px";
+        p.style.height = size + "px";
+
         p.style.left = Math.random()*100 + "vw";
-        p.style.animationDuration = (5 + Math.random()*6) + "s";
-        p.style.opacity = Math.random()*0.5 + 0.2;
-        p.style.width = p.style.height = (2 + Math.random()*3) + "px";
+
+        p.style.animationDuration = (4 + Math.random()*6) + "s";
+        p.style.animationDelay = Math.random()*5 + "s";
 
         document.body.appendChild(p);
     }
@@ -189,7 +195,7 @@ function renderCard(item, index){
         : null;
 
     return `
-        <div class="card" style="animation-delay:${index * 0.05}s">
+        <div class="card" style="animation-delay:${index * 0.06}s">
             <h3 style="color:#00ffff">${item.nome}</h3>
 
             ${item.imagem ? `<img src="${item.imagem}">` : ""}
@@ -209,7 +215,6 @@ function renderCard(item, index){
 
 async function carregar(){
 
-    // 🔥 destaques
     const d = await client
         .from("produtos")
         .select("*")
@@ -219,11 +224,10 @@ async function carregar(){
     document.getElementById("destaques").innerHTML =
         d.data?.map(renderCard).join("") || "<p>Nenhum destaque</p>";
 
-    // 📦 todos (SEM duplicar)
     const t = await client
         .from("produtos")
         .select("*")
-        .eq("destaque", false) // 🔥 remove duplicação
+        .eq("destaque", false)
         .order("id", { ascending:false });
 
     document.getElementById("todos").innerHTML =
