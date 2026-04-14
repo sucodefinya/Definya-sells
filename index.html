@@ -11,58 +11,46 @@ body{
     font-family:Arial;
     background:#000;
     color:#e5e7eb;
-    overflow:hidden;
+    overflow-x:hidden;
 }
 
-/* 🔥 GLOW DE FOGO NEON */
+/* 🔥 glow fogo leve */
 body::before{
     content:"";
     position:fixed;
-    width:600px;
-    height:600px;
+    width:500px;
+    height:500px;
     background: radial-gradient(circle, rgba(255,80,0,0.10), transparent 60%);
     top:-200px;
     left:-200px;
-    animation: fireMove 8s ease-in-out infinite;
     z-index:-2;
 }
 
 body::after{
     content:"";
     position:fixed;
-    width:600px;
-    height:600px;
-    background: radial-gradient(circle, rgba(0,255,255,0.08), transparent 60%);
+    width:500px;
+    height:500px;
+    background: radial-gradient(circle, rgba(0,255,255,0.06), transparent 60%);
     bottom:-200px;
     right:-200px;
-    animation: fireMove2 10s ease-in-out infinite;
     z-index:-2;
 }
 
-@keyframes fireMove{
-    0%,100%{ transform:translate(0,0); }
-    50%{ transform:translate(40px,30px); }
-}
-
-@keyframes fireMove2{
-    0%,100%{ transform:translate(0,0); }
-    50%{ transform:translate(-40px,-30px); }
-}
-
-/* 🌌 partículas leves (não polui) */
+/* ⚪ partículas */
 .particle{
     position:fixed;
-    width:3px;
-    height:3px;
+    width:2px;
+    height:2px;
     background:white;
     box-shadow:0 0 6px rgba(255,255,255,0.8);
     border-radius:50%;
-    opacity:0.6;
-    animation: floatParticle linear infinite;
+    opacity:0.5;
+    animation: fall linear infinite;
     z-index:-1;
 }
 
-@keyframes floatParticle{
+@keyframes fall{
     from{ transform:translateY(100vh); }
     to{ transform:translateY(-10vh); }
 }
@@ -71,8 +59,6 @@ body::after{
     max-width:900px;
     margin:auto;
     padding:20px;
-    position:relative;
-    z-index:1;
 }
 
 .header{
@@ -83,43 +69,11 @@ body::after{
 
 h1{
     color:#00ffff;
-    text-shadow:0 0 8px rgba(0,255,255,0.3);
+    text-shadow:0 0 6px rgba(0,255,255,0.25);
+    font-size:22px;
 }
 
-h2{
-    text-align:center;
-    margin-top:30px;
-    color:#ff4d00; /* fogo neon */
-    text-shadow:0 0 8px rgba(255,80,0,0.4);
-}
-
-/* CARD LIMPO */
-.card{
-    background:#0a0a0f;
-    padding:15px;
-    margin:15px 0;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,0.06);
-    transition:0.2s;
-}
-
-.card:hover{
-    transform:translateY(-3px);
-    border:1px solid rgba(255,80,0,0.25);
-}
-
-img{
-    width:100%;
-    border-radius:10px;
-    margin:10px 0;
-}
-
-.price{
-    color:#00ff88;
-    font-weight:bold;
-}
-
-/* BOTÃO ADMIN CORRIGIDO */
+/* botões topo */
 .admin-btn{
     padding:8px 14px;
     border:1px solid #00ffff;
@@ -134,17 +88,73 @@ img{
     color:#000;
 }
 
-/* botão ver mais */
 .btn{
     display:block;
     text-align:center;
     padding:12px;
-    margin:25px 0;
+    margin:20px 0;
     background:#0a0a0f;
     color:#00ffff;
     border:1px solid rgba(0,255,255,0.25);
     border-radius:10px;
     text-decoration:none;
+    transition:0.2s;
+}
+
+.btn:hover{
+    border-color:#00ffff;
+}
+
+/* título */
+h2{
+    text-align:center;
+    margin-top:25px;
+    color:#ff4d00;
+    text-shadow:0 0 6px rgba(255,80,0,0.3);
+}
+
+/* card */
+.card{
+    background:#0a0a0f;
+    padding:15px;
+    margin:15px 0;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.06);
+    transition:0.2s;
+}
+
+.card:hover{
+    transform:translateY(-3px);
+    border:1px solid rgba(255,80,0,0.2);
+}
+
+img{
+    width:100%;
+    border-radius:10px;
+    margin:10px 0;
+}
+
+.price{
+    color:#00ff88;
+    font-weight:bold;
+}
+
+/* botão comprar */
+.buy-btn{
+    display:block;
+    margin-top:10px;
+    padding:10px;
+    text-align:center;
+    border:1px solid #00ff88;
+    color:#00ff88;
+    border-radius:10px;
+    text-decoration:none;
+    transition:0.2s;
+}
+
+.buy-btn:hover{
+    background:#00ff88;
+    color:#000;
 }
 </style>
 </head>
@@ -158,10 +168,10 @@ img{
         <a class="admin-btn" href="admin">Admin</a>
     </div>
 
+    <a class="btn" href="dashboard">📦 CATÁLOGO</a>
+
     <h2>🔥 OS MAIS PROCURADOS</h2>
     <div id="destaques"></div>
-
-    <a class="btn" href="dashboard">Ver mais produtos</a>
 
 </div>
 
@@ -173,16 +183,15 @@ const supabaseAnonKey = "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis";
 
 const client = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-/* 🌌 partículas leves sem poluição */
+/* partículas */
 function createParticles(){
-    for(let i=0;i<18;i++){
+    for(let i=0;i<20;i++){
         let p = document.createElement("div");
         p.classList.add("particle");
 
         p.style.left = Math.random()*100 + "vw";
         p.style.animationDuration = (6 + Math.random()*6) + "s";
         p.style.opacity = Math.random()*0.5 + 0.2;
-        p.style.width = p.style.height = (2 + Math.random()*2) + "px";
 
         document.body.appendChild(p);
     }
@@ -200,8 +209,8 @@ async function carregarDestaques(){
     const box = document.getElementById("destaques");
     box.innerHTML = "";
 
-    if(!data){
-        box.innerHTML = "<p>Erro</p>";
+    if(!data || error){
+        box.innerHTML = "<p>Erro ao carregar</p>";
         return;
     }
 
@@ -211,12 +220,26 @@ async function carregarDestaques(){
     }
 
     data.forEach(item => {
+
+        const whatsappLink = item.whatsapp
+            ? `https://wa.me/${item.whatsapp}?text=${encodeURIComponent("Olá! Tenho interesse no produto: " + item.nome)}`
+            : null;
+
         box.innerHTML += `
             <div class="card">
                 <h3 style="color:#00ffff">${item.nome}</h3>
+
                 ${item.imagem ? `<img src="${item.imagem}">` : ""}
+
                 <p>${item.descricao}</p>
+
                 <div class="price">💰 R$ ${parseFloat(item.preco).toFixed(2)}</div>
+
+                ${whatsappLink ? `
+                    <a class="buy-btn" href="${whatsappLink}" target="_blank">
+                        🛒 Comprar
+                    </a>
+                ` : ""}
             </div>
         `;
     });
@@ -226,4 +249,4 @@ carregarDestaques();
 </script>
 
 </body>
-</html>
+    </html>
