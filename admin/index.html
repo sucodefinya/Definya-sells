@@ -3,157 +3,204 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin</title>
+<title>Admin - Gerenciador de Produtos</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #0f172a;
-  color: white;
-}
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        line-height: 1.5;
+    }
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    h2, h3 {
+        color: #60a5fa;
+    }
+    input, textarea {
+        width: 100%;
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 8px;
+        border: none;
+        background: #1e2937;
+        color: white;
+        font-size: 16px;
+    }
+    button {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        margin: 5px 5px 5px 0;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .add { background: #22c55e; color: white; width: 100%; font-size: 18px; }
+    .delete { background: #ef4444; color: white; }
+    .star { background: #eab308; color: black; }
 
-.container {
-  padding: 20px;
-}
-
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 8px;
-  border: none;
-}
-
-button {
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  margin-top: 5px;
-  cursor: pointer;
-}
-
-.add { background: #22c55e; width: 100%; }
-.delete { background: red; }
-.star { background: gold; color: black; }
-
-.card {
-  background: #1e293b;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 10px;
-}
-
-#logs {
-  margin-top: 20px;
-  background: #020617;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 13px;
-}
+    .card {
+        background: #1e2937;
+        padding: 15px;
+        margin-top: 12px;
+        border-radius: 12px;
+        border-left: 4px solid #3b82f6;
+    }
+    #logs {
+        margin-top: 30px;
+        background: #020617;
+        padding: 15px;
+        border-radius: 10px;
+        font-family: monospace;
+        font-size: 13px;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #334155;
+    }
+    .preco {
+        font-size: 1.2em;
+        color: #86efac;
+        font-weight: bold;
+    }
 </style>
 </head>
-
 <body>
 
 <div class="container">
-  <h2>🔐 Admin</h2>
+    <h2>🔐 Painel Admin</h2>
 
-  <input id="nome" placeholder="Nome do item">
-  <textarea id="descricao" placeholder="Descrição"></textarea>
-  <input id="preco" placeholder="Preço">
+    <input id="nome" placeholder="Nome do produto">
+    <textarea id="descricao" rows="4" placeholder="Descrição do produto"></textarea>
+    <input id="preco" type="number" step="0.01" placeholder="Preço (ex: 29.90)">
 
-  <button class="add" onclick="publicar()">Publicar</button>
+    <button class="add" onclick="publicar()">🚀 Publicar Produto</button>
 
-  <h3>📦 Produtos:</h3>
-  <div id="lista"></div>
+    <h3>📦 Produtos Cadastrados</h3>
+    <div id="lista"></div>
 
-  <div id="logs"></div>
+    <div id="logs"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-function log(msg) {
-  const el = document.getElementById("logs");
-  el.innerHTML += msg + "<br>";
+function log(msg, type = 'info') {
+    const el = document.getElementById("logs");
+    const timestamp = new Date().toLocaleTimeString('pt-BR');
+    let prefix = 'ℹ️';
+    if (type === 'success') prefix = '✅';
+    if (type === 'error') prefix = '❌';
+    el.innerHTML += `[${timestamp}] ${prefix} ${msg}<br>`;
+    el.scrollTop = el.scrollHeight;
 }
 
-const { createClient } = supabase;
+const supabaseUrl = "https://dbqleycdrkdhxrozsmup.supabase.co";
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicWxleWNkcmtkaHhyb3pzbXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzYwOTQsImV4cCI6MjA5MTc1MjA5NH0.KWT_IMxwmD_fcAf1g9c8oE5m682_BNo_vjSZlZtZNA";
 
-const client = createClient(
-  "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicWxleWNkcmtkaHhyb3pzbXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzYwOTQsImV4cCI6MjA5MTc1MjA5NH0.KWT_IMxwmD_fcAf1g9c8oE5m682_BNo_vjSZlZtZNA"
-);
+const client = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-log("✅ Admin conectado");
+log("✅ Admin conectado ao Supabase", "success");
 
 async function carregar() {
-  const { data } = await client
-    .from("produtos")
-    .select("*")
-    .order("criado_em", { ascending: false });
+    const { data, error } = await client
+        .from("produtos")
+        .select("*")
+        .order("criado_em", { ascending: false });
 
-  const lista = document.getElementById("lista");
-  lista.innerHTML = "";
+    if (error) {
+        log("Erro ao carregar produtos: " + error.message, "error");
+        return;
+    }
 
-  data.forEach(item => {
-    lista.innerHTML += `
-      <div class="card">
-        <b>${item.nome}</b> ${item.destaque ? "⭐" : ""}<br>
-        ${item.descricao}<br>
-        💰 R$ ${item.preco}<br>
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
 
-        <button class="delete" onclick="deletar('${item.id}')">Excluir</button>
-        <button class="star" onclick="toggleDestaque('${item.id}', ${item.destaque})">
-          ${item.destaque ? "Remover destaque" : "Destacar"}
-        </button>
-      </div>
-    `;
-  });
+    if (!data || data.length === 0) {
+        lista.innerHTML = "<p style='color:#64748b; padding:10px;'>Nenhum produto cadastrado ainda.</p>";
+        return;
+    }
+
+    data.forEach(item => {
+        lista.innerHTML += `
+            <div class="card">
+                <b>${item.nome}</b> ${item.destaque ? "⭐ <small>(destaque)</small>" : ""}<br><br>
+                ${item.descricao}<br><br>
+                <span class="preco">💰 R$ ${parseFloat(item.preco).toFixed(2)}</span><br><br>
+
+                <button class="delete" onclick="deletar('${item.id}')">🗑️ Excluir</button>
+                <button class="star" onclick="toggleDestaque('${item.id}', ${!!item.destaque})">
+                    ${item.destaque ? "🌟 Remover destaque" : "⭐ Destacar"}
+                </button>
+            </div>
+        `;
+    });
 }
 
 async function publicar() {
-  const nome = document.getElementById("nome").value;
-  const descricao = document.getElementById("descricao").value;
-  const preco = document.getElementById("preco").value;
+    const nome = document.getElementById("nome").value.trim();
+    const descricao = document.getElementById("descricao").value.trim();
+    const preco = document.getElementById("preco").value.trim();
 
-  if (!nome || !descricao || !preco) {
-    log("❌ Preencha tudo");
-    return;
-  }
+    if (!nome || !descricao || !preco) {
+        log("❌ Preencha todos os campos!", "error");
+        return;
+    }
 
-  await client.from("produtos").insert([
-    { nome, descricao, preco }
-  ]);
+    const { error } = await client.from("produtos").insert([
+        { 
+            nome, 
+            descricao, 
+            preco: parseFloat(preco),
+            destaque: false 
+        }
+    ]);
 
-  log("✅ Produto criado");
-
-  document.getElementById("nome").value = "";
-  document.getElementById("descricao").value = "";
-  document.getElementById("preco").value = "";
-
-  carregar();
+    if (error) {
+        log("Erro ao publicar: " + error.message, "error");
+    } else {
+        log(`✅ Produto "${nome}" publicado com sucesso!`, "success");
+        // Limpa os campos
+        document.getElementById("nome").value = "";
+        document.getElementById("descricao").value = "";
+        document.getElementById("preco").value = "";
+        carregar();
+    }
 }
 
 async function deletar(id) {
-  await client.from("produtos").delete().eq("id", id);
-  log("🗑️ Produto deletado");
-  carregar();
+    if (!confirm("Tem certeza que deseja excluir este produto?")) return;
+
+    const { error } = await client.from("produtos").delete().eq("id", id);
+
+    if (error) {
+        log("Erro ao deletar: " + error.message, "error");
+    } else {
+        log("🗑️ Produto excluído com sucesso", "success");
+        carregar();
+    }
 }
 
 async function toggleDestaque(id, atual) {
-  await client
-    .from("produtos")
-    .update({ destaque: !atual })
-    .eq("id", id);
+    const { error } = await client
+        .from("produtos")
+        .update({ destaque: !atual })
+        .eq("id", id);
 
-  log("⭐ Atualizado destaque");
-  carregar();
+    if (error) {
+        log("Erro ao atualizar destaque: " + error.message, "error");
+    } else {
+        log("⭐ Destaque atualizado", "success");
+        carregar();
+    }
 }
 
+// Carrega os produtos ao iniciar
 carregar();
 </script>
 
 </body>
-  </html>
+</html>
