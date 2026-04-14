@@ -3,71 +3,106 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Definya Market</title>
+<title>Home</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #0f172a;
-  color: white;
+body{
+    margin:0;
+    font-family:Arial;
+    background:#0f172a;
+    color:#e2e8f0;
 }
 
-header {
-  background: #020617;
-  padding: 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.container{
+    max-width:900px;
+    margin:auto;
+    padding:20px;
 }
 
-button {
-  background: #22c55e;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin-left: 10px;
+h2{
+    margin-top:20px;
+    color:#facc15;
 }
 
-.container {
-  padding: 20px;
+.card{
+    background:#1e2937;
+    padding:15px;
+    margin:15px 0;
+    border-radius:12px;
 }
 
-.card {
-  background: #1e293b;
-  padding: 15px;
-  margin-bottom: 10px;
-  border-radius: 10px;
+img{
+    width:100%;
+    border-radius:10px;
+    margin:10px 0;
+}
+
+.price{
+    color:#22c55e;
+    font-weight:bold;
+    font-size:18px;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h2>🛒 Definya Market</h2>
-  <div>
-    <button onclick="location.href='/dashboard'">Anunciar</button>
-    <button onclick="location.href='/admin'">Admin</button>
-  </div>
-</header>
-
 <div class="container">
 
-  <div class="card">
-    <h3>⚔️ Espada Lendária</h3>
-    <p>Dano alto + item raro</p>
-    <strong>R$ 50</strong>
-  </div>
+    <h1>🏪 Minha Loja</h1>
 
-  <div class="card">
-    <h3>💰 1kk Gold</h3>
-    <p>Entrega rápida</p>
-    <strong>R$ 20</strong>
-  </div>
+    <h2>🔥 OS MAIS PROCURADOS</h2>
+    <div id="destaques"></div>
 
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseUrl = "https://dbqleycdrkdhxrozsmup.supabase.co";
+const supabaseAnonKey = "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis";
+
+const client = supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+async function carregarDestaques(){
+
+    const { data, error } = await client
+        .from("produtos")
+        .select("*")
+        .eq("destaque", true)
+        .limit(3);
+
+    const box = document.getElementById("destaques");
+    box.innerHTML = "";
+
+    if(error){
+        box.innerHTML = "Erro ao carregar";
+        return;
+    }
+
+    if(!data || data.length === 0){
+        box.innerHTML = "<p>Nenhum destaque ainda 😢</p>";
+        return;
+    }
+
+    data.forEach(item => {
+
+        box.innerHTML += `
+            <div class="card">
+                <h3>${item.nome}</h3>
+
+                ${item.imagem ? `<img src="${item.imagem}">` : ""}
+
+                <p>${item.descricao}</p>
+
+                <div class="price">💰 R$ ${parseFloat(item.preco).toFixed(2)}</div>
+            </div>
+        `;
+    });
+}
+
+carregarDestaques();
+</script>
 
 </body>
 </html>
