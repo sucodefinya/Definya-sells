@@ -108,41 +108,40 @@ img{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabase = window.supabase.createClient(
+const supabase = supabase.createClient(
   "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
+  "SUA_ANON_KEY_AQUI"
 );
 
-// 🔐 SOMENTE ESSE EMAIL
+// 🔐 LOGIN CHECK
 const ADMIN_EMAIL = "claudiogg270@gmail.com";
 
-/* PROTEÇÃO */
 async function checkAuth(){
     const { data } = await supabase.auth.getSession();
 
     const user = data?.session?.user;
 
     if(!user){
-        window.location.href = "admin-login.html";
+        window.location.href = "/loginadm/";
         return;
     }
 
     if(user.email !== ADMIN_EMAIL){
         await supabase.auth.signOut();
         alert("Acesso negado");
-        window.location.href = "admin-login.html";
+        window.location.href = "/loginadm/";
     }
 }
 
 checkAuth();
 
-/* logout */
+// logout
 async function logout(){
     await supabase.auth.signOut();
-    window.location.href = "admin-login.html";
+    window.location.href = "/loginadm/";
 }
 
-/* upload imagem */
+// upload imagem
 let imagemFile = null;
 
 document.getElementById("imagemInput").addEventListener("change",(e)=>{
@@ -161,16 +160,23 @@ async function uploadImagem(){
 
     const fileName = `produto-${Date.now()}.${imagemFile.name.split('.').pop()}`;
 
-    await supabase.storage.from("produtos")
-    .upload(fileName, imagemFile, { upsert:true });
+    const { error } = await supabase.storage
+        .from("produtos")
+        .upload(fileName, imagemFile, { upsert:true });
 
-    const { data } = supabase.storage.from("produtos")
-    .getPublicUrl(fileName);
+    if(error){
+        alert(error.message);
+        return null;
+    }
+
+    const { data } = supabase.storage
+        .from("produtos")
+        .getPublicUrl(fileName);
 
     return data.publicUrl;
 }
 
-/* publicar */
+// publicar
 async function publicar(){
     const nome = document.getElementById("nome").value;
     const descricao = document.getElementById("descricao").value;
@@ -193,35 +199,67 @@ async function publicar(){
         return;
     }
 
+    document.getElementById("nome").value = "";
+    document.getElementById("descricao").value = "";
+    document.getElementById("preco").value = "";
+    document.getElementById("whatsapp").value = "";
+    document.getElementById("preview").innerHTML = "";
+    imagemFile = null;
+
     carregar();
 }
 
-/* carregar */
+// carregar produtos
 async function carregar(){
-    const { data } = await supabase.from("produtos").select("*");
+    const { data, error } = await supabase
+        .from("produtos")
+        .select("*")
+        .order("id", { ascending:false });
 
-    document.getElementById("lista").innerHTML =
-    data.map(p=>`
-        <div class="card">
+    if(error){
+        alert(error.message);
+        return;
+    }
+
+    const lista = document.getElementById("lista");
+
+    if(!data || data.length === 0){
+        lista.innerHTML = "<p style='opacity:0.6'>Nenhum produto ainda</p>";
+        return;
+    }
+
+    lista.innerHTML = "";
+
+    data.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
             <b>${p.nome}</b><br>
+
             ${p.imagem ? `<img src="${p.imagem}">` : ""}
+
             <p>${p.descricao}</p>
-            💰 ${p.preco}<br><br>
+
+            💰 R$ ${Number(p.preco || 0).toFixed(2)}<br><br>
 
             <button class="delete" onclick="del('${p.id}')">Excluir</button>
             <button class="star" onclick="star('${p.id}',${p.destaque})">
-                Destaque
+                ${p.destaque ? "Remover destaque" : "Destacar"}
             </button>
-        </div>
-    `).join("");
+        `;
+
+        lista.appendChild(card);
+    });
 }
 
-/* ações */
+// delete
 async function del(id){
     await supabase.from("produtos").delete().eq("id",id);
     carregar();
 }
 
+// destaque
 async function star(id,val){
     await supabase.from("produtos")
     .update({destaque:!val}).eq("id",id);
