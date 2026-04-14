@@ -3,56 +3,95 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard</title>
+<title>Catálogo</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #0f172a;
-  color: white;
+body{
+    margin:0;
+    font-family:Arial;
+    background:#000;
+    color:#e5e7eb;
+    overflow-x:hidden;
 }
 
-.container {
-  padding: 20px;
+/* glow leve */
+body::before{
+    content:"";
+    position:fixed;
+    width:500px;
+    height:500px;
+    background: radial-gradient(circle, rgba(0,255,255,0.06), transparent 60%);
+    top:-200px;
+    left:-200px;
+    z-index:-2;
 }
 
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 8px;
-  border: none;
+.container{
+    max-width:900px;
+    margin:auto;
+    padding:20px;
 }
 
-button {
-  background: #22c55e;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
-  width: 100%;
-  margin-top: 5px;
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
-.card {
-  background: #1e293b;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 10px;
+h1{
+    color:#00ffff;
+    font-size:22px;
 }
 
-.delete {
-  background: red;
+.back-btn{
+    padding:8px 14px;
+    border:1px solid #00ffff;
+    color:#00ffff;
+    text-decoration:none;
+    border-radius:10px;
 }
 
-#logs {
-  margin-top: 20px;
-  background: #020617;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 13px;
-  max-height: 200px;
-  overflow-y: auto;
+.section-title{
+    margin-top:25px;
+    text-align:center;
+    color:#ff4d00;
+}
+
+/* card */
+.card{
+    background:#0a0a0f;
+    padding:15px;
+    margin:15px 0;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.06);
+}
+
+img{
+    width:100%;
+    border-radius:10px;
+    margin:10px 0;
+}
+
+.price{
+    color:#00ff88;
+    font-weight:bold;
+}
+
+/* botão comprar */
+.buy-btn{
+    display:block;
+    margin-top:10px;
+    padding:10px;
+    text-align:center;
+    border:1px solid #00ff88;
+    color:#00ff88;
+    border-radius:10px;
+    text-decoration:none;
+}
+
+.buy-btn:hover{
+    background:#00ff88;
+    color:#000;
 }
 </style>
 </head>
@@ -60,117 +99,74 @@ button {
 <body>
 
 <div class="container">
-  <h2>📦 Dashboard</h2>
 
-  <input id="nome" placeholder="Nome do item">
-  <textarea id="descricao" placeholder="Descrição"></textarea>
-  <input id="preco" placeholder="Preço">
+    <div class="header">
+        <h1>📦 CATÁLOGO</h1>
+        <a class="back-btn" href="/">Home</a>
+    </div>
 
-  <button onclick="publicar()">Publicar</button>
+    <h2 class="section-title">🔥 MAIS PROCURADOS</h2>
+    <div id="destaques"></div>
 
-  <h3>📋 Itens:</h3>
-  <div id="lista"></div>
+    <h2 class="section-title">📦 TODOS OS PRODUTOS</h2>
+    <div id="todos"></div>
 
-  <div id="logs"></div>
 </div>
 
-<!-- SUPABASE V2 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-function log(msg) {
-  const el = document.getElementById("logs");
-  el.innerHTML += msg + "<br>";
-  el.scrollTop = el.scrollHeight;
-}
+const supabaseUrl = "https://dbqleycdrkdhxrozsmup.supabase.co";
+const supabaseAnonKey = "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis";
 
-log("🚀 Página carregada");
+const client = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-const { createClient } = supabase;
+function renderCard(item){
+    const whatsapp = item.whatsapp
+        ? `https://wa.me/${item.whatsapp}?text=${encodeURIComponent("Olá! Tenho interesse no produto: " + item.nome)}`
+        : null;
 
-const client = createClient(
-  "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicWxleWNkcmtkaHhyb3pzbXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzYwOTQsImV4cCI6MjA5MTc1MjA5NH0.KWT_IMxwmD_fcAf1Xg9c8oE5m682_BNo_vjSZlZtZNA"
-);
+    return `
+        <div class="card">
+            <h3 style="color:#00ffff">${item.nome}</h3>
 
-log("✅ Supabase conectado");
+            ${item.imagem ? `<img src="${item.imagem}">` : ""}
 
-async function carregar() {
-  log("📥 Carregando itens...");
+            <p>${item.descricao}</p>
 
-  const { data, error } = await client
-    .from("produtos")
-    .select("*")
-    .order("criado_em", { ascending: false });
+            <div class="price">💰 R$ ${parseFloat(item.preco).toFixed(2)}</div>
 
-  if (error) {
-    log("❌ Erro ao carregar: " + error.message);
-    return;
-  }
-
-  const lista = document.getElementById("lista");
-  lista.innerHTML = "";
-
-  data.forEach(item => {
-    lista.innerHTML += `
-      <div class="card">
-        <b>${item.nome}</b><br>
-        ${item.descricao}<br>
-        💰 R$ ${item.preco}<br>
-        <button class="delete" onclick="deletar('${item.id}')">Excluir</button>
-      </div>
+            ${whatsapp ? `
+                <a class="buy-btn" href="${whatsapp}" target="_blank">
+                    🛒 Comprar
+                </a>
+            ` : ""}
+        </div>
     `;
-  });
-
-  log("✅ Itens carregados");
 }
 
-async function publicar() {
-  log("🟡 Publicando...");
+async function carregar(){
 
-  const nome = document.getElementById("nome").value;
-  const descricao = document.getElementById("descricao").value;
-  const preco = document.getElementById("preco").value;
+    // 🔥 destaques
+    const d = await client
+        .from("produtos")
+        .select("*")
+        .eq("destaque", true)
+        .limit(5);
 
-  if (!nome || !descricao || !preco) {
-    log("❌ Preencha tudo");
-    return;
-  }
+    document.getElementById("destaques").innerHTML =
+        d.data?.map(renderCard).join("") || "<p>Nenhum destaque</p>";
 
-  const { error } = await client
-    .from("produtos")
-    .insert([{ nome, descricao, preco }]);
+    // 📦 todos produtos
+    const t = await client
+        .from("produtos")
+        .select("*")
+        .order("id", { ascending:false });
 
-  if (error) {
-    log("❌ Erro ao salvar: " + error.message);
-  } else {
-    log("✅ Item salvo!");
-
-    document.getElementById("nome").value = "";
-    document.getElementById("descricao").value = "";
-    document.getElementById("preco").value = "";
-
-    carregar();
-  }
+    document.getElementById("todos").innerHTML =
+        t.data?.map(renderCard).join("") || "<p>Sem produtos</p>";
 }
 
-async function deletar(id) {
-  log("🗑️ Deletando...");
-
-  const { error } = await client
-    .from("produtos")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    log("❌ Erro ao deletar: " + error.message);
-  } else {
-    log("✅ Item deletado!");
-    carregar();
-  }
-}
-
-// carregar ao abrir
 carregar();
 </script>
 
