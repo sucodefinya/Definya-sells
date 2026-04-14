@@ -13,7 +13,6 @@ body{
     color:#e2e8f0;
 }
 
-/* topo */
 .topbar{
     display:flex;
     justify-content:space-between;
@@ -23,16 +22,6 @@ body{
     border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
-.logout{
-    background:#ef4444;
-    color:#fff;
-    border:none;
-    padding:10px 15px;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-/* container */
 .container{
     max-width:900px;
     margin:auto;
@@ -64,7 +53,11 @@ button{
     margin-top:10px;
 }
 
-/* cards */
+.logout{
+    background:#ef4444;
+    color:#fff;
+}
+
 .card{
     background:#0b1220;
     padding:15px;
@@ -90,16 +83,15 @@ img{
 
 <body>
 
-<!-- TOP BAR -->
 <div class="topbar">
-    <h3>🔐 Painel Admin</h3>
+    <h3>🔐 Admin</h3>
     <button class="logout" onclick="logout()">Sair</button>
 </div>
 
 <div class="container">
 
     <input id="nome" placeholder="Nome do produto">
-    <textarea id="descricao" rows="4" placeholder="Descrição"></textarea>
+    <textarea id="descricao" placeholder="Descrição"></textarea>
     <input id="preco" type="number" placeholder="Preço">
     <input id="whatsapp" placeholder="WhatsApp">
 
@@ -118,17 +110,30 @@ img{
 <script>
 const supabase = window.supabase.createClient(
   "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
+  "SUA_ANON_KEY"
 );
 
-/* 🔐 PROTEÇÃO REAL */
+// 🔐 SOMENTE ESSE EMAIL
+const ADMIN_EMAIL = "claudiogg270@gmail.com";
+
+/* PROTEÇÃO */
 async function checkAuth(){
     const { data } = await supabase.auth.getSession();
 
-    if(!data.session){
+    const user = data?.session?.user;
+
+    if(!user){
+        window.location.href = "admin-login.html";
+        return;
+    }
+
+    if(user.email !== ADMIN_EMAIL){
+        await supabase.auth.signOut();
+        alert("Acesso negado");
         window.location.href = "admin-login.html";
     }
 }
+
 checkAuth();
 
 /* logout */
@@ -137,7 +142,7 @@ async function logout(){
     window.location.href = "admin-login.html";
 }
 
-/* upload */
+/* upload imagem */
 let imagemFile = null;
 
 document.getElementById("imagemInput").addEventListener("change",(e)=>{
@@ -159,7 +164,9 @@ async function uploadImagem(){
     await supabase.storage.from("produtos")
     .upload(fileName, imagemFile, { upsert:true });
 
-    const { data } = supabase.storage.from("produtos").getPublicUrl(fileName);
+    const { data } = supabase.storage.from("produtos")
+    .getPublicUrl(fileName);
+
     return data.publicUrl;
 }
 
@@ -172,7 +179,7 @@ async function publicar(){
 
     let img = await uploadImagem();
 
-    await supabase.from("produtos").insert([{
+    const { error } = await supabase.from("produtos").insert([{
         nome,
         descricao,
         preco,
@@ -180,6 +187,11 @@ async function publicar(){
         imagem: img,
         destaque:false
     }]);
+
+    if(error){
+        alert(error.message);
+        return;
+    }
 
     carregar();
 }
