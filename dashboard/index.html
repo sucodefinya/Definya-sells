@@ -40,6 +40,16 @@ button {
   cursor: pointer;
   width: 100%;
 }
+
+#logs {
+  margin-top: 20px;
+  background: #020617;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  max-height: 200px;
+  overflow-y: auto;
+}
 </style>
 </head>
 
@@ -56,46 +66,55 @@ button {
   <input id="preco" placeholder="Preço (R$)">
 
   <button onclick="publicar()">Publicar</button>
+
+  <div id="logs"></div>
 </div>
 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
-console.log("🚀 Página carregada");
+function log(msg) {
+  const logs = document.getElementById("logs");
+  logs.innerHTML += msg + "<br>";
+  logs.scrollTop = logs.scrollHeight;
+}
+
+log("🚀 Página carregada");
 
 const supabase = window.supabase.createClient(
   "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicWxleWNkcmtkaHhyb3pzbXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzYwOTQsImV4cCI6MjA5MTc1MjA5NH0.KWT_IMxwmD_fcAf1Xg9c8oE5m682_BNo_vjSZlZtZNA"
+  "SUA_ANON_KEY_AQUI"
 );
 
-console.log("✅ Supabase conectado");
+log("🔗 Conectando ao Supabase...");
+log("✅ Supabase conectado");
 
 async function publicar() {
-  console.log("🟡 Botão clicado");
+  log("🟡 Botão clicado");
 
   const nome = document.getElementById("nome").value;
   const descricao = document.getElementById("descricao").value;
   const preco = document.getElementById("preco").value;
 
   if (!nome || !descricao || !preco) {
-    console.log("❌ Campos vazios");
+    log("❌ Campos vazios");
     alert("Preencha tudo!");
     return;
   }
 
-  console.log("📤 Enviando pro banco...");
+  log("📤 Enviando dados...");
 
   const { data, error } = await supabase.from("produtos").insert([
     { nome, descricao, preco }
   ]);
 
   if (error) {
-    console.error("❌ Erro:", error);
-    alert("Erro ao publicar: " + error.message);
+    log("❌ ERRO: " + error.message);
+    alert("Erro ao publicar");
   } else {
-    console.log("✅ Salvo no banco:", data);
-    alert("Item publicado com sucesso!");
+    log("✅ Item salvo com sucesso!");
+    alert("Publicado com sucesso!");
 
     document.getElementById("nome").value = "";
     document.getElementById("descricao").value = "";
