@@ -62,35 +62,41 @@ button {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
+console.log("🚀 Página carregada");
+
 const supabase = window.supabase.createClient(
   "https://dbqleycdrkdhxrozsmup.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRicWxleWNkcmtkaHhyb3pzbXVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzYwOTQsImV4cCI6MjA5MTc1MjA5NH0.KWT_IMxwmD_fcAf1Xg9c8oE5m682_BNo_vjSZlZtZNA"
 );
 
+console.log("✅ Supabase conectado");
+
 async function publicar() {
+  console.log("🟡 Botão clicado");
+
   const nome = document.getElementById("nome").value;
   const descricao = document.getElementById("descricao").value;
   const preco = document.getElementById("preco").value;
 
   if (!nome || !descricao || !preco) {
+    console.log("❌ Campos vazios");
     alert("Preencha tudo!");
     return;
   }
 
-  const { error } = await supabase.from("produtos").insert([
-    {
-      nome: nome,
-      descricao: descricao,
-      preco: preco
-    }
+  console.log("📤 Enviando pro banco...");
+
+  const { data, error } = await supabase.from("produtos").insert([
+    { nome, descricao, preco }
   ]);
 
   if (error) {
+    console.error("❌ Erro:", error);
     alert("Erro ao publicar: " + error.message);
   } else {
+    console.log("✅ Salvo no banco:", data);
     alert("Item publicado com sucesso!");
-    
-    // limpar campos
+
     document.getElementById("nome").value = "";
     document.getElementById("descricao").value = "";
     document.getElementById("preco").value = "";
