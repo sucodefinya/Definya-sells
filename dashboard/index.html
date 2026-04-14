@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anunciar Item</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+}
+
+header {
+  background: #020617;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.container {
+  padding: 20px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: none;
+}
+
+button {
+  background: #22c55e;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h2>📦 Anunciar Item</h2>
+  <button onclick="location.href='/'">Voltar</button>
+</header>
+
+<div class="container">
+  <input id="nome" placeholder="Nome do item">
+  <textarea id="descricao" placeholder="Descrição"></textarea>
+  <input id="preco" placeholder="Preço (R$)">
+
+  <button onclick="publicar()">Publicar</button>
+</div>
+
+<script>
+function publicar() {
+  const nome = document.getElementById("nome").value;
+  const descricao = document.getElementById("descricao").value;
+  const preco = document.getElementById("preco").value;
+
+  if (!nome || !descricao || !preco) {
+    alert("Preencha tudo!");
+    return;
+  }
+
+  alert("Item publicado (em breve vai salvar no banco 😏)");
+}
+</script>
+
+</body>
+</html>
