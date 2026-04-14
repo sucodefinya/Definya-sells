@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Final</title>
+<title>Admin Completo</title>
 
 <style>
 body{
@@ -16,16 +16,24 @@ body{
 .topbar{
     display:flex;
     justify-content:space-between;
-    align-items:center;
     padding:15px;
     background:#0b1220;
-    border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
 .container{
     max-width:900px;
     margin:auto;
     padding:20px;
+}
+
+input, textarea{
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    background:#111827;
+    border:none;
+    color:#fff;
+    border-radius:10px;
 }
 
 button{
@@ -43,6 +51,7 @@ button{
 .add{
     background:#22c55e;
     width:100%;
+    font-weight:bold;
     margin-top:10px;
 }
 
@@ -82,7 +91,7 @@ img{
     padding:10px;
     font-family:monospace;
     font-size:12px;
-    height:160px;
+    height:150px;
     overflow:auto;
     border-radius:10px;
 }
@@ -92,11 +101,22 @@ img{
 <body>
 
 <div class="topbar">
-    <h3>🔐 Admin Panel</h3>
+    <h3>🔐 Admin</h3>
     <button class="logout" onclick="logout()">🚪 Sair</button>
 </div>
 
 <div class="container">
+
+    <h3>➕ Adicionar Produto</h3>
+
+    <input id="nome" placeholder="Nome do produto">
+    <textarea id="descricao" placeholder="Descrição"></textarea>
+    <input id="preco" placeholder="Preço">
+    <input id="whatsapp" placeholder="WhatsApp">
+
+    <input type="file" id="imagemInput">
+
+    <button class="add" onclick="publicar()">PUBLICAR</button>
 
     <h3>📦 Produtos</h3>
     <div id="lista"></div>
@@ -111,10 +131,12 @@ img{
 <script>
 const client = supabase.createClient(
   "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "SUA_ANON_KEY_AQUI"
+  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-/* ================= LOGS ================= */
+let imagemFile = null;
+
+/* LOGS */
 function log(msg){
     const el = document.getElementById("logs");
     const t = new Date().toLocaleTimeString();
@@ -124,10 +146,67 @@ function log(msg){
 
 log("📄 Admin carregado");
 
-/* ================= CARREGAR ================= */
-async function carregar(){
+/* IMAGE */
+document.getElementById("imagemInput").addEventListener("change",(e)=>{
+    imagemFile = e.target.files[0];
+    log("🖼️ imagem selecionada");
+});
 
-    log("📦 carregando produtos...");
+/* UPLOAD */
+async function uploadImagem(){
+    if(!imagemFile) return null;
+
+    const fileName = `produto-${Date.now()}.${imagemFile.name.split('.').pop()}`;
+
+    const { error } = await client.storage
+        .from("produtos")
+        .upload(fileName, imagemFile, { upsert:true });
+
+    if(error){
+        log("❌ erro upload: " + error.message);
+        return null;
+    }
+
+    const { data } = client.storage
+        .from("produtos")
+        .getPublicUrl(fileName);
+
+    return data.publicUrl;
+}
+
+/* PUBLICAR */
+async function publicar(){
+
+    log("🚀 publicando...");
+
+    const nome = document.getElementById("nome").value;
+    const descricao = document.getElementById("descricao").value;
+    const preco = document.getElementById("preco").value;
+    const whatsapp = document.getElementById("whatsapp").value;
+
+    const img = await uploadImagem();
+
+    const { error } = await client.from("produtos").insert([{
+        nome,
+        descricao,
+        preco,
+        whatsapp,
+        imagem: img,
+        destaque:false
+    }]);
+
+    if(error){
+        log("❌ erro: " + error.message);
+        return;
+    }
+
+    log("✅ produto publicado");
+
+    carregar();
+}
+
+/* CARREGAR */
+async function carregar(){
 
     const { data, error } = await client
         .from("produtos")
@@ -135,17 +214,12 @@ async function carregar(){
         .order("id",{ascending:false});
 
     if(error){
-        log("❌ erro: " + error.message);
+        log("❌ erro load: " + error.message);
         return;
     }
 
     const lista = document.getElementById("lista");
     lista.innerHTML = "";
-
-    if(!data || data.length === 0){
-        lista.innerHTML = "<p>Nenhum produto ainda</p>";
-        return;
-    }
 
     data.forEach(p => {
 
@@ -158,7 +232,7 @@ async function carregar(){
             ${p.imagem ? `<img src="${p.imagem}">` : ""}
 
             <p>${p.descricao}</p>
-            💰 R$ ${p.preco || 0}
+            💰 R$ ${p.preco}
 
             <div class="actions">
                 <button class="delBtn" onclick="del('${p.id}')">🗑 Excluir</button>
@@ -172,29 +246,18 @@ async function carregar(){
         lista.appendChild(div);
     });
 
-    log("✅ produtos carregados: " + data.length);
+    log("📦 carregado: " + data.length);
 }
 
-/* ================= DELETE ================= */
+/* DELETE */
 async function del(id){
 
-    log("🗑 deletando...");
-
-    const { error } = await client
-        .from("produtos")
-        .delete()
-        .eq("id", id);
-
-    if(error){
-        log("❌ erro delete: " + error.message);
-        return;
-    }
-
-    log("✅ deletado");
+    await client.from("produtos").delete().eq("id",id);
+    log("🗑 deletado");
     carregar();
 }
 
-/* ================= FAVORITO (3 LIMITES) ================= */
+/* FAVORITO LIMITE 3 */
 async function fav(id, atual){
 
     const { data } = await client
@@ -205,36 +268,25 @@ async function fav(id, atual){
     const total = data?.length || 0;
 
     if(!atual && total >= 3){
-        alert("Limite de 3 favoritos atingido");
-        log("❌ limite 3 favoritos");
+        alert("Limite de 3 favoritos");
         return;
     }
 
-    const { error } = await client
+    await client
         .from("produtos")
         .update({ destaque: !atual })
         .eq("id", id);
 
-    if(error){
-        log("❌ erro fav: " + error.message);
-        return;
-    }
-
-    log("⭐ atualizado favorito");
     carregar();
 }
 
-/* ================= LOGOUT ================= */
+/* LOGOUT */
 async function logout(){
-
-    log("🚪 saindo...");
-
     await client.auth.signOut();
-
     window.location.href = "/index.html";
 }
 
-/* ================= INIT ================= */
+/* INIT */
 carregar();
 </script>
 
