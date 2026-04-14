@@ -31,7 +31,7 @@
     <input id="whatsapp" placeholder="WhatsApp (ex: 11987654321)">
 
     <label style="display:block; margin:15px 0 8px; font-weight:bold;">📸 Imagem do produto</label>
-    <input id="imagemInput" type="file" accept="image/*" style="padding:12px; background:#1e2937; width:100%;">
+    <input id="imagemInput" type="file" accept="image/*">
 
     <div id="preview"></div>
 
@@ -61,46 +61,46 @@
         el.scrollTop = el.scrollHeight;
     }
 
-    // Preview da imagem
+    // Preview imagem
     document.getElementById('imagemInput').addEventListener('change', (e) => {
         imagemFile = e.target.files[0];
         if (!imagemFile) return;
 
         const reader = new FileReader();
-        reader.onload = function(ev) {
+        reader.onload = (ev) => {
             document.getElementById('preview').innerHTML = `
-                <img src="${ev.target.result}" alt="Pré-visualização">
-                <small style="color:#86efac; display:block; margin-top:8px;">Imagem selecionada da galeria ✓</small>
+                <img src="${ev.target.result}">
+                <small style="color:#86efac;">Imagem selecionada ✓</small>
             `;
         };
         reader.readAsDataURL(imagemFile);
     });
 
-    // === FUNÇÃO CORRIGIDA DO UPLOAD ===
+    // UPLOAD CORRIGIDO
     async function uploadImagem() {
         if (!imagemFile) return null;
 
         const fileExt = imagemFile.name.split('.').pop().toLowerCase();
-        const fileName = `produto-\( {Date.now()}. \){fileExt}`;
+        const fileName = `produto-${Date.now()}.${fileExt}`;
 
         log(`📤 Enviando imagem... (${fileName})`);
 
-        const { error: uploadError } = await client.storage
+        const { error } = await client.storage
             .from('produtos')
-            .upload(fileName, imagemFile, { 
+            .upload(fileName, imagemFile, {
                 upsert: true,
-                contentType: imagemFile.type 
+                contentType: imagemFile.type
             });
 
-        if (uploadError) {
-            log("Erro no upload: " + uploadError.message, "error");
-            console.error(uploadError);
+        if (error) {
+            log("Erro no upload: " + error.message, "error");
             return null;
         }
 
-        const { data: urlData } = client.storage.from('produtos').getPublicUrl(fileName);
-        log("✅ Imagem enviada com sucesso", "success");
-        return urlData.publicUrl;
+        const { data } = client.storage.from('produtos').getPublicUrl(fileName);
+
+        log("✅ Imagem enviada", "success");
+        return data.publicUrl;
     }
 
     async function publicar() {
@@ -115,6 +115,7 @@
         }
 
         let imagemUrl = null;
+
         if (imagemFile) {
             imagemUrl = await uploadImagem();
             if (!imagemUrl) return;
@@ -131,20 +132,20 @@
 
         if (error) {
             log("Erro ao publicar: " + error.message, "error");
-        } else {
-            log(`✅ Produto "${nome}" publicado com sucesso!`, "success");
-            
-            // Limpa tudo
-            document.getElementById("nome").value = "";
-            document.getElementById("descricao").value = "";
-            document.getElementById("preco").value = "";
-            document.getElementById("whatsapp").value = "";
-            document.getElementById("imagemInput").value = "";
-            document.getElementById("preview").innerHTML = "";
-            imagemFile = null;
-
-            carregar();
+            return;
         }
+
+        log(`✅ Produto "${nome}" publicado!`, "success");
+
+        document.getElementById("nome").value = "";
+        document.getElementById("descricao").value = "";
+        document.getElementById("preco").value = "";
+        document.getElementById("whatsapp").value = "";
+        document.getElementById("imagemInput").value = "";
+        document.getElementById("preview").innerHTML = "";
+        imagemFile = null;
+
+        carregar();
     }
 
     async function carregar() {
@@ -154,7 +155,7 @@
             .order("criado_em", { ascending: false });
 
         if (error) {
-            log("Erro ao carregar produtos: " + error.message, "error");
+            log("Erro ao carregar: " + error.message, "error");
             return;
         }
 
@@ -162,17 +163,18 @@
         lista.innerHTML = "";
 
         if (!data || data.length === 0) {
-            lista.innerHTML = "<p style='color:#64748b; padding:10px;'>Nenhum produto cadastrado ainda.</p>";
+            lista.innerHTML = "<p style='color:#64748b;'>Nenhum produto ainda</p>";
             return;
         }
 
         data.forEach(item => {
-            const imgHtml = item.imagem 
-                ? `<img src="\( {item.imagem}" alt=" \){item.nome}">` 
-                : '<p style="color:#64748b;">Sem imagem</p>';
 
-            const whatsappHtml = item.whatsapp 
-                ? `<br>📱 WhatsApp: <a href="https://wa.me/\( {item.whatsapp}" target="_blank" style="color:#22c55e;"> \){item.whatsapp}</a>` 
+            const imgHtml = item.imagem
+                ? `<img src="${item.imagem}" alt="${item.nome}">`
+                : `<p style="color:#64748b;">Sem imagem</p>`;
+
+            const whatsappHtml = item.whatsapp
+                ? `<br>📱 WhatsApp: <a href="https://wa.me/${item.whatsapp}" target="_blank" style="color:#22c55e;">${item.whatsapp}</a>`
                 : '';
 
             lista.innerHTML += `
@@ -184,7 +186,7 @@
                     ${whatsappHtml}<br><br>
 
                     <button class="delete" onclick="deletar('${item.id}')">🗑️ Excluir</button>
-                    <button class="star" onclick="toggleDestaque('${item.id}', ${!!item.destaque})">
+                    <button class="star" onclick="toggleDestaque('${item.id}', ${item.destaque})">
                         ${item.destaque ? "Remover destaque" : "Destacar"}
                     </button>
                 </div>
@@ -205,9 +207,9 @@
         carregar();
     }
 
-    // Inicia
-    log("✅ Painel carregado - Escolha a imagem da galeria", "success");
+    log("✅ Painel carregado", "success");
     carregar();
 </script>
+
 </body>
 </html>
