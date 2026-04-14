@@ -6,18 +6,73 @@
 <title>Painel Admin</title>
 
 <style>
-    body { margin:0; font-family: Arial, sans-serif; background:#0f172a; color:#e2e8f0; }
-    .container { max-width: 900px; margin: 0 auto; padding:20px; }
-    input, textarea { width:100%; padding:14px; margin:10px 0; border-radius:10px; border:none; background:#1e2937; color:white; font-size:16px; }
-    button { padding:14px 20px; border:none; border-radius:10px; cursor:pointer; margin:8px 0; font-weight:600; font-size:16px; }
-    .add { background:#22c55e; width:100%; }
+    body { 
+        margin:0; 
+        font-family: Arial, sans-serif; 
+        background:#0f172a; 
+        color:#e2e8f0; 
+    }
+    .container { 
+        max-width: 900px; 
+        margin: 0 auto; 
+        padding:20px; 
+    }
+    input, textarea { 
+        width:100%; 
+        padding:14px; 
+        margin:10px 0; 
+        border-radius:10px; 
+        border:none; 
+        background:#1e2937; 
+        color:white; 
+        font-size:16px; 
+    }
+    button { 
+        padding:14px 20px; 
+        border:none; 
+        border-radius:10px; 
+        cursor:pointer; 
+        margin:8px 0; 
+        font-weight:600; 
+        font-size:16px; 
+    }
+    .add { 
+        background:#22c55e; 
+        width:100%; 
+        font-size:18px; 
+    }
     .delete { background:#ef4444; color:white; }
     .star { background:#eab308; color:black; }
-    .card { background:#1e2937; padding:15px; margin-top:15px; border-radius:12px; }
-    img { max-width:100%; border-radius:10px; margin:10px 0; }
-    #preview { margin:15px 0; text-align:center; }
-    #preview img { max-height:220px; }
-    #logs { margin-top:30px; background:#020617; padding:15px; border-radius:10px; font-family:monospace; font-size:13px; max-height:280px; overflow-y:auto; }
+    .card { 
+        background:#1e2937; 
+        padding:15px; 
+        margin-top:15px; 
+        border-radius:12px; 
+    }
+    img { 
+        max-width:100%; 
+        border-radius:10px; 
+        margin:10px 0; 
+    }
+    #preview { 
+        margin:15px 0; 
+        text-align:center; 
+    }
+    #preview img { 
+        max-height:250px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+    }
+    #logs { 
+        margin-top:30px; 
+        background:#020617; 
+        padding:15px; 
+        border-radius:10px; 
+        font-family:monospace; 
+        font-size:13px; 
+        max-height:300px; 
+        overflow-y:auto; 
+        line-height:1.4;
+    }
 </style>
 </head>
 <body>
@@ -31,7 +86,8 @@
     <input id="whatsapp" placeholder="WhatsApp (ex: 11987654321)">
 
     <label style="display:block; margin:15px 0 8px; font-weight:bold;">📸 Imagem do produto</label>
-    <input id="imagemInput" type="file" accept="image/*" style="padding:10px; background:#1e2937;">
+    <input id="imagemInput" type="file" accept="image/*" style="padding:12px; background:#1e2937; width:100%;">
+
     <div id="preview"></div>
 
     <button class="add" onclick="publicar()">🚀 Publicar Produto</button>
@@ -45,105 +101,173 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseUrl = "https://dbqleycdrkdhxrozsmup.supabase.co";
-const supabaseAnonKey = "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis";   // ← Troque pela sua chave atual
+    const supabaseUrl = "https://dbqleycdrkdhxrozsmup.supabase.co";
+    const supabaseAnonKey = "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis";
 
-const client = supabase.createClient(supabaseUrl, supabaseAnonKey);
+    const client = supabase.createClient(supabaseUrl, supabaseAnonKey);
 
-let imagemFile = null;
+    let imagemFile = null;
 
-function log(msg, type = 'info') {
-    const el = document.getElementById("logs");
-    const time = new Date().toLocaleTimeString('pt-BR');
-    const prefix = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
-    el.innerHTML += `[${time}] ${prefix} ${msg}<br>`;
-    el.scrollTop = el.scrollHeight;
-}
-
-// Preview da imagem selecionada da galeria
-document.getElementById('imagemInput').addEventListener('change', (e) => {
-    imagemFile = e.target.files[0];
-    if (!imagemFile) return;
-
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-        document.getElementById('preview').innerHTML = `
-            <img src="${ev.target.result}" alt="Pré-visualização">
-            <small style="color:#86efac;">Imagem selecionada da galeria ✓</small>
-        `;
-    };
-    reader.readAsDataURL(imagemFile);
-});
-
-async function uploadImagem() {
-    if (!imagemFile) return null;
-
-    const fileExt = imagemFile.name.split('.').pop().toLowerCase();
-    const fileName = `produto-\( {Date.now()}. \){fileExt}`;
-
-    log("📤 Enviando imagem da sua galeria...");
-
-    const { error } = await client.storage
-        .from('produtos')
-        .upload(fileName, imagemFile, { upsert: true });
-
-    if (error) {
-        log("Erro no upload da imagem: " + error.message, "error");
-        return null;
+    function log(msg, type = 'info') {
+        const el = document.getElementById("logs");
+        const time = new Date().toLocaleTimeString('pt-BR');
+        const prefix = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+        el.innerHTML += `[${time}] ${prefix} ${msg}<br>`;
+        el.scrollTop = el.scrollHeight;
     }
 
-    const { data: urlData } = client.storage.from('produtos').getPublicUrl(fileName);
-    log("✅ Imagem enviada com sucesso", "success");
-    return urlData.publicUrl;
-}
+    // Preview da imagem selecionada da galeria
+    document.getElementById('imagemInput').addEventListener('change', (e) => {
+        imagemFile = e.target.files[0];
+        if (!imagemFile) return;
 
-async function publicar() {
-    const nome = document.getElementById("nome").value.trim();
-    const descricao = document.getElementById("descricao").value.trim();
-    const preco = document.getElementById("preco").value.trim();
-    const whatsapp = document.getElementById("whatsapp").value.trim();
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('preview').innerHTML = `
+                <img src="${ev.target.result}" alt="Pré-visualização">
+                <small style="color:#86efac; display:block; margin-top:8px;">
+                    Imagem selecionada da galeria ✓
+                </small>
+            `;
+        };
+        reader.readAsDataURL(imagemFile);
+    });
 
-    if (!nome || !descricao || !preco) {
-        log("❌ Nome, descrição e preço são obrigatórios", "error");
-        return;
+    async function uploadImagem() {
+        if (!imagemFile) return null;
+
+        const fileExt = imagemFile.name.split('.').pop().toLowerCase();
+        const fileName = `produto-\( {Date.now()}. \){fileExt}`;
+
+        log(`📤 Enviando imagem... (${fileName})`);
+
+        const { error: uploadError } = await client.storage
+            .from('produtos')
+            .upload(fileName, imagemFile, { 
+                upsert: true,
+                contentType: imagemFile.type 
+            });
+
+        if (uploadError) {
+            log("Erro no upload: " + uploadError.message, "error");
+            console.error("Upload error:", uploadError);
+            return null;
+        }
+
+        const { data: urlData } = client.storage
+            .from('produtos')
+            .getPublicUrl(fileName);
+
+        log("✅ Imagem enviada com sucesso", "success");
+        return urlData.publicUrl;
     }
 
-    let imagemUrl = null;
-    if (imagemFile) {
-        imagemUrl = await uploadImagem();
-        if (!imagemUrl) return;
+    async function publicar() {
+        const nome = document.getElementById("nome").value.trim();
+        const descricao = document.getElementById("descricao").value.trim();
+        const preco = document.getElementById("preco").value.trim();
+        const whatsapp = document.getElementById("whatsapp").value.trim();
+
+        if (!nome || !descricao || !preco) {
+            log("❌ Nome, descrição e preço são obrigatórios", "error");
+            return;
+        }
+
+        let imagemUrl = null;
+        if (imagemFile) {
+            imagemUrl = await uploadImagem();
+            if (!imagemUrl) return;   // para se der erro no upload
+        }
+
+        const { error } = await client.from("produtos").insert([{
+            nome,
+            descricao,
+            preco: parseFloat(preco),
+            whatsapp: whatsapp || null,
+            imagem: imagemUrl,
+            destaque: false
+        }]);
+
+        if (error) {
+            log("Erro ao publicar produto: " + error.message, "error");
+        } else {
+            log(`✅ Produto "${nome}" publicado com sucesso!`, "success");
+            
+            // Limpa formulário
+            document.getElementById("nome").value = "";
+            document.getElementById("descricao").value = "";
+            document.getElementById("preco").value = "";
+            document.getElementById("whatsapp").value = "";
+            document.getElementById("imagemInput").value = "";
+            document.getElementById("preview").innerHTML = "";
+            imagemFile = null;
+
+            carregar();
+        }
     }
 
-    const { error } = await client.from("produtos").insert([{
-        nome, descricao, preco: parseFloat(preco),
-        whatsapp: whatsapp || null,
-        imagem: imagemUrl,
-        destaque: false
-    }]);
+    async function carregar() {
+        const { data, error } = await client
+            .from("produtos")
+            .select("*")
+            .order("criado_em", { ascending: false });
 
-    if (error) {
-        log("Erro ao publicar: " + error.message, "error");
-    } else {
-        log(`✅ Produto "${nome}" publicado com sucesso!`, "success");
-        
-        // Limpa o formulário
-        document.getElementById("nome").value = "";
-        document.getElementById("descricao").value = "";
-        document.getElementById("preco").value = "";
-        document.getElementById("whatsapp").value = "";
-        document.getElementById("imagemInput").value = "";
-        document.getElementById("preview").innerHTML = "";
-        imagemFile = null;
+        if (error) {
+            log("Erro ao carregar produtos: " + error.message, "error");
+            return;
+        }
 
+        const lista = document.getElementById("lista");
+        lista.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            lista.innerHTML = "<p style='color:#64748b; padding:10px;'>Nenhum produto cadastrado ainda.</p>";
+            return;
+        }
+
+        data.forEach(item => {
+            const imgHtml = item.imagem 
+                ? `<img src="\( {item.imagem}" alt=" \){item.nome}">` 
+                : '<p style="color:#64748b;">Sem imagem</p>';
+
+            const whatsappHtml = item.whatsapp 
+                ? `<br>📱 WhatsApp: <a href="https://wa.me/\( {item.whatsapp}" target="_blank" style="color:#22c55e;"> \){item.whatsapp}</a>` 
+                : '';
+
+            lista.innerHTML += `
+                <div class="card">
+                    <b>${item.nome}</b> ${item.destaque ? "⭐" : ""}<br><br>
+                    ${imgHtml}
+                    ${item.descricao}<br><br>
+                    💰 R$ ${parseFloat(item.preco).toFixed(2)}
+                    ${whatsappHtml}<br><br>
+
+                    <button class="delete" onclick="deletar('${item.id}')">🗑️ Excluir</button>
+                    <button class="star" onclick="toggleDestaque('${item.id}', ${!!item.destaque})">
+                        ${item.destaque ? "Remover destaque" : "Destacar"}
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    async function deletar(id) {
+        if (!confirm("Tem certeza que deseja excluir este produto?")) return;
+        await client.from("produtos").delete().eq("id", id);
+        log("🗑️ Produto excluído", "success");
         carregar();
     }
-}
 
-// Funções carregar, deletar e toggleDestaque permanecem iguais às da versão anterior
-// (copie elas do código que te mandei antes se precisar)
+    async function toggleDestaque(id, atual) {
+        await client.from("produtos").update({ destaque: !atual }).eq("id", id);
+        log("⭐ Destaque atualizado", "success");
+        carregar();
+    }
 
-log("✅ Painel carregado - Toque em 'Imagem do produto' para escolher da galeria", "success");
-carregar();
+    // Inicialização
+    log("✅ Painel carregado - Toque em 'Imagem do produto' para escolher da galeria", "success");
+    carregar();
 </script>
+
 </body>
 </html>
