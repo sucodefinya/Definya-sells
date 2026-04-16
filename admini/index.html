@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Itens</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#05060a;
+    color:#e2e8f0;
+}
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px;
+    background:#0b1220;
+}
+
+.top-actions{
+    display:flex;
+    gap:10px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    padding:20px;
+}
+
+input, textarea{
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    background:#111827;
+    border:none;
+    color:#fff;
+    border-radius:10px;
+}
+
+button{
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.back{
+    background:#00ffff;
+    color:#000;
+}
+
+.logout{
+    background:#ef4444;
+    color:#fff;
+}
+
+.add{
+    background:#22c55e;
+    width:100%;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+.card{
+    background:#0b1220;
+    padding:12px;
+    margin-top:12px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.05);
+}
+
+img{
+    width:100%;
+    border-radius:10px;
+    margin-top:8px;
+}
+
+.delBtn{
+    background:#ef4444;
+    color:#fff;
+    margin-top:10px;
+}
+
+#preview img{
+    max-height:200px;
+}
+
+.removeImg{
+    margin-top:8px;
+    background:#ef4444;
+    color:#fff;
+}
+
+#logs{
+    margin-top:15px;
+    background:#000;
+    padding:10px;
+    font-family:monospace;
+    font-size:12px;
+    height:150px;
+    overflow:auto;
+    border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <h3>📦 Admin Itens</h3>
+
+    <div class="top-actions">
+        <button class="back" onclick="goAdmin()">🔙 Admin</button>
+        <button class="logout" onclick="logout()">🚪 Sair</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <h3>➕ Adicionar Item</h3>
+
+    <input id="nome" placeholder="Nome do item">
+    <textarea id="descricao" placeholder="Descrição"></textarea>
+    <input id="preco" placeholder="Preço">
+
+    <input type="file" id="imagemInput">
+
+    <div id="preview"></div>
+
+    <h3>👀 Preview</h3>
+    <div id="previewCard" class="card"></div>
+
+    <button class="add" onclick="publicar()">PUBLICAR ITEM</button>
+
+    <h3>📦 Itens</h3>
+    <div id="lista"></div>
+
+    <h3>📜 Logs</h3>
+    <div id="logs"></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const client = supabase.createClient(
+  "https://dbqleycdrkdhxrozsmup.supabase.co",
+  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
+);
+
+let imagemFile = null;
+
+function log(msg){
+    const el = document.getElementById("logs");
+    const t = new Date().toLocaleTimeString();
+    el.innerHTML += `[${t}] ${msg}<br>`;
+    el.scrollTop = el.scrollHeight;
+}
+
+log("📄 Admin Itens carregado");
+
+/* PREVIEW */
+function atualizarPreview(){
+    const nome = document.getElementById("nome").value || "Nome do item";
+    const descricao = document.getElementById("descricao").value || "Descrição...";
+    const preco = document.getElementById("preco").value || "0.00";
+
+    let imgHTML = "";
+
+    if(imagemFile){
+        const url = URL.createObjectURL(imagemFile);
+        imgHTML = `<img src="${url}">`;
+    }
+
+    document.getElementById("previewCard").innerHTML = `
+        <b>${nome}</b>
+        ${imgHTML}
+        <p>${descricao}</p>
+        💰 R$ ${preco}
+    `;
+}
+
+["nome","descricao","preco"].forEach(id=>{
+    document.getElementById(id).addEventListener("input", atualizarPreview);
+});
+
+/* IMAGE */
+document.getElementById("imagemInput").addEventListener("change",(e)=>{
+    imagemFile = e.target.files[0];
+
+    if(!imagemFile){
+        limparPreviewImg();
+        atualizarPreview();
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = (ev)=>{
+        document.getElementById("preview").innerHTML = `
+            <img src="${ev.target.result}">
+            <br>
+            <button class="removeImg" onclick="removerImagem()">❌ Remover</button>
+        `;
+    };
+
+    reader.readAsDataURL(imagemFile);
+
+    log("🖼️ imagem selecionada");
+    atualizarPreview();
+});
+
+function removerImagem(){
+    imagemFile = null;
+    document.getElementById("imagemInput").value = "";
+    limparPreviewImg();
+    atualizarPreview();
+}
+
+function limparPreviewImg(){
+    document.getElementById("preview").innerHTML = "";
+}
+
+/* UPLOAD */
+async function uploadImagem(){
+    if(!imagemFile) return null;
+
+    const fileName = `item-${Date.now()}.${imagemFile.name.split('.').pop()}`;
+
+    const { error } = await client.storage
+        .from("itens")
+        .upload(fileName, imagemFile, { upsert:true });
+
+    if(error){
+        log("❌ erro upload");
+        return null;
+    }
+
+    const { data } = client.storage
+        .from("itens")
+        .getPublicUrl(fileName);
+
+    return data.publicUrl;
+}
+
+/* PUBLICAR */
+async function publicar(){
+
+    log("🚀 publicando item...");
+
+    const nome = document.getElementById("nome").value;
+    const descricao = document.getElementById("descricao").value;
+    const preco = document.getElementById("preco").value;
+
+    const img = await uploadImagem();
+
+    const { error } = await client.from("itens").insert([{
+        nome, descricao, preco, imagem: img
+    }]);
+
+    if(error){
+        log("❌ erro: " + error.message);
+        return;
+    }
+
+    log("✅ item publicado");
+
+    document.getElementById("nome").value = "";
+    document.getElementById("descricao").value = "";
+    document.getElementById("preco").value = "";
+    removerImagem();
+    document.getElementById("previewCard").innerHTML = "";
+
+    carregar();
+}
+
+/* CARREGAR */
+async function carregar(){
+
+    const { data } = await client
+        .from("itens")
+        .select("*")
+        .order("id",{ascending:false});
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    data.forEach(p=>{
+        lista.innerHTML += `
+        <div class="card">
+            <b>${p.nome}</b>
+            ${p.imagem ? `<img src="${p.imagem}">` : ""}
+            <p>${p.descricao}</p>
+            💰 R$ ${p.preco}
+
+            <button class="delBtn" onclick="del('${p.id}')">🗑 Excluir</button>
+        </div>
+        `;
+    });
+
+    log("📦 itens carregados: " + data.length);
+}
+
+/* DELETE */
+async function del(id){
+    await client.from("itens").delete().eq("id",id);
+    log("🗑 deletado");
+    carregar();
+}
+
+/* NAV */
+function goAdmin(){
+    window.location.href = "/admin";
+}
+
+/* LOGOUT */
+async function logout(){
+    await client.auth.signOut();
+    window.location.href = "/index.html";
+}
+
+carregar();
+</script>
+
+</body>
+  </html>
