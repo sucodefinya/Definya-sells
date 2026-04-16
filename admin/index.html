@@ -1,294 +1,329 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Completo</title>
-
-<style>
-body{
-    margin:0;
-    font-family:Arial;
-    background:#05060a;
-    color:#e2e8f0;
-}
-
-.topbar{
-    display:flex;
-    justify-content:space-between;
-    padding:15px;
-    background:#0b1220;
-}
-
-.container{
-    max-width:900px;
-    margin:auto;
-    padding:20px;
-}
-
-input, textarea{
-    width:100%;
-    padding:12px;
-    margin:6px 0;
-    background:#111827;
-    border:none;
-    color:#fff;
-    border-radius:10px;
-}
-
-button{
-    padding:10px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-}
-
-.logout{
-    background:#ef4444;
-    color:#fff;
-}
-
-.add{
-    background:#22c55e;
-    width:100%;
-    font-weight:bold;
-    margin-top:10px;
-}
-
-.card{
-    background:#0b1220;
-    padding:12px;
-    margin-top:12px;
-    border-radius:10px;
-    border:1px solid rgba(255,255,255,0.05);
-}
-
-img{
-    width:100%;
-    border-radius:10px;
-    margin-top:8px;
-}
-
-.actions{
-    margin-top:10px;
-    display:flex;
-    gap:8px;
-}
-
-.delBtn{
-    background:#ef4444;
-    color:#fff;
-}
-
-.favBtn{
-    background:#facc15;
-    color:#000;
-}
-
-#logs{
-    margin-top:15px;
-    background:#000;
-    padding:10px;
-    font-family:monospace;
-    font-size:12px;
-    height:150px;
-    overflow:auto;
-    border-radius:10px;
-}
-</style>
-</head>
-
-<body>
-
-<div class="topbar">
-    <h3>🔐 Admin</h3>
-    <button class="logout" onclick="logout()">🚪 Sair</button>
-</div>
-
-<div class="container">
-
-    <h3>➕ Adicionar Produto</h3>
-
-    <input id="nome" placeholder="Nome do produto">
-    <textarea id="descricao" placeholder="Descrição"></textarea>
-    <input id="preco" placeholder="Preço">
-    <input id="whatsapp" placeholder="WhatsApp">
-
-    <input type="file" id="imagemInput">
-
-    <button class="add" onclick="publicar()">PUBLICAR</button>
-
-    <h3>📦 Produtos</h3>
-    <div id="lista"></div>
-
-    <h3>📜 Logs</h3>
-    <div id="logs"></div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-const client = supabase.createClient(
-  "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
-);
-
-let imagemFile = null;
-
-/* LOGS */
-function log(msg){
-    const el = document.getElementById("logs");
-    const t = new Date().toLocaleTimeString();
-    el.innerHTML += `[${t}] ${msg}<br>`;
-    el.scrollTop = el.scrollHeight;
-}
-
-log("📄 Admin carregado");
-
-/* IMAGE */
-document.getElementById("imagemInput").addEventListener("change",(e)=>{
-    imagemFile = e.target.files[0];
-    log("🖼️ imagem selecionada");
-});
-
-/* UPLOAD */
-async function uploadImagem(){
-    if(!imagemFile) return null;
-
-    const fileName = `produto-${Date.now()}.${imagemFile.name.split('.').pop()}`;
-
-    const { error } = await client.storage
-        .from("produtos")
-        .upload(fileName, imagemFile, { upsert:true });
-
-    if(error){
-        log("❌ erro upload: " + error.message);
-        return null;
-    }
-
-    const { data } = client.storage
-        .from("produtos")
-        .getPublicUrl(fileName);
-
-    return data.publicUrl;
-}
-
-/* PUBLICAR */
-async function publicar(){
-
-    log("🚀 publicando...");
-
-    const nome = document.getElementById("nome").value;
-    const descricao = document.getElementById("descricao").value;
-    const preco = document.getElementById("preco").value;
-    const whatsapp = document.getElementById("whatsapp").value;
-
-    const img = await uploadImagem();
-
-    const { error } = await client.from("produtos").insert([{
-        nome,
-        descricao,
-        preco,
-        whatsapp,
-        imagem: img,
-        destaque:false
-    }]);
-
-    if(error){
-        log("❌ erro: " + error.message);
+<!DOCTYPE html>  
+<html lang="pt-br">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Admin Completo</title>  
+  
+<style>  
+body{  
+    margin:0;  
+    font-family:Arial;  
+    background:#05060a;  
+    color:#e2e8f0;  
+}  
+  
+.topbar{  
+    display:flex;  
+    justify-content:space-between;  
+    padding:15px;  
+    background:#0b1220;  
+}  
+  
+.container{  
+    max-width:900px;  
+    margin:auto;  
+    padding:20px;  
+}  
+  
+input, textarea{  
+    width:100%;  
+    padding:12px;  
+    margin:6px 0;  
+    background:#111827;  
+    border:none;  
+    color:#fff;  
+    border-radius:10px;  
+}  
+  
+button{  
+    padding:10px;  
+    border:none;  
+    border-radius:8px;  
+    cursor:pointer;  
+}  
+  
+.logout{  
+    background:#ef4444;  
+    color:#fff;  
+}  
+  
+.add{  
+    background:#22c55e;  
+    width:100%;  
+    font-weight:bold;  
+    margin-top:10px;  
+}  
+  
+.card{  
+    background:#0b1220;  
+    padding:12px;  
+    margin-top:12px;  
+    border-radius:10px;  
+    border:1px solid rgba(255,255,255,0.05);  
+}  
+  
+img{  
+    width:100%;  
+    border-radius:10px;  
+    margin-top:8px;  
+}  
+  
+.actions{  
+    margin-top:10px;  
+    display:flex;  
+    gap:8px;  
+}  
+  
+.delBtn{  
+    background:#ef4444;  
+    color:#fff;  
+}  
+  
+.favBtn{  
+    background:#facc15;  
+    color:#000;  
+}  
+  
+#preview{  
+    margin-top:10px;  
+    text-align:center;  
+}  
+  
+#preview img{  
+    max-height:200px;  
+    border-radius:10px;  
+    box-shadow:0 0 10px rgba(0,0,0,0.4);  
+}  
+  
+#logs{  
+    margin-top:15px;  
+    background:#000;  
+    padding:10px;  
+    font-family:monospace;  
+    font-size:12px;  
+    height:150px;  
+    overflow:auto;  
+    border-radius:10px;  
+}  
+</style>  
+</head>  
+  
+<body>  
+  
+<div class="topbar">  
+    <h3>🔐 Admin</h3>  
+    <button class="logout" onclick="logout()">🚪 Sair</button>  
+</div>  
+  
+<div class="container">  
+  
+    <h3>➕ Adicionar Produto</h3>  
+  
+    <input id="nome" placeholder="Nome do produto">  
+    <textarea id="descricao" placeholder="Descrição"></textarea>  
+    <input id="preco" placeholder="Preço">  
+    <input id="whatsapp" placeholder="WhatsApp">  
+  
+    <input type="file" id="imagemInput">  
+  
+    <!-- 🔥 PREVIEW -->
+    <div id="preview"></div>
+  
+    <button class="add" onclick="publicar()">PUBLICAR</button>  
+  
+    <h3>📦 Produtos</h3>  
+    <div id="lista"></div>  
+  
+    <h3>📜 Logs</h3>  
+    <div id="logs"></div>  
+  
+</div>  
+  
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  
+  
+<script>  
+const client = supabase.createClient(  
+  "https://dbqleycdrkdhxrozsmup.supabase.co",  
+  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"  
+);  
+  
+let imagemFile = null;  
+  
+/* LOGS */  
+function log(msg){  
+    const el = document.getElementById("logs");  
+    const t = new Date().toLocaleTimeString();  
+    el.innerHTML += `[${t}] ${msg}<br>`;  
+    el.scrollTop = el.scrollHeight;  
+}  
+  
+log("📄 Admin carregado");  
+  
+/* IMAGE + PREVIEW */
+document.getElementById("imagemInput").addEventListener("change",(e)=>{  
+    imagemFile = e.target.files[0];  
+    
+    if(!imagemFile){
+        document.getElementById("preview").innerHTML = "";
         return;
     }
 
-    log("✅ produto publicado");
+    const reader = new FileReader();
 
-    carregar();
-}
-
-/* CARREGAR */
-async function carregar(){
-
-    const { data, error } = await client
-        .from("produtos")
-        .select("*")
-        .order("id",{ascending:false});
-
-    if(error){
-        log("❌ erro load: " + error.message);
-        return;
-    }
-
-    const lista = document.getElementById("lista");
-    lista.innerHTML = "";
-
-    data.forEach(p => {
-
-        const div = document.createElement("div");
-        div.className = "card";
-
-        div.innerHTML = `
-            <b>${p.nome}</b><br>
-
-            ${p.imagem ? `<img src="${p.imagem}">` : ""}
-
-            <p>${p.descricao}</p>
-            💰 R$ ${p.preco}
-
-            <div class="actions">
-                <button class="delBtn" onclick="del('${p.id}')">🗑 Excluir</button>
-
-                <button class="favBtn" onclick="fav('${p.id}', ${p.destaque})">
-                    ⭐ ${p.destaque ? "Remover" : "Favoritar"}
-                </button>
-            </div>
+    reader.onload = (ev)=>{
+        document.getElementById("preview").innerHTML = `
+            <img src="${ev.target.result}">
+            <p style="color:#22c55e; font-size:12px;">Preview carregado ✓</p>
         `;
+    };
 
-        lista.appendChild(div);
-    });
+    reader.readAsDataURL(imagemFile);
 
-    log("📦 carregado: " + data.length);
-}
+    log("🖼️ imagem selecionada");  
+});  
+  
+/* UPLOAD */  
+async function uploadImagem(){  
+    if(!imagemFile) return null;  
+  
+    const fileName = `produto-${Date.now()}.${imagemFile.name.split('.').pop()}`;  
+  
+    const { error } = await client.storage  
+        .from("produtos")  
+        .upload(fileName, imagemFile, { upsert:true });  
+  
+    if(error){  
+        log("❌ erro upload: " + error.message);  
+        return null;  
+    }  
+  
+    const { data } = client.storage  
+        .from("produtos")  
+        .getPublicUrl(fileName);  
+  
+    return data.publicUrl;  
+}  
+  
+/* PUBLICAR */  
+async function publicar(){  
+  
+    log("🚀 publicando...");  
+  
+    const nome = document.getElementById("nome").value;  
+    const descricao = document.getElementById("descricao").value;  
+    const preco = document.getElementById("preco").value;  
+    const whatsapp = document.getElementById("whatsapp").value;  
+  
+    const img = await uploadImagem();  
+  
+    const { error } = await client.from("produtos").insert([{  
+        nome,  
+        descricao,  
+        preco,  
+        whatsapp,  
+        imagem: img,  
+        destaque:false  
+    }]);  
+  
+    if(error){  
+        log("❌ erro: " + error.message);  
+        return;  
+    }  
+  
+    log("✅ produto publicado");  
 
-/* DELETE */
-async function del(id){
-
-    await client.from("produtos").delete().eq("id",id);
-    log("🗑 deletado");
-    carregar();
-}
-
-/* FAVORITO LIMITE 3 */
-async function fav(id, atual){
-
-    const { data } = await client
-        .from("produtos")
-        .select("*")
-        .eq("destaque", true);
-
-    const total = data?.length || 0;
-
-    if(!atual && total >= 3){
-        alert("Limite de 3 favoritos");
-        return;
-    }
-
-    await client
-        .from("produtos")
-        .update({ destaque: !atual })
-        .eq("id", id);
-
-    carregar();
-}
-
-/* LOGOUT */
-async function logout(){
-    await client.auth.signOut();
-    window.location.href = "/index.html";
-}
-
-/* INIT */
-carregar();
-</script>
-
-</body>
+    // limpa preview
+    document.getElementById("preview").innerHTML = "";
+    document.getElementById("imagemInput").value = "";
+    imagemFile = null;
+  
+    carregar();  
+}  
+  
+/* CARREGAR */  
+async function carregar(){  
+  
+    const { data, error } = await client  
+        .from("produtos")  
+        .select("*")  
+        .order("id",{ascending:false});  
+  
+    if(error){  
+        log("❌ erro load: " + error.message);  
+        return;  
+    }  
+  
+    const lista = document.getElementById("lista");  
+    lista.innerHTML = "";  
+  
+    data.forEach(p => {  
+  
+        const div = document.createElement("div");  
+        div.className = "card";  
+  
+        div.innerHTML = `  
+            <b>${p.nome}</b><br>  
+  
+            ${p.imagem ? `<img src="${p.imagem}">` : ""}  
+  
+            <p>${p.descricao}</p>  
+            💰 R$ ${p.preco}  
+  
+            <div class="actions">  
+                <button class="delBtn" onclick="del('${p.id}')">🗑 Excluir</button>  
+  
+                <button class="favBtn" onclick="fav('${p.id}', ${p.destaque})">  
+                    ⭐ ${p.destaque ? "Remover" : "Favoritar"}  
+                </button>  
+            </div>  
+        `;  
+  
+        lista.appendChild(div);  
+    });  
+  
+    log("📦 carregado: " + data.length);  
+}  
+  
+/* DELETE */  
+async function del(id){  
+    await client.from("produtos").delete().eq("id",id);  
+    log("🗑 deletado");  
+    carregar();  
+}  
+  
+/* FAVORITO LIMITE 3 */  
+async function fav(id, atual){  
+  
+    const { data } = await client  
+        .from("produtos")  
+        .select("*")  
+        .eq("destaque", true);  
+  
+    const total = data?.length || 0;  
+  
+    if(!atual && total >= 3){  
+        alert("Limite de 3 favoritos");  
+        return;  
+    }  
+  
+    await client  
+        .from("produtos")  
+        .update({ destaque: !atual })  
+        .eq("id", id);  
+  
+    carregar();  
+}  
+  
+/* LOGOUT */  
+async function logout(){  
+    await client.auth.signOut();  
+    window.location.href = "/index.html";  
+}  
+  
+/* INIT */  
+carregar();  
+</script>  
+  
+</body>  
 </html>
