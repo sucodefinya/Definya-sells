@@ -27,66 +27,65 @@ body{
     z-index:9999;
     overflow:hidden;
     animation:fadeOut 1s ease forwards;
-    animation-delay:2.5s;
+    animation-delay:3s;
 }
 
-/* imagem acima das partículas */
+/* container central */
+.splash-center{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* logo */
 #splash img{
     width:320px;
     z-index:2;
-    animation:zoom 1.2s ease;
 }
 
-/* 🔴 partículas atrás */
+/* 🔴 partículas saindo da logo */
 .red-particle{
     position:absolute;
-    width:3px;
-    height:3px;
+    width:4px;
+    height:4px;
     background:#ff2a2a;
     border-radius:50%;
-    opacity:0.7;
-    animation:rise linear infinite;
-    z-index:1;
+    opacity:0.8;
+    animation:explode linear forwards;
 }
 
-@keyframes rise{
-    from{ transform:translateY(100vh); opacity:0; }
-    20%{ opacity:1; }
-    to{ transform:translateY(-10vh); opacity:0; }
+@keyframes explode{
+    from{
+        transform:translate(0,0);
+        opacity:1;
+    }
+    to{
+        transform:translate(var(--x), var(--y));
+        opacity:0;
+    }
 }
 
-/* 🔄 loading bar */
+/* 🔄 loading */
 .loading-bar{
-    width:200px;
+    width:220px;
     height:4px;
     background:#111;
     margin-top:20px;
     border-radius:10px;
     overflow:hidden;
-    z-index:2;
 }
 
 .loading-fill{
     height:100%;
     width:0%;
-    background:#fff;
-    animation:load 2s linear forwards;
+    background:#ff2a2a;
 }
 
-@keyframes load{
-    to{ width:100%; }
-}
-
-@keyframes zoom{
-    from{ transform:scale(0.9); opacity:0; }
-    to{ transform:scale(1); opacity:1; }
-}
-
-@keyframes fadeOut{
-    to{
-        opacity:0;
-        visibility:hidden;
-    }
+.loading-text{
+    margin-top:8px;
+    font-size:14px;
+    color:#ff2a2a;
 }
 
 /* fundo glow */
@@ -118,7 +117,6 @@ body::after{
     width:2px;
     height:2px;
     background:white;
-    box-shadow:0 0 6px rgba(255,255,255,0.8);
     border-radius:50%;
     opacity:0.5;
     animation: fall linear infinite;
@@ -136,7 +134,6 @@ body::after{
     padding:20px;
 }
 
-/* HEADER */
 .header{
     display:flex;
     justify-content:space-between;
@@ -147,7 +144,6 @@ body::after{
     max-width:260px;
 }
 
-/* botão admin */
 .admin-btn{
     padding:8px 14px;
     border:1px solid #ff2a2a;
@@ -161,7 +157,6 @@ body::after{
     color:#000;
 }
 
-/* botão catálogo */
 .btn{
     display:block;
     text-align:center;
@@ -174,18 +169,12 @@ body::after{
     text-decoration:none;
 }
 
-.btn:hover{
-    border-color:#ff2a2a;
-}
-
-/* título */
 h2{
     text-align:center;
     margin-top:25px;
     color:#ff2a2a;
 }
 
-/* card */
 .card{
     background:#0a0a0f;
     padding:15px;
@@ -210,21 +199,21 @@ img{
     font-weight:bold;
 }
 
-/* 🟡 BOTÃO COMPRAR NEON BRANCO */
+/* 🔴 BOTÃO COMPRAR NEON VERMELHO */
 .buy-btn{
     display:block;
     margin-top:10px;
     padding:10px;
     text-align:center;
-    border:1px solid #fff;
-    color:#fff;
+    border:1px solid #ff2a2a;
+    color:#ff2a2a;
     border-radius:10px;
     text-decoration:none;
-    box-shadow:0 0 8px rgba(255,255,255,0.4);
+    box-shadow:0 0 10px rgba(255,0,0,0.5);
 }
 
 .buy-btn:hover{
-    background:#fff;
+    background:#ff2a2a;
     color:#000;
 }
 </style>
@@ -234,11 +223,15 @@ img{
 
 <!-- 🔥 SPLASH -->
 <div id="splash">
-    <img src="InShot_20260415_234327721.png">
+    <div class="splash-center" id="splashCenter">
+        <img src="InShot_20260415_234327721.png">
+    </div>
 
     <div class="loading-bar">
-        <div class="loading-fill"></div>
+        <div class="loading-fill" id="loadingFill"></div>
     </div>
+
+    <div class="loading-text" id="loadingText">0%</div>
 </div>
 
 <div class="container">
@@ -264,36 +257,56 @@ const client = supabase.createClient(
 );
 
 /* partículas fundo */
-function createParticles(){
-    for(let i=0;i<20;i++){
-        let p = document.createElement("div");
-        p.classList.add("particle");
-
-        p.style.left = Math.random()*100 + "vw";
-        p.style.animationDuration = (6 + Math.random()*6) + "s";
-
-        document.body.appendChild(p);
-    }
+for(let i=0;i<20;i++){
+    let p = document.createElement("div");
+    p.classList.add("particle");
+    p.style.left = Math.random()*100 + "vw";
+    p.style.animationDuration = (6 + Math.random()*6) + "s";
+    document.body.appendChild(p);
 }
-createParticles();
 
-/* 🔴 partículas splash ATRÁS da imagem */
-function splashParticles(){
-    const splash = document.getElementById("splash");
+/* 🔴 partículas explodindo da logo */
+function explodeParticles(){
+    const center = document.getElementById("splashCenter");
 
-    for(let i=0;i<40;i++){
-        let p = document.createElement("div");
-        p.classList.add("red-particle");
+    setInterval(()=>{
+        for(let i=0;i<8;i++){
+            let p = document.createElement("div");
+            p.classList.add("red-particle");
 
-        p.style.left = Math.random()*100 + "vw";
-        p.style.animationDuration = (2 + Math.random()*2) + "s";
+            let x = (Math.random()*200 - 100) + "px";
+            let y = (Math.random()*200 - 100) + "px";
 
-        splash.appendChild(p);
-    }
+            p.style.setProperty('--x', x);
+            p.style.setProperty('--y', y);
+            p.style.animationDuration = (0.6 + Math.random()*0.6) + "s";
+
+            center.appendChild(p);
+
+            setTimeout(()=>p.remove(),1000);
+        }
+    },150);
 }
-splashParticles();
+explodeParticles();
 
-/* carregar produtos */
+/* 🔄 loading com % */
+let progress = 0;
+const fill = document.getElementById("loadingFill");
+const text = document.getElementById("loadingText");
+
+const interval = setInterval(()=>{
+    progress += Math.random()*15;
+
+    if(progress >= 100){
+        progress = 100;
+        clearInterval(interval);
+    }
+
+    fill.style.width = progress + "%";
+    text.innerText = Math.floor(progress) + "%";
+},150);
+
+/* produtos */
 async function carregarDestaques(){
     const { data } = await client
         .from("produtos")
@@ -302,35 +315,21 @@ async function carregarDestaques(){
         .limit(3);
 
     const box = document.getElementById("destaques");
-    box.innerHTML = "";
 
-    if(!data || data.length === 0){
-        box.innerHTML = "<p>Nenhum destaque ainda</p>";
+    if(!data){
+        box.innerHTML = "<p>Erro</p>";
         return;
     }
 
-    data.forEach(item => {
-
-        const link = item.whatsapp
-            ? `https://wa.me/${item.whatsapp}?text=${encodeURIComponent("Quero: " + item.nome)}`
-            : "#";
-
-        box.innerHTML += `
-            <div class="card">
-                <h3 style="color:#ff2a2a">${item.nome}</h3>
-
-                ${item.imagem ? `<img src="${item.imagem}">` : ""}
-
-                <p>${item.descricao}</p>
-
-                <div class="price">💰 R$ ${parseFloat(item.preco).toFixed(2)}</div>
-
-                <a class="buy-btn" href="${link}" target="_blank">
-                    🛒 Comprar
-                </a>
-            </div>
-        `;
-    });
+    box.innerHTML = data.map(item=>`
+        <div class="card">
+            <h3 style="color:#ff2a2a">${item.nome}</h3>
+            ${item.imagem ? `<img src="${item.imagem}">` : ""}
+            <p>${item.descricao}</p>
+            <div class="price">💰 R$ ${parseFloat(item.preco).toFixed(2)}</div>
+            <a class="buy-btn" href="https://wa.me/${item.whatsapp}" target="_blank">🛒 Comprar</a>
+        </div>
+    `).join("");
 }
 
 carregarDestaques();
