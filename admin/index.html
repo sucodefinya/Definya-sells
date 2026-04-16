@@ -16,9 +16,15 @@ body{
 .topbar{  
     display:flex;  
     justify-content:space-between;  
+    align-items:center;
     padding:15px;  
     background:#0b1220;  
 }  
+
+.top-actions{
+    display:flex;
+    gap:10px;
+}
   
 .container{  
     max-width:900px;  
@@ -47,6 +53,11 @@ button{
     background:#ef4444;  
     color:#fff;  
 }  
+
+.goItens{
+    background:#00ffff;
+    color:#000;
+}
   
 .add{  
     background:#22c55e;  
@@ -93,8 +104,13 @@ img{
 #preview img{  
     max-height:200px;  
     border-radius:10px;  
-    box-shadow:0 0 10px rgba(0,0,0,0.4);  
 }  
+
+.removeImg{
+    margin-top:8px;
+    background:#ef4444;
+    color:#fff;
+}
   
 #logs{  
     margin-top:15px;  
@@ -113,7 +129,11 @@ img{
   
 <div class="topbar">  
     <h3>🔐 Admin</h3>  
-    <button class="logout" onclick="logout()">🚪 Sair</button>  
+
+    <div class="top-actions">
+        <button class="goItens" onclick="goItens()">📦 Admin Itens</button>
+        <button class="logout" onclick="logout()">🚪 Sair</button>  
+    </div>
 </div>  
   
 <div class="container">  
@@ -127,7 +147,7 @@ img{
   
     <input type="file" id="imagemInput">  
   
-    <!-- 🔥 PREVIEW -->
+    <!-- PREVIEW -->
     <div id="preview"></div>
   
     <button class="add" onclick="publicar()">PUBLICAR</button>  
@@ -150,7 +170,7 @@ const client = supabase.createClient(
   
 let imagemFile = null;  
   
-/* LOGS */  
+/* LOG */  
 function log(msg){  
     const el = document.getElementById("logs");  
     const t = new Date().toLocaleTimeString();  
@@ -160,12 +180,12 @@ function log(msg){
   
 log("📄 Admin carregado");  
   
-/* IMAGE + PREVIEW */
+/* PREVIEW + IMAGE */  
 document.getElementById("imagemInput").addEventListener("change",(e)=>{  
     imagemFile = e.target.files[0];  
     
     if(!imagemFile){
-        document.getElementById("preview").innerHTML = "";
+        limparPreview();
         return;
     }
 
@@ -174,7 +194,8 @@ document.getElementById("imagemInput").addEventListener("change",(e)=>{
     reader.onload = (ev)=>{
         document.getElementById("preview").innerHTML = `
             <img src="${ev.target.result}">
-            <p style="color:#22c55e; font-size:12px;">Preview carregado ✓</p>
+            <br>
+            <button class="removeImg" onclick="removerImagem()">❌ Remover imagem</button>
         `;
     };
 
@@ -182,7 +203,18 @@ document.getElementById("imagemInput").addEventListener("change",(e)=>{
 
     log("🖼️ imagem selecionada");  
 });  
-  
+
+function removerImagem(){
+    imagemFile = null;
+    document.getElementById("imagemInput").value = "";
+    limparPreview();
+    log("🗑️ imagem removida");
+}
+
+function limparPreview(){
+    document.getElementById("preview").innerHTML = "";
+}
+
 /* UPLOAD */  
 async function uploadImagem(){  
     if(!imagemFile) return null;  
@@ -233,10 +265,12 @@ async function publicar(){
   
     log("✅ produto publicado");  
 
-    // limpa preview
-    document.getElementById("preview").innerHTML = "";
-    document.getElementById("imagemInput").value = "";
-    imagemFile = null;
+    document.getElementById("nome").value = "";
+    document.getElementById("descricao").value = "";
+    document.getElementById("preco").value = "";
+    document.getElementById("whatsapp").value = "";
+
+    removerImagem();
   
     carregar();  
 }  
@@ -292,7 +326,7 @@ async function del(id){
     carregar();  
 }  
   
-/* FAVORITO LIMITE 3 */  
+/* FAVORITO */  
 async function fav(id, atual){  
   
     const { data } = await client  
@@ -315,15 +349,19 @@ async function fav(id, atual){
     carregar();  
 }  
   
+/* NAV */
+function goItens(){
+    window.location.href = "/admini";
+}
+
 /* LOGOUT */  
 async function logout(){  
     await client.auth.signOut();  
     window.location.href = "/index.html";  
 }  
   
-/* INIT */  
 carregar();  
 </script>  
   
 </body>  
-</html>
+  </html>
