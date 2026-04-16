@@ -14,7 +14,39 @@ body{
     overflow-x:hidden;
 }
 
-/* 🔥 glow fogo leve */
+/* 🔥 SPLASH SCREEN */
+#splash{
+    position:fixed;
+    width:100%;
+    height:100vh;
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+    animation:fadeOut 1s ease forwards;
+    animation-delay:2s;
+}
+
+#splash img{
+    width:250px;
+    animation:zoom 1.5s ease;
+    filter: drop-shadow(0 0 15px rgba(0,255,255,0.5));
+}
+
+@keyframes zoom{
+    from{ transform:scale(0.8); opacity:0; }
+    to{ transform:scale(1); opacity:1; }
+}
+
+@keyframes fadeOut{
+    to{
+        opacity:0;
+        visibility:hidden;
+    }
+}
+
+/* 🔥 glow fundo */
 body::before{
     content:"";
     position:fixed;
@@ -37,7 +69,7 @@ body::after{
     z-index:-2;
 }
 
-/* ⚪ partículas */
+/* partículas */
 .particle{
     position:fixed;
     width:2px;
@@ -61,19 +93,20 @@ body::after{
     padding:20px;
 }
 
+/* HEADER */
 .header{
     display:flex;
     justify-content:space-between;
     align-items:center;
 }
 
-h1{
-    color:#00ffff;
-    text-shadow:0 0 6px rgba(0,255,255,0.25);
-    font-size:22px;
+/* LOGO NO LUGAR DO TEXTO */
+.logo{
+    max-width:180px;
+    filter: drop-shadow(0 0 10px rgba(0,255,255,0.4));
 }
 
-/* botões topo */
+/* botão admin */
 .admin-btn{
     padding:8px 14px;
     border:1px solid #00ffff;
@@ -88,6 +121,7 @@ h1{
     color:#000;
 }
 
+/* botão catálogo */
 .btn{
     display:block;
     text-align:center;
@@ -161,10 +195,17 @@ img{
 
 <body>
 
+<!-- 🔥 TELA DE ABERTURA -->
+<div id="splash">
+    <img src="InShot_20260415_234327721.png">
+</div>
+
 <div class="container">
 
     <div class="header">
-        <h1>⚡ LOJA NEON</h1>
+        <!-- LOGO -->
+        <img src="InShot_20260415_234108748.png" class="logo">
+
         <a class="admin-btn" href="admin/loginadm/">Admin</a>
     </div>
 
@@ -249,4 +290,4 @@ carregarDestaques();
 </script>
 
 </body>
-    </html>
+</html>
