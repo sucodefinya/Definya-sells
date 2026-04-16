@@ -14,7 +14,7 @@ body{
     overflow-x:hidden;
 }
 
-/* 🔥 SPLASH SCREEN */
+/* 🔥 SPLASH */
 #splash{
     position:fixed;
     width:100%;
@@ -23,18 +23,21 @@ body{
     display:flex;
     justify-content:center;
     align-items:center;
+    flex-direction:column;
     z-index:9999;
     overflow:hidden;
     animation:fadeOut 1s ease forwards;
-    animation-delay:2s;
+    animation-delay:2.5s;
 }
 
+/* imagem acima das partículas */
 #splash img{
     width:320px;
+    z-index:2;
     animation:zoom 1.2s ease;
 }
 
-/* 🔴 partículas vermelhas */
+/* 🔴 partículas atrás */
 .red-particle{
     position:absolute;
     width:3px;
@@ -43,12 +46,35 @@ body{
     border-radius:50%;
     opacity:0.7;
     animation:rise linear infinite;
+    z-index:1;
 }
 
 @keyframes rise{
     from{ transform:translateY(100vh); opacity:0; }
     20%{ opacity:1; }
     to{ transform:translateY(-10vh); opacity:0; }
+}
+
+/* 🔄 loading bar */
+.loading-bar{
+    width:200px;
+    height:4px;
+    background:#111;
+    margin-top:20px;
+    border-radius:10px;
+    overflow:hidden;
+    z-index:2;
+}
+
+.loading-fill{
+    height:100%;
+    width:0%;
+    background:#fff;
+    animation:load 2s linear forwards;
+}
+
+@keyframes load{
+    to{ width:100%; }
 }
 
 @keyframes zoom{
@@ -63,7 +89,7 @@ body{
     }
 }
 
-/* 🔥 fundo glow */
+/* fundo glow */
 body::before{
     content:"";
     position:fixed;
@@ -86,7 +112,7 @@ body::after{
     z-index:-2;
 }
 
-/* ⚪ partículas fundo */
+/* partículas fundo */
 .particle{
     position:fixed;
     width:2px;
@@ -117,7 +143,6 @@ body::after{
     align-items:center;
 }
 
-/* 🔥 LOGO MAIOR */
 .logo{
     max-width:260px;
 }
@@ -129,7 +154,6 @@ body::after{
     color:#ff2a2a;
     text-decoration:none;
     border-radius:10px;
-    transition:0.2s;
 }
 
 .admin-btn:hover{
@@ -148,7 +172,6 @@ body::after{
     border:1px solid rgba(255,0,0,0.3);
     border-radius:10px;
     text-decoration:none;
-    transition:0.2s;
 }
 
 .btn:hover{
@@ -169,7 +192,6 @@ h2{
     margin:15px 0;
     border-radius:12px;
     border:1px solid rgba(255,255,255,0.06);
-    transition:0.2s;
 }
 
 .card:hover{
@@ -188,21 +210,21 @@ img{
     font-weight:bold;
 }
 
-/* botão comprar */
+/* 🟡 BOTÃO COMPRAR NEON BRANCO */
 .buy-btn{
     display:block;
     margin-top:10px;
     padding:10px;
     text-align:center;
-    border:1px solid #00ff88;
-    color:#00ff88;
+    border:1px solid #fff;
+    color:#fff;
     border-radius:10px;
     text-decoration:none;
-    transition:0.2s;
+    box-shadow:0 0 8px rgba(255,255,255,0.4);
 }
 
 .buy-btn:hover{
-    background:#00ff88;
+    background:#fff;
     color:#000;
 }
 </style>
@@ -213,6 +235,10 @@ img{
 <!-- 🔥 SPLASH -->
 <div id="splash">
     <img src="InShot_20260415_234327721.png">
+
+    <div class="loading-bar">
+        <div class="loading-fill"></div>
+    </div>
 </div>
 
 <div class="container">
@@ -251,7 +277,7 @@ function createParticles(){
 }
 createParticles();
 
-/* 🔴 partículas da splash */
+/* 🔴 partículas splash ATRÁS da imagem */
 function splashParticles(){
     const splash = document.getElementById("splash");
 
@@ -269,7 +295,6 @@ splashParticles();
 
 /* carregar produtos */
 async function carregarDestaques(){
-
     const { data } = await client
         .from("produtos")
         .select("*")
