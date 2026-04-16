@@ -14,7 +14,7 @@ body{
     overflow-x:hidden;
 }
 
-/* ANIMAÇÃO DE ENTRADA */
+/* ANIMAÇÃO */
 .fade-in{
     opacity:0;
     transform:translateY(20px);
@@ -56,14 +56,22 @@ body{
     color:#000;
 }
 
-/* LOGO GRANDE */
+/* LOGO */
 .logo{
     display:block;
     margin:20px auto 30px auto;
     max-width:320px;
     width:100%;
     filter: drop-shadow(0 0 10px rgba(0,255,255,0.4));
-    animation:fadeIn 1s ease forwards;
+}
+
+/* IMAGEM DOS CARDS */
+.card-img{
+    width:100%;
+    max-height:120px;
+    object-fit:contain;
+    margin-bottom:10px;
+    filter: drop-shadow(0 0 8px rgba(0,255,255,0.3));
 }
 
 /* CARDS */
@@ -119,25 +127,25 @@ a{
         <a href="/index.html" class="back">⬅ Voltar</a>
     </div>
 
-    <!-- LOGO GRANDE -->
+    <!-- LOGO -->
     <img src="InShot_20260415_232237061.png" class="logo fade-in">
 
     <!-- UPADORES -->
     <div class="card fade-in" style="animation-delay:0.2s;">
-        <h2>Upadores e Treinadores</h2>
+        <img src="InShot_20260415_233141446.png" class="card-img">
         <p class="sub">Serviços de melhoria de conta, skills e progressão.</p>
         <a class="btn" href="skill/index.html">Acessar</a>
     </div>
 
     <!-- CONTAS -->
     <div class="card fade-in" style="animation-delay:0.4s;">
-        <h2>Contas</h2>
+        <img src="InShot_20260415_232954727.png" class="card-img">
         <a class="btn" href="dashboard/index.html">Acessar</a>
     </div>
 
     <!-- ITENS -->
     <div class="card fade-in" style="animation-delay:0.6s;">
-        <h2>Itens</h2>
+        <img src="InShot_20260415_233237975.png" class="card-img">
         <p class="sub">Encontre os itens que você procura.</p>
         <a class="btn" href="itens/index.html">Acessar</a>
     </div>
