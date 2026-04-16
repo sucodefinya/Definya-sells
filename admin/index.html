@@ -95,16 +95,6 @@ img{
     background:#facc15;  
     color:#000;  
 }  
-  
-#preview{  
-    margin-top:10px;  
-    text-align:center;  
-}  
-  
-#preview img{  
-    max-height:200px;  
-    border-radius:10px;  
-}  
 
 .removeImg{
     margin-top:8px;
@@ -122,6 +112,11 @@ img{
     overflow:auto;  
     border-radius:10px;  
 }  
+
+.previewTitle{
+    margin-top:20px;
+    color:#00ffff;
+}
 </style>  
 </head>  
   
@@ -147,8 +142,10 @@ img{
   
     <input type="file" id="imagemInput">  
   
-    <!-- PREVIEW -->
     <div id="preview"></div>
+
+    <h3 class="previewTitle">👀 Preview do Produto</h3>
+    <div id="previewCard" class="card"></div>
   
     <button class="add" onclick="publicar()">PUBLICAR</button>  
   
@@ -170,22 +167,50 @@ const client = supabase.createClient(
   
 let imagemFile = null;  
   
-/* LOG */  
 function log(msg){  
     const el = document.getElementById("logs");  
     const t = new Date().toLocaleTimeString();  
     el.innerHTML += `[${t}] ${msg}<br>`;  
     el.scrollTop = el.scrollHeight;  
 }  
-  
-log("📄 Admin carregado");  
-  
-/* PREVIEW + IMAGE */  
+
+log("📄 Admin carregado");
+
+/* PREVIEW DINÂMICO */
+function atualizarPreview(){
+    const nome = document.getElementById("nome").value || "Nome do produto";
+    const descricao = document.getElementById("descricao").value || "Descrição...";
+    const preco = document.getElementById("preco").value || "0.00";
+
+    let imgHTML = "";
+
+    if(imagemFile){
+        const url = URL.createObjectURL(imagemFile);
+        imgHTML = `<img src="${url}">`;
+    }
+
+    document.getElementById("previewCard").innerHTML = `
+        <b style="font-size:18px;">${nome}</b>
+        ${imgHTML}
+        <p>${descricao}</p>
+        <div style="color:#00ff88;font-weight:bold;">
+            💰 R$ ${preco}
+        </div>
+    `;
+}
+
+/* INPUTS */
+["nome","descricao","preco"].forEach(id=>{
+    document.getElementById(id).addEventListener("input", atualizarPreview);
+});
+
+/* IMAGE */
 document.getElementById("imagemInput").addEventListener("change",(e)=>{  
     imagemFile = e.target.files[0];  
     
     if(!imagemFile){
-        limparPreview();
+        limparPreviewImagem();
+        atualizarPreview();
         return;
     }
 
@@ -202,16 +227,18 @@ document.getElementById("imagemInput").addEventListener("change",(e)=>{
     reader.readAsDataURL(imagemFile);
 
     log("🖼️ imagem selecionada");  
+    atualizarPreview();
 });  
 
 function removerImagem(){
     imagemFile = null;
     document.getElementById("imagemInput").value = "";
-    limparPreview();
+    limparPreviewImagem();
+    atualizarPreview();
     log("🗑️ imagem removida");
 }
 
-function limparPreview(){
+function limparPreviewImagem(){
     document.getElementById("preview").innerHTML = "";
 }
 
@@ -250,12 +277,7 @@ async function publicar(){
     const img = await uploadImagem();  
   
     const { error } = await client.from("produtos").insert([{  
-        nome,  
-        descricao,  
-        preco,  
-        whatsapp,  
-        imagem: img,  
-        destaque:false  
+        nome, descricao, preco, whatsapp, imagem: img, destaque:false  
     }]);  
   
     if(error){  
@@ -271,97 +293,75 @@ async function publicar(){
     document.getElementById("whatsapp").value = "";
 
     removerImagem();
-  
+    document.getElementById("previewCard").innerHTML = "";
+
     carregar();  
 }  
   
 /* CARREGAR */  
 async function carregar(){  
-  
-    const { data, error } = await client  
-        .from("produtos")  
-        .select("*")  
-        .order("id",{ascending:false});  
-  
-    if(error){  
-        log("❌ erro load: " + error.message);  
-        return;  
-    }  
-  
-    const lista = document.getElementById("lista");  
-    lista.innerHTML = "";  
-  
-    data.forEach(p => {  
-  
-        const div = document.createElement("div");  
-        div.className = "card";  
-  
-        div.innerHTML = `  
-            <b>${p.nome}</b><br>  
-  
-            ${p.imagem ? `<img src="${p.imagem}">` : ""}  
-  
-            <p>${p.descricao}</p>  
-            💰 R$ ${p.preco}  
-  
-            <div class="actions">  
-                <button class="delBtn" onclick="del('${p.id}')">🗑 Excluir</button>  
-  
-                <button class="favBtn" onclick="fav('${p.id}', ${p.destaque})">  
-                    ⭐ ${p.destaque ? "Remover" : "Favoritar"}  
-                </button>  
-            </div>  
-        `;  
-  
-        lista.appendChild(div);  
-    });  
-  
-    log("📦 carregado: " + data.length);  
-}  
-  
-/* DELETE */  
-async function del(id){  
-    await client.from("produtos").delete().eq("id",id);  
-    log("🗑 deletado");  
-    carregar();  
-}  
-  
-/* FAVORITO */  
-async function fav(id, atual){  
-  
-    const { data } = await client  
-        .from("produtos")  
-        .select("*")  
-        .eq("destaque", true);  
-  
-    const total = data?.length || 0;  
-  
-    if(!atual && total >= 3){  
-        alert("Limite de 3 favoritos");  
-        return;  
-    }  
-  
-    await client  
-        .from("produtos")  
-        .update({ destaque: !atual })  
-        .eq("id", id);  
-  
-    carregar();  
-}  
-  
+    const { data } = await client.from("produtos").select("*").order("id",{ascending:false});  
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    data.forEach(p=>{
+        lista.innerHTML += `
+        <div class="card">
+            <b>${p.nome}</b>
+            ${p.imagem ? `<img src="${p.imagem}">` : ""}
+            <p>${p.descricao}</p>
+            💰 R$ ${p.preco}
+
+            <div class="actions">
+                <button class="delBtn" onclick="del('${p.id}')">🗑 Excluir</button>
+                <button class="favBtn" onclick="fav('${p.id}', ${p.destaque})">
+                    ⭐ ${p.destaque ? "Remover" : "Favoritar"}
+                </button>
+            </div>
+        </div>
+        `;
+    });
+
+    log("📦 carregado: " + data.length);
+}
+
+/* DELETE */
+async function del(id){
+    await client.from("produtos").delete().eq("id",id);
+    log("🗑 deletado");
+    carregar();
+}
+
+/* FAVORITO */
+async function fav(id, atual){
+    const { data } = await client.from("produtos").select("*").eq("destaque", true);
+
+    if(!atual && data.length >= 3){
+        alert("Limite de 3 favoritos");
+        return;
+    }
+
+    await client.from("produtos")
+    .update({ destaque: !atual })
+    .eq("id", id);
+
+    carregar();
+}
+
 /* NAV */
 function goItens(){
     window.location.href = "/admini";
 }
 
-/* LOGOUT */  
-async function logout(){  
-    await client.auth.signOut();  
-    window.location.href = "/index.html";  
-}  
-  
-carregar();  
+/* LOGOUT */
+async function logout(){
+    await client.auth.signOut();
+    window.location.href = "/index.html";
+}
+
+carregar();
 </script>  
   
 </body>  
-  </html>
+</html>
