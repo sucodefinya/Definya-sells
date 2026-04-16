@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Itens Definya</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#05060a;
+    color:#e2e8f0;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+    color:#00ffff;
+}
+
+.card{
+    background:#0b1220;
+    padding:15px;
+    margin:15px 0;
+    border-radius:12px;
+}
+
+img{
+    width:100%;
+    border-radius:10px;
+}
+
+.buy{
+    display:block;
+    margin-top:10px;
+    padding:10px;
+    text-align:center;
+    border:1px solid #00ff88;
+    color:#00ff88;
+    border-radius:10px;
+    text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>📦 Itens do Definya</h1>
+    <div id="lista"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const client = supabase.createClient(
+  "https://dbqleycdrkdhxrozsmup.supabase.co",
+  "SUA_ANON_KEY_AQUI"
+);
+
+async function carregarItens(){
+
+    const { data, error } = await client
+        .from("itens")
+        .select("*")
+        .order("criado_em",{ascending:false});
+
+    const lista = document.getElementById("lista");
+
+    if(error){
+        lista.innerHTML = "<p>Erro ao carregar</p>";
+        return;
+    }
+
+    lista.innerHTML = data.map(item => `
+        <div class="card">
+            <h3>${item.nome}</h3>
+
+            ${item.imagem ? `<img src="${item.imagem}">` : ""}
+
+            <p>${item.descricao}</p>
+
+            💰 R$ ${item.preco}
+
+            <a class="buy" href="https://wa.me/?text=${encodeURIComponent("Quero comprar: " + item.nome)}">
+                🛒 Comprar
+            </a>
+        </div>
+    `).join("");
+}
+
+carregarItens();
+</script>
+
+</body>
+</html>
