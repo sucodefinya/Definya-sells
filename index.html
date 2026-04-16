@@ -26,33 +26,29 @@ body{
     flex-direction:column;
     z-index:9999;
     overflow:hidden;
-    animation:fadeOut 1s ease forwards;
-    animation-delay:3s;
 }
 
-/* container central */
+/* container da logo */
 .splash-center{
     position:relative;
-    display:flex;
-    justify-content:center;
-    align-items:center;
 }
 
 /* logo */
 #splash img{
     width:320px;
     z-index:2;
+    position:relative;
 }
 
-/* 🔴 partículas saindo da logo */
+/* 🔴 partículas livres */
 .red-particle{
     position:absolute;
     width:4px;
     height:4px;
     background:#ff2a2a;
     border-radius:50%;
-    opacity:0.8;
-    animation:explode linear forwards;
+    pointer-events:none;
+    animation:explode 0.8s linear forwards;
 }
 
 @keyframes explode{
@@ -66,7 +62,7 @@ body{
     }
 }
 
-/* 🔄 loading */
+/* 🔄 loading neon */
 .loading-bar{
     width:220px;
     height:4px;
@@ -80,6 +76,8 @@ body{
     height:100%;
     width:0%;
     background:#ff2a2a;
+    box-shadow:0 0 10px #ff2a2a, 0 0 20px #ff0000;
+    transition:width 0.2s;
 }
 
 .loading-text{
@@ -134,6 +132,7 @@ body::after{
     padding:20px;
 }
 
+/* HEADER */
 .header{
     display:flex;
     justify-content:space-between;
@@ -144,6 +143,7 @@ body::after{
     max-width:260px;
 }
 
+/* botões */
 .admin-btn{
     padding:8px 14px;
     border:1px solid #ff2a2a;
@@ -199,7 +199,7 @@ img{
     font-weight:bold;
 }
 
-/* 🔴 BOTÃO COMPRAR NEON VERMELHO */
+/* 🔴 botão comprar neon */
 .buy-btn{
     display:block;
     margin-top:10px;
@@ -209,7 +209,7 @@ img{
     color:#ff2a2a;
     border-radius:10px;
     text-decoration:none;
-    box-shadow:0 0 10px rgba(255,0,0,0.5);
+    box-shadow:0 0 10px #ff2a2a;
 }
 
 .buy-btn:hover{
@@ -221,17 +221,17 @@ img{
 
 <body>
 
-<!-- 🔥 SPLASH -->
+<!-- SPLASH -->
 <div id="splash">
-    <div class="splash-center" id="splashCenter">
+    <div class="splash-center" id="center">
         <img src="InShot_20260415_234327721.png">
     </div>
 
     <div class="loading-bar">
-        <div class="loading-fill" id="loadingFill"></div>
+        <div class="loading-fill" id="fill"></div>
     </div>
 
-    <div class="loading-text" id="loadingText">0%</div>
+    <div class="loading-text" id="text">0%</div>
 </div>
 
 <div class="container">
@@ -260,51 +260,59 @@ const client = supabase.createClient(
 for(let i=0;i<20;i++){
     let p = document.createElement("div");
     p.classList.add("particle");
-    p.style.left = Math.random()*100 + "vw";
-    p.style.animationDuration = (6 + Math.random()*6) + "s";
+    p.style.left = Math.random()*100+"vw";
+    p.style.animationDuration = (6+Math.random()*6)+"s";
     document.body.appendChild(p);
 }
 
-/* 🔴 partículas explodindo da logo */
-function explodeParticles(){
-    const center = document.getElementById("splashCenter");
+/* 🔴 partículas corretas (posição real da logo) */
+function spawnParticle(){
+    const img = document.querySelector("#center img");
+    const rect = img.getBoundingClientRect();
 
-    setInterval(()=>{
-        for(let i=0;i<8;i++){
-            let p = document.createElement("div");
-            p.classList.add("red-particle");
+    let p = document.createElement("div");
+    p.classList.add("red-particle");
 
-            let x = (Math.random()*200 - 100) + "px";
-            let y = (Math.random()*200 - 100) + "px";
+    p.style.left = rect.left + rect.width/2 + "px";
+    p.style.top = rect.top + rect.height/2 + "px";
 
-            p.style.setProperty('--x', x);
-            p.style.setProperty('--y', y);
-            p.style.animationDuration = (0.6 + Math.random()*0.6) + "s";
+    let x = (Math.random()*200 - 100) + "px";
+    let y = (Math.random()*200 - 100) + "px";
 
-            center.appendChild(p);
+    p.style.setProperty('--x', x);
+    p.style.setProperty('--y', y);
 
-            setTimeout(()=>p.remove(),1000);
-        }
-    },150);
+    document.body.appendChild(p);
+
+    setTimeout(()=>p.remove(),800);
 }
-explodeParticles();
 
-/* 🔄 loading com % */
+setInterval(spawnParticle,80);
+
+/* 🔄 loading real */
 let progress = 0;
-const fill = document.getElementById("loadingFill");
-const text = document.getElementById("loadingText");
+const fill = document.getElementById("fill");
+const text = document.getElementById("text");
+const splash = document.getElementById("splash");
 
-const interval = setInterval(()=>{
-    progress += Math.random()*15;
+const loading = setInterval(()=>{
+    progress += Math.random()*12;
 
     if(progress >= 100){
         progress = 100;
-        clearInterval(interval);
+        clearInterval(loading);
+
+        setTimeout(()=>{
+            splash.style.transition = "opacity 0.6s";
+            splash.style.opacity = "0";
+
+            setTimeout(()=> splash.remove(),600);
+        },300);
     }
 
     fill.style.width = progress + "%";
     text.innerText = Math.floor(progress) + "%";
-},150);
+},120);
 
 /* produtos */
 async function carregarDestaques(){
