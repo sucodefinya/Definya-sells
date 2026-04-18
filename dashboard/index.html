@@ -22,7 +22,7 @@ body{
     overflow-x:hidden;
 }
 
-/* 🔥 glow */
+/* glow */
 body::before{
     content:"";
     position:fixed;
@@ -45,7 +45,7 @@ body::after{
     z-index:-3;
 }
 
-/* 🌬️ vento */
+/* vento */
 .wind{
     position:fixed;
     width:100%;
@@ -65,7 +65,7 @@ body::after{
     to{ transform:translateX(-40px); }
 }
 
-/* 🔴 partículas */
+/* partículas */
 .particle{
     position:fixed;
     bottom:-10px;
@@ -94,7 +94,6 @@ body::after{
     align-items:center;
 }
 
-/* título */
 h1{
     color:var(--main);
     text-shadow:0 0 12px var(--soft);
@@ -137,10 +136,19 @@ img{
     margin:10px 0;
 }
 
-/* preço */
+/* 💸 PREÇO COM IMAGEM */
 .price{
+    display:flex;
+    align-items:center;
+    gap:6px;
     color:#00ff88;
     font-weight:bold;
+}
+
+.price img{
+    width:24px;
+    height:24px;
+    filter: drop-shadow(0 0 8px rgba(0,255,150,0.9));
 }
 
 /* botão */
@@ -191,6 +199,19 @@ const client = supabase.createClient(
   "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
+/* FORMATAR NÚMERO */
+function formatarNumero(num){
+    if(!num) return "5599999999999";
+
+    num = num.replace(/\D/g,"");
+
+    if(!num.startsWith("55")){
+        num = "55" + num;
+    }
+
+    return num;
+}
+
 /* partículas */
 setInterval(() => {
     const p = document.createElement("div");
@@ -211,9 +232,9 @@ setInterval(() => {
 /* render */
 function renderCard(item){
 
-    const whatsapp = item.whatsapp
-        ? `https://wa.me/${item.whatsapp}?text=${encodeURIComponent("Olá! Tenho interesse no produto: " + item.nome)}`
-        : null;
+    const numero = formatarNumero(item.whatsapp);
+
+    const whatsapp = `https://wa.me/${numero}?text=${encodeURIComponent("Olá! Tenho interesse no produto: " + item.nome)}`;
 
     return `
         <div class="card">
@@ -223,18 +244,19 @@ function renderCard(item){
 
             <p>${item.descricao}</p>
 
-            <div class="price">💰 R$ ${parseFloat(item.preco).toFixed(2)}</div>
+            <div class="price">
+                <img src="/price.png">
+                R$ ${parseFloat(item.preco).toFixed(2)}
+            </div>
 
-            ${whatsapp ? `
-                <a class="buy-btn" href="${whatsapp}" target="_blank">
-                    🛒 Comprar
-                </a>
-            ` : ""}
+            <a class="buy-btn" href="${whatsapp}" target="_blank">
+                🛒 Comprar
+            </a>
         </div>
     `;
 }
 
-/* animação scroll */
+/* animação */
 function observerSetup(){
     const cards = document.querySelectorAll(".card");
 
