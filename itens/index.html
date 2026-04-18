@@ -71,6 +71,11 @@ select{
     padding:15px;
     border:1px solid rgba(255,255,255,0.05);
     overflow:hidden;
+    transition:0.25s;
+}
+
+.card:hover{
+    transform:translateY(-5px) scale(1.02);
 }
 
 /* RARIDADE */
@@ -79,33 +84,29 @@ select{
 .raro{ border-color:#3b82f6; }
 .epico{ border-color:#a855f7; }
 
-/* 🔥 LENDARIO MELHORADO */
 .lendario{
     border-color:#facc15;
-    box-shadow:0 0 25px rgba(250,204,21,0.5);
+    box-shadow:0 0 20px rgba(250,204,21,0.4);
 }
 
-/* ✨ FAÍSCAS */
-.spark{
+/* ✨ PARTICULAS LENDARIO (MELHORADAS) */
+.lendario::before{
+    content:"";
     position:absolute;
-    width:4px;
-    height:4px;
-    background:#facc15;
-    border-radius:50%;
-    box-shadow:0 0 8px #facc15;
+    width:100%;
+    height:100%;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(255,215,0,0.6) 1px, transparent 2px),
+        radial-gradient(circle at 70% 60%, rgba(255,255,200,0.6) 1px, transparent 2px),
+        radial-gradient(circle at 40% 80%, rgba(255,215,0,0.5) 1px, transparent 2px);
+    animation: sparkle 2.5s linear infinite;
     pointer-events:none;
-    animation: subir 3s linear forwards;
+    opacity:0.6;
 }
 
-@keyframes subir{
-    from{
-        transform:translateY(0);
-        opacity:1;
-    }
-    to{
-        transform:translateY(-120px);
-        opacity:0;
-    }
+@keyframes sparkle{
+    from{ transform:translateY(0); }
+    to{ transform:translateY(-20px); }
 }
 
 .card img{
@@ -142,9 +143,20 @@ select{
 .epico .badge{ background:#a855f7; }
 .lendario .badge{ background:#facc15; color:#000; }
 
+/* 💸 PREÇO COM IMAGEM */
 .price{
+    display:flex;
+    align-items:center;
+    gap:6px;
     color:#00ff88;
     font-weight:bold;
+    margin-top:5px;
+}
+
+.price img{
+    width:18px;
+    height:18px;
+    filter: drop-shadow(0 0 5px rgba(0,255,150,0.6));
 }
 
 /* BOTÃO */
@@ -157,11 +169,13 @@ select{
     border:1px solid #ff2a2a;
     color:#ff2a2a;
     text-decoration:none;
+    box-shadow:0 0 10px rgba(255,0,0,0.3);
 }
 
 .buy:hover{
     background:#ff2a2a;
     color:#000;
+    box-shadow:0 0 20px #ff2a2a;
 }
 
 .empty{
@@ -201,34 +215,22 @@ const client = supabase.createClient(
   "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-/* FORMATAR NUMERO */
+const WHATSAPP_PADRAO = "5599999999999";
+
+/* 🔧 FORMATAR NÚMERO */
 function formatarNumero(num){
-    if(!num) return "";
+    if(!num) return WHATSAPP_PADRAO;
+
     num = num.replace(/\D/g,"");
+
     if(!num.startsWith("55")){
-        num = "55"+num;
+        num = "55" + num;
     }
+
     return num;
 }
 
-/* PARTICULAS LENDARIO */
-function gerarSpark(card){
-
-    setInterval(()=>{
-        const p = document.createElement("div");
-        p.classList.add("spark");
-
-        p.style.left = Math.random()*100 + "%";
-        p.style.bottom = "0px";
-
-        card.appendChild(p);
-
-        setTimeout(()=>p.remove(),3000);
-
-    },500);
-}
-
-/* CARREGAR */
+/* carregar */
 async function carregar(){
 
     const filtro = document.getElementById("filtro").value;
@@ -257,40 +259,34 @@ async function carregar(){
     data.forEach(item=>{
 
         const raridade = item.raridade || "comum";
+
         const numero = formatarNumero(item.whatsapp);
 
         const msg = encodeURIComponent(
             "Olá! Quero comprar: " + item.nome
         );
 
-        const link = numero
-            ? `https://wa.me/${numero}?text=${msg}`
-            : "#";
-
-        const id = "card-"+item.id;
+        const link = `https://wa.me/${numero}?text=${msg}`;
 
         lista.innerHTML += `
-        <div class="card ${raridade}" id="${id}">
+        <div class="card ${raridade}">
             <div class="badge">${raridade}</div>
 
             ${item.imagem ? `<img src="${item.imagem}">` : ""}
 
             <div class="nome">${item.nome}</div>
             <div class="desc">${item.descricao || ""}</div>
-            <div class="price">💰 R$ ${item.preco}</div>
+
+            <div class="price">
+                <img src="price.png">
+                R$ ${item.preco}
+            </div>
 
             <a href="${link}" target="_blank" class="buy">
                 🛒 Comprar
             </a>
         </div>
         `;
-
-        if(raridade === "lendario"){
-            setTimeout(()=>{
-                gerarSpark(document.getElementById(id));
-            },100);
-        }
-
     });
 }
 
