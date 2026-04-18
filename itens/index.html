@@ -6,11 +6,7 @@
 <title>Itens - Loja</title>
 
 <style>
-
-/* 🔴 TEMA */
 :root{
-    --main:#ff2a2a;
-    --soft:rgba(255,0,0,0.3);
     --bg:#000;
     --card:#0a0a0f;
     --text:#e5e7eb;
@@ -23,29 +19,6 @@ body{
     color:var(--text);
 }
 
-/* 🔥 glow fundo */
-body::before{
-    content:"";
-    position:fixed;
-    width:400px;
-    height:400px;
-    background: radial-gradient(circle, rgba(255,50,0,0.15), transparent 60%);
-    top:-150px;
-    left:-150px;
-    z-index:-2;
-}
-
-body::after{
-    content:"";
-    position:fixed;
-    width:400px;
-    height:400px;
-    background: radial-gradient(circle, rgba(255,0,0,0.08), transparent 60%);
-    bottom:-150px;
-    right:-150px;
-    z-index:-2;
-}
-
 /* HEADER */
 .header{
     display:flex;
@@ -53,119 +26,160 @@ body::after{
     align-items:center;
     padding:15px 20px;
     background:#0a0a0f;
-    border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
-.header h1{
-    color:var(--main);
-    text-shadow:0 0 10px var(--soft);
-}
-
-/* voltar */
 .back{
-    color:var(--main);
-    text-decoration:none;
-    border:1px solid var(--main);
+    border:1px solid #ff2a2a;
+    color:#ff2a2a;
     padding:6px 12px;
     border-radius:10px;
-    box-shadow:0 0 8px var(--soft);
-    transition:0.2s;
+    text-decoration:none;
 }
 
-.back:hover{
-    background:var(--main);
-    color:#000;
+/* FILTRO */
+.filter{
+    padding:10px 20px;
 }
 
-/* container */
+select{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    background:#111827;
+    color:#fff;
+    border:none;
+}
+
+/* GRID */
 .container{
     max-width:1000px;
     margin:auto;
     padding:20px;
 }
 
-/* grid */
 .grid{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
     gap:15px;
 }
 
-/* card */
+/* CARD */
 .card{
+    position:relative;
     background:var(--card);
     border-radius:12px;
     padding:15px;
     border:1px solid rgba(255,255,255,0.05);
-    transition:0.25s;
+    overflow:hidden;
 }
 
-.card:hover{
-    transform:translateY(-6px) scale(1.02);
-    border:1px solid var(--main);
-    box-shadow:0 0 20px var(--soft);
+/* CORES RARIDADE */
+.comum{ border-color:#6b7280; }
+.incomum{ border-color:#22c55e; }
+.raro{ border-color:#3b82f6; }
+.epico{ border-color:#a855f7; }
+.lendario{
+    border-color:#facc15;
+    box-shadow:0 0 20px rgba(250,204,21,0.4);
+}
+
+/* PARTICULAS LENDARIO */
+.lendario::after{
+    content:"";
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:radial-gradient(circle, rgba(255,215,0,0.2) 2px, transparent 2px);
+    background-size:20px 20px;
+    animation: sparkle 3s linear infinite;
+    pointer-events:none;
+}
+
+@keyframes sparkle{
+    from{ background-position:0 0; }
+    to{ background-position:50px 50px; }
 }
 
 .card img{
     width:100%;
     border-radius:10px;
-    margin-bottom:10px;
 }
 
-/* texto */
+/* TEXT */
 .nome{
-    font-size:16px;
     font-weight:bold;
-    color:var(--main);
+    margin-top:5px;
 }
 
 .desc{
     font-size:14px;
     color:#9ca3af;
-    margin:8px 0;
 }
+
+/* BADGE */
+.badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+    padding:4px 8px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:bold;
+    text-transform:uppercase;
+}
+
+.comum .badge{ background:#6b7280; }
+.incomum .badge{ background:#22c55e; }
+.raro .badge{ background:#3b82f6; }
+.epico .badge{ background:#a855f7; }
+.lendario .badge{ background:#facc15; color:#000; }
 
 .price{
     color:#00ff88;
     font-weight:bold;
-    margin-top:5px;
 }
 
-/* botão comprar 🔴 */
+/* BOTÃO */
 .buy{
     display:block;
     margin-top:10px;
-    text-align:center;
     padding:10px;
+    text-align:center;
     border-radius:10px;
-    border:1px solid var(--main);
-    color:var(--main);
+    border:1px solid #ff2a2a;
+    color:#ff2a2a;
     text-decoration:none;
-    box-shadow:0 0 10px var(--soft);
-    transition:0.2s;
 }
 
 .buy:hover{
-    background:var(--main);
+    background:#ff2a2a;
     color:#000;
-    box-shadow:0 0 20px var(--main);
 }
 
-/* vazio */
 .empty{
     text-align:center;
     margin-top:40px;
-    color:#6b7280;
 }
-
 </style>
 </head>
 
 <body>
 
 <div class="header">
-    <h1>📦 ITENS</h1>
+    <h2>📦 ITENS</h2>
     <a href="/catalogo" class="back">⬅ Voltar</a>
+</div>
+
+<!-- FILTRO -->
+<div class="filter">
+    <select id="filtro" onchange="carregar()">
+        <option value="">Todas raridades</option>
+        <option value="comum">Comum</option>
+        <option value="incomum">Incomum</option>
+        <option value="raro">Raro</option>
+        <option value="epico">Épico</option>
+        <option value="lendario">Lendário</option>
+    </select>
 </div>
 
 <div class="container">
@@ -182,43 +196,50 @@ const client = supabase.createClient(
 
 const WHATSAPP_PADRAO = "5599999999999";
 
-/* carregar itens */
+/* carregar */
 async function carregar(){
 
-    const { data, error } = await client
-        .from("itens")
-        .select("*")
-        .order("id",{ascending:false});
+    const filtro = document.getElementById("filtro").value;
+
+    let query = client.from("itens").select("*");
+
+    if(filtro){
+        query = query.eq("raridade", filtro);
+    }
+
+    const { data, error } = await query.order("id",{ascending:false});
 
     const lista = document.getElementById("lista");
     lista.innerHTML = "";
 
     if(error){
-        lista.innerHTML = "<p class='empty'>Erro ao carregar</p>";
+        lista.innerHTML = "<p class='empty'>Erro</p>";
         return;
     }
 
     if(!data || data.length === 0){
-        lista.innerHTML = "<p class='empty'>Nenhum item disponível</p>";
+        lista.innerHTML = "<p class='empty'>Nenhum item</p>";
         return;
     }
 
     data.forEach(item=>{
 
+        const raridade = item.raridade || "comum";
+
         const msg = encodeURIComponent(
-            "Olá! Quero comprar este item: " + item.nome
+            "Olá! Quero comprar: " + item.nome
         );
 
         const link = `https://wa.me/${WHATSAPP_PADRAO}?text=${msg}`;
 
         lista.innerHTML += `
-        <div class="card">
+        <div class="card ${raridade}">
+            <div class="badge">${raridade}</div>
+
             ${item.imagem ? `<img src="${item.imagem}">` : ""}
 
             <div class="nome">${item.nome}</div>
-
             <div class="desc">${item.descricao || ""}</div>
-
             <div class="price">💰 R$ ${item.preco}</div>
 
             <a href="${link}" target="_blank" class="buy">
