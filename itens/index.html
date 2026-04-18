@@ -6,14 +6,47 @@
 <title>Itens - Loja</title>
 
 <style>
+
+/* 🔴 TEMA */
+:root{
+    --main:#ff2a2a;
+    --soft:rgba(255,0,0,0.3);
+    --bg:#000;
+    --card:#0a0a0f;
+    --text:#e5e7eb;
+}
+
 body{
     margin:0;
     font-family:Arial;
-    background:#000;
-    color:#e5e7eb;
+    background:var(--bg);
+    color:var(--text);
 }
 
-/* topo */
+/* 🔥 glow fundo */
+body::before{
+    content:"";
+    position:fixed;
+    width:400px;
+    height:400px;
+    background: radial-gradient(circle, rgba(255,50,0,0.15), transparent 60%);
+    top:-150px;
+    left:-150px;
+    z-index:-2;
+}
+
+body::after{
+    content:"";
+    position:fixed;
+    width:400px;
+    height:400px;
+    background: radial-gradient(circle, rgba(255,0,0,0.08), transparent 60%);
+    bottom:-150px;
+    right:-150px;
+    z-index:-2;
+}
+
+/* HEADER */
 .header{
     display:flex;
     justify-content:space-between;
@@ -24,15 +57,24 @@ body{
 }
 
 .header h1{
-    color:#00ffff;
+    color:var(--main);
+    text-shadow:0 0 10px var(--soft);
 }
 
+/* voltar */
 .back{
-    color:#00ffff;
+    color:var(--main);
     text-decoration:none;
-    border:1px solid #00ffff;
+    border:1px solid var(--main);
     padding:6px 12px;
     border-radius:10px;
+    box-shadow:0 0 8px var(--soft);
+    transition:0.2s;
+}
+
+.back:hover{
+    background:var(--main);
+    color:#000;
 }
 
 /* container */
@@ -51,16 +93,17 @@ body{
 
 /* card */
 .card{
-    background:#0a0a0f;
+    background:var(--card);
     border-radius:12px;
     padding:15px;
     border:1px solid rgba(255,255,255,0.05);
-    transition:0.2s;
+    transition:0.25s;
 }
 
 .card:hover{
-    transform:translateY(-5px);
-    border:1px solid rgba(0,255,255,0.2);
+    transform:translateY(-6px) scale(1.02);
+    border:1px solid var(--main);
+    box-shadow:0 0 20px var(--soft);
 }
 
 .card img{
@@ -69,10 +112,11 @@ body{
     margin-bottom:10px;
 }
 
+/* texto */
 .nome{
     font-size:16px;
     font-weight:bold;
-    color:#00ffff;
+    color:var(--main);
 }
 
 .desc{
@@ -87,22 +131,24 @@ body{
     margin-top:5px;
 }
 
-/* botão */
+/* botão comprar 🔴 */
 .buy{
     display:block;
     margin-top:10px;
     text-align:center;
     padding:10px;
     border-radius:10px;
-    border:1px solid #00ff88;
-    color:#00ff88;
+    border:1px solid var(--main);
+    color:var(--main);
     text-decoration:none;
+    box-shadow:0 0 10px var(--soft);
     transition:0.2s;
 }
 
 .buy:hover{
-    background:#00ff88;
+    background:var(--main);
     color:#000;
+    box-shadow:0 0 20px var(--main);
 }
 
 /* vazio */
@@ -111,6 +157,7 @@ body{
     margin-top:40px;
     color:#6b7280;
 }
+
 </style>
 </head>
 
@@ -133,9 +180,9 @@ const client = supabase.createClient(
   "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-/* CONFIG WHATSAPP PADRÃO */
-const WHATSAPP_PADRAO = "5599999999999"; // troca pelo seu
+const WHATSAPP_PADRAO = "5599999999999";
 
+/* carregar itens */
 async function carregar(){
 
     const { data, error } = await client
@@ -144,6 +191,7 @@ async function carregar(){
         .order("id",{ascending:false});
 
     const lista = document.getElementById("lista");
+    lista.innerHTML = "";
 
     if(error){
         lista.innerHTML = "<p class='empty'>Erro ao carregar</p>";
