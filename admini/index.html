@@ -46,21 +46,6 @@ input, textarea, select{
     border-radius:10px;
 }
 
-/* CHECKBOX CUSTOM */
-.checkbox{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin:10px 0;
-    cursor:pointer;
-}
-
-.checkbox input{
-    width:18px;
-    height:18px;
-    accent-color:#ff2a2a;
-}
-
 /* BOTÕES */
 button{
     padding:10px;
@@ -104,7 +89,7 @@ button{
     position:relative;
 }
 
-/* DESTAQUE VISUAL */
+/* DESTAQUE */
 .destaque{
     border:1px solid #ff3c00;
     box-shadow:0 0 15px rgba(255,60,0,0.5);
@@ -122,6 +107,28 @@ button{
     font-weight:bold;
 }
 
+/* BOTÕES ITEM */
+.item-actions{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+}
+
+.destacarBtn{
+    background:#facc15;
+    color:#000;
+}
+
+.removerDestaqueBtn{
+    background:#6b7280;
+    color:#fff;
+}
+
+.delBtn{
+    background:#ef4444;
+    color:#fff;
+}
+
 /* LOG */
 #logs{
     margin-top:15px;
@@ -135,12 +142,7 @@ button{
     border:1px solid rgba(255,0,0,0.2);
 }
 
-.delBtn{
-    background:#ef4444;
-    color:#fff;
-    margin-top:10px;
-}
-
+/* RARIDADE */
 .raridade{
     margin-top:5px;
     font-weight:bold;
@@ -182,19 +184,6 @@ button{
 <option value="lendario">Lendário</option>
 </select>
 
-<!-- 🔥 NOVO: DESTAQUE -->
-<label class="checkbox">
-    <input type="checkbox" id="destaque">
-    <span>🔥 Destacar item</span>
-</label>
-
-<input type="file" id="imagemInput">
-
-<div id="preview"></div>
-
-<h3>👀 Preview</h3>
-<div id="previewCard" class="card"></div>
-
 <button class="add" onclick="publicar()">PUBLICAR ITEM</button>
 
 <h3>📜 Logs</h3>
@@ -216,7 +205,7 @@ const client = supabase.createClient(
 /* FORMATAR NUMERO */
 function formatarNumero(num){
     if(!num) return "";
-    num = num.replace(/\D/g,"");
+    num = num.replace(/\\D/g,"");
     if(!num.startsWith("55")) num = "55"+num;
     return num;
 }
@@ -229,29 +218,6 @@ function log(msg){
     el.scrollTop = el.scrollHeight;
 }
 
-/* PREVIEW */
-function atualizarPreview(){
-    const nome = document.getElementById("nome").value || "Item";
-    const desc = document.getElementById("descricao").value || "...";
-    const preco = document.getElementById("preco").value || "0";
-    const raridade = document.getElementById("raridade").value;
-    const destaque = document.getElementById("destaque").checked;
-
-    document.getElementById("previewCard").innerHTML = `
-        <div class="${destaque ? "destaque" : ""}">
-            ${destaque ? `<div class="badge">DESTAQUE</div>` : ""}
-            <b>${nome}</b>
-            <p>${desc}</p>
-            💰 ${preco}
-            ${raridade ? `<div class="raridade ${raridade}">${raridade}</div>` : ""}
-        </div>
-    `;
-}
-
-["nome","descricao","preco","raridade","destaque"].forEach(id=>{
-    document.getElementById(id).addEventListener("input", atualizarPreview);
-});
-
 /* PUBLICAR */
 async function publicar(){
 
@@ -259,7 +225,6 @@ async function publicar(){
     const descricao = document.getElementById("descricao").value;
     const preco = document.getElementById("preco").value;
     const raridade = document.getElementById("raridade").value;
-    const destaque = document.getElementById("destaque").checked;
     let whatsapp = formatarNumero(document.getElementById("whatsapp").value);
 
     if(!raridade){
@@ -268,7 +233,7 @@ async function publicar(){
     }
 
     const { error } = await client.from("itens").insert([{
-        nome, descricao, preco, raridade, whatsapp, destaque
+        nome,descricao,preco,raridade,whatsapp,destaque:false
     }]);
 
     if(error){
@@ -277,8 +242,23 @@ async function publicar(){
     }
 
     log("item publicado");
+    carregar();
+}
 
-    document.getElementById("destaque").checked = false;
+/* 🔥 TOGGLE DESTAQUE */
+async function toggleDestaque(id, atual){
+
+    const { error } = await client
+        .from("itens")
+        .update({ destaque: !atual })
+        .eq("id", id);
+
+    if(error){
+        log("erro ao atualizar destaque");
+        return;
+    }
+
+    log(atual ? "❌ removido do destaque" : "⭐ item destacado");
 
     carregar();
 }
@@ -286,7 +266,10 @@ async function publicar(){
 /* CARREGAR */
 async function carregar(){
 
-    const { data } = await client.from("itens").select("*");
+    const { data } = await client
+        .from("itens")
+        .select("*")
+        .order("id",{ascending:false});
 
     const lista = document.getElementById("lista");
     lista.innerHTML = "";
@@ -299,7 +282,19 @@ async function carregar(){
             <p>${p.descricao}</p>
             💰 ${p.preco}
             ${p.raridade ? `<div class="raridade ${p.raridade}">${p.raridade}</div>` : ""}
-            <button class="delBtn" onclick="del('${p.id}')">Excluir</button>
+
+            <div class="item-actions">
+                <button 
+                    class="${p.destaque ? "removerDestaqueBtn" : "destacarBtn"}"
+                    onclick="toggleDestaque('${p.id}', ${p.destaque})"
+                >
+                    ${p.destaque ? "❌ Tirar destaque" : "⭐ Destacar"}
+                </button>
+
+                <button class="delBtn" onclick="del('${p.id}')">
+                    🗑 Excluir
+                </button>
+            </div>
         </div>
         `;
     });
@@ -308,6 +303,7 @@ async function carregar(){
 /* DELETE */
 async function del(id){
     await client.from("itens").delete().eq("id",id);
+    log("🗑 deletado");
     carregar();
 }
 
