@@ -14,7 +14,7 @@ body{
     overflow-x:hidden;
 }
 
-/* 🔥 SPLASH */
+/* SPLASH */
 #splash{
     position:fixed;
     width:100%;
@@ -25,44 +25,29 @@ body{
     align-items:center;
     flex-direction:column;
     z-index:9999;
-    overflow:hidden;
-}
-
-/* container da logo */
-.splash-center{
-    position:relative;
 }
 
 /* logo */
 #splash img{
     width:320px;
-    z-index:2;
-    position:relative;
 }
 
-/* 🔴 partículas livres */
+/* partículas splash */
 .red-particle{
     position:absolute;
     width:4px;
     height:4px;
     background:#ff2a2a;
     border-radius:50%;
-    pointer-events:none;
     animation:explode 0.8s linear forwards;
 }
 
 @keyframes explode{
-    from{
-        transform:translate(0,0);
-        opacity:1;
-    }
-    to{
-        transform:translate(var(--x), var(--y));
-        opacity:0;
-    }
+    from{ transform:translate(0,0); opacity:1; }
+    to{ transform:translate(var(--x), var(--y)); opacity:0; }
 }
 
-/* 🔄 loading neon */
+/* loading */
 .loading-bar{
     width:220px;
     height:4px;
@@ -76,63 +61,21 @@ body{
     height:100%;
     width:0%;
     background:#ff2a2a;
-    box-shadow:0 0 10px #ff2a2a, 0 0 20px #ff0000;
-    transition:width 0.2s;
+    box-shadow:0 0 10px #ff2a2a;
 }
 
 .loading-text{
     margin-top:8px;
-    font-size:14px;
     color:#ff2a2a;
 }
 
-/* fundo glow */
-body::before{
-    content:"";
-    position:fixed;
-    width:500px;
-    height:500px;
-    background: radial-gradient(circle, rgba(255,50,0,0.15), transparent 60%);
-    top:-200px;
-    left:-200px;
-    z-index:-2;
-}
-
-body::after{
-    content:"";
-    position:fixed;
-    width:500px;
-    height:500px;
-    background: radial-gradient(circle, rgba(255,0,0,0.08), transparent 60%);
-    bottom:-200px;
-    right:-200px;
-    z-index:-2;
-}
-
-/* partículas fundo */
-.particle{
-    position:fixed;
-    width:2px;
-    height:2px;
-    background:white;
-    border-radius:50%;
-    opacity:0.5;
-    animation: fall linear infinite;
-    z-index:-1;
-}
-
-@keyframes fall{
-    from{ transform:translateY(100vh); }
-    to{ transform:translateY(-10vh); }
-}
-
+/* layout */
 .container{
     max-width:900px;
     margin:auto;
     padding:20px;
 }
 
-/* HEADER */
 .header{
     display:flex;
     justify-content:space-between;
@@ -143,18 +86,13 @@ body::after{
     max-width:260px;
 }
 
-/* botões */
+/* botão */
 .admin-btn{
     padding:8px 14px;
     border:1px solid #ff2a2a;
     color:#ff2a2a;
-    text-decoration:none;
     border-radius:10px;
-}
-
-.admin-btn:hover{
-    background:#ff2a2a;
-    color:#000;
+    text-decoration:none;
 }
 
 .btn{
@@ -169,18 +107,21 @@ body::after{
     text-decoration:none;
 }
 
+/* título */
 h2{
     text-align:center;
     margin-top:25px;
     color:#ff2a2a;
 }
 
+/* card */
 .card{
     background:#0a0a0f;
     padding:15px;
     margin:15px 0;
     border-radius:12px;
     border:1px solid rgba(255,255,255,0.06);
+    position:relative;
 }
 
 .card:hover{
@@ -191,15 +132,48 @@ h2{
 img{
     width:100%;
     border-radius:10px;
-    margin:10px 0;
 }
 
+/* raridade */
+.badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+    padding:4px 8px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.comum{ border-color:#6b7280; }
+.incomum{ border-color:#22c55e; }
+.raro{ border-color:#3b82f6; }
+.epico{ border-color:#a855f7; }
+.lendario{
+    border-color:#facc15;
+    box-shadow:0 0 15px rgba(250,204,21,0.5);
+}
+
+.comum .badge{ background:#6b7280; }
+.incomum .badge{ background:#22c55e; }
+.raro .badge{ background:#3b82f6; }
+.epico .badge{ background:#a855f7; }
+.lendario .badge{ background:#facc15; color:#000; }
+
+/* preço com imagem */
 .price{
+    display:flex;
+    align-items:center;
+    gap:6px;
     color:#00ff88;
     font-weight:bold;
 }
 
-/* 🔴 botão comprar neon */
+.price img{
+    width:22px;
+}
+
+/* botão comprar */
 .buy-btn{
     display:block;
     margin-top:10px;
@@ -209,7 +183,6 @@ img{
     color:#ff2a2a;
     border-radius:10px;
     text-decoration:none;
-    box-shadow:0 0 10px #ff2a2a;
 }
 
 .buy-btn:hover{
@@ -223,9 +196,7 @@ img{
 
 <!-- SPLASH -->
 <div id="splash">
-    <div class="splash-center" id="center">
-        <img src="InShot_20260415_234327721.png">
-    </div>
+    <img src="InShot_20260415_234327721.png">
 
     <div class="loading-bar">
         <div class="loading-fill" id="fill"></div>
@@ -243,7 +214,7 @@ img{
 
     <a class="btn" href="catalogo">📦 CATÁLOGO</a>
 
-    <h2>🔥 OS MAIS PROCURADOS</h2>
+    <h2>🔥 MAIS PROCURADOS</h2>
     <div id="destaques"></div>
 
 </div>
@@ -256,57 +227,32 @@ const client = supabase.createClient(
   "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-/* partículas fundo */
-for(let i=0;i<20;i++){
-    let p = document.createElement("div");
-    p.classList.add("particle");
-    p.style.left = Math.random()*100+"vw";
-    p.style.animationDuration = (6+Math.random()*6)+"s";
-    document.body.appendChild(p);
+/* FORMATAR NUMERO */
+function formatarNumero(num){
+    if(!num) return "5599999999999";
+    num = num.replace(/\D/g,"");
+    if(!num.startsWith("55")){
+        num = "55" + num;
+    }
+    return num;
 }
 
-/* 🔴 partículas corretas (posição real da logo) */
-function spawnParticle(){
-    const img = document.querySelector("#center img");
-    const rect = img.getBoundingClientRect();
-
-    let p = document.createElement("div");
-    p.classList.add("red-particle");
-
-    p.style.left = rect.left + rect.width/2 + "px";
-    p.style.top = rect.top + rect.height/2 + "px";
-
-    let x = (Math.random()*200 - 100) + "px";
-    let y = (Math.random()*200 - 100) + "px";
-
-    p.style.setProperty('--x', x);
-    p.style.setProperty('--y', y);
-
-    document.body.appendChild(p);
-
-    setTimeout(()=>p.remove(),800);
-}
-
-setInterval(spawnParticle,80);
-
-/* 🔄 loading real */
+/* loading */
 let progress = 0;
 const fill = document.getElementById("fill");
 const text = document.getElementById("text");
 const splash = document.getElementById("splash");
 
 const loading = setInterval(()=>{
-    progress += Math.random()*12;
+    progress += Math.random()*10;
 
     if(progress >= 100){
         progress = 100;
         clearInterval(loading);
 
         setTimeout(()=>{
-            splash.style.transition = "opacity 0.6s";
             splash.style.opacity = "0";
-
-            setTimeout(()=> splash.remove(),600);
+            setTimeout(()=> splash.remove(),500);
         },300);
     }
 
@@ -314,8 +260,9 @@ const loading = setInterval(()=>{
     text.innerText = Math.floor(progress) + "%";
 },120);
 
-/* produtos */
+/* carregar */
 async function carregarDestaques(){
+
     const { data } = await client
         .from("produtos")
         .select("*")
@@ -324,20 +271,32 @@ async function carregarDestaques(){
 
     const box = document.getElementById("destaques");
 
-    if(!data){
-        box.innerHTML = "<p>Erro</p>";
-        return;
-    }
+    box.innerHTML = data.map(item=>{
 
-    box.innerHTML = data.map(item=>`
-        <div class="card">
+        const raridade = item.raridade || "comum";
+        const numero = formatarNumero(item.whatsapp);
+
+        return `
+        <div class="card ${raridade}">
+            <div class="badge">${raridade}</div>
+
             <h3 style="color:#ff2a2a">${item.nome}</h3>
+
             ${item.imagem ? `<img src="${item.imagem}">` : ""}
+
             <p>${item.descricao}</p>
-            <div class="price">💰 R$ ${parseFloat(item.preco).toFixed(2)}</div>
-            <a class="buy-btn" href="https://wa.me/${item.whatsapp}" target="_blank">🛒 Comprar</a>
+
+            <div class="price">
+                <img src="/price.png">
+                R$ ${parseFloat(item.preco).toFixed(2)}
+            </div>
+
+            <a class="buy-btn" href="https://wa.me/${numero}" target="_blank">
+                🛒 Comprar
+            </a>
         </div>
-    `).join("");
+        `;
+    }).join("");
 }
 
 carregarDestaques();
