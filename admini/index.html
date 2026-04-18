@@ -46,6 +46,21 @@ input, textarea, select{
     border-radius:10px;
 }
 
+/* CHECKBOX CUSTOM */
+.checkbox{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:10px 0;
+    cursor:pointer;
+}
+
+.checkbox input{
+    width:18px;
+    height:18px;
+    accent-color:#ff2a2a;
+}
+
 /* BOTÕES */
 button{
     padding:10px;
@@ -64,7 +79,6 @@ button{
     color:#fff;
 }
 
-/* BOTÃO PUBLICAR */
 .add{
     width:100%;
     margin-top:15px;
@@ -87,11 +101,25 @@ button{
     margin-top:12px;
     border-radius:10px;
     border:1px solid rgba(255,255,255,0.05);
+    position:relative;
 }
 
-img{
-    width:100%;
-    border-radius:10px;
+/* DESTAQUE VISUAL */
+.destaque{
+    border:1px solid #ff3c00;
+    box-shadow:0 0 15px rgba(255,60,0,0.5);
+}
+
+.badge{
+    position:absolute;
+    top:8px;
+    right:8px;
+    background:#ff3c00;
+    color:#000;
+    padding:4px 8px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:bold;
 }
 
 /* LOG */
@@ -107,14 +135,12 @@ img{
     border:1px solid rgba(255,0,0,0.2);
 }
 
-/* DELETE */
 .delBtn{
     background:#ef4444;
     color:#fff;
     margin-top:10px;
 }
 
-/* RARIDADE */
 .raridade{
     margin-top:5px;
     font-weight:bold;
@@ -145,7 +171,6 @@ img{
 <input id="nome" placeholder="Nome do item">
 <textarea id="descricao" placeholder="Descrição"></textarea>
 <input id="preco" placeholder="Preço">
-
 <input id="whatsapp" placeholder="WhatsApp">
 
 <select id="raridade">
@@ -157,6 +182,12 @@ img{
 <option value="lendario">Lendário</option>
 </select>
 
+<!-- 🔥 NOVO: DESTAQUE -->
+<label class="checkbox">
+    <input type="checkbox" id="destaque">
+    <span>🔥 Destacar item</span>
+</label>
+
 <input type="file" id="imagemInput">
 
 <div id="preview"></div>
@@ -164,14 +195,11 @@ img{
 <h3>👀 Preview</h3>
 <div id="previewCard" class="card"></div>
 
-<!-- 🔥 BOTÃO NO LUGAR CERTO -->
 <button class="add" onclick="publicar()">PUBLICAR ITEM</button>
 
-<!-- LOGS -->
 <h3>📜 Logs</h3>
 <div id="logs"></div>
 
-<!-- ITENS -->
 <h3>📦 Itens</h3>
 <div id="lista"></div>
 
@@ -184,8 +212,6 @@ const client = supabase.createClient(
 "https://dbqleycdrkdhxrozsmup.supabase.co",
 "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
-
-let imagemFile = null;
 
 /* FORMATAR NUMERO */
 function formatarNumero(num){
@@ -209,16 +235,20 @@ function atualizarPreview(){
     const desc = document.getElementById("descricao").value || "...";
     const preco = document.getElementById("preco").value || "0";
     const raridade = document.getElementById("raridade").value;
+    const destaque = document.getElementById("destaque").checked;
 
     document.getElementById("previewCard").innerHTML = `
-        <b>${nome}</b>
-        <p>${desc}</p>
-        💰 ${preco}
-        ${raridade ? `<div class="raridade ${raridade}">${raridade}</div>` : ""}
+        <div class="${destaque ? "destaque" : ""}">
+            ${destaque ? `<div class="badge">DESTAQUE</div>` : ""}
+            <b>${nome}</b>
+            <p>${desc}</p>
+            💰 ${preco}
+            ${raridade ? `<div class="raridade ${raridade}">${raridade}</div>` : ""}
+        </div>
     `;
 }
 
-["nome","descricao","preco","raridade"].forEach(id=>{
+["nome","descricao","preco","raridade","destaque"].forEach(id=>{
     document.getElementById(id).addEventListener("input", atualizarPreview);
 });
 
@@ -229,6 +259,7 @@ async function publicar(){
     const descricao = document.getElementById("descricao").value;
     const preco = document.getElementById("preco").value;
     const raridade = document.getElementById("raridade").value;
+    const destaque = document.getElementById("destaque").checked;
     let whatsapp = formatarNumero(document.getElementById("whatsapp").value);
 
     if(!raridade){
@@ -237,7 +268,7 @@ async function publicar(){
     }
 
     const { error } = await client.from("itens").insert([{
-        nome,descricao,preco,raridade,whatsapp
+        nome, descricao, preco, raridade, whatsapp, destaque
     }]);
 
     if(error){
@@ -246,6 +277,9 @@ async function publicar(){
     }
 
     log("item publicado");
+
+    document.getElementById("destaque").checked = false;
+
     carregar();
 }
 
@@ -259,7 +293,8 @@ async function carregar(){
 
     data.forEach(p=>{
         lista.innerHTML += `
-        <div class="card">
+        <div class="card ${p.destaque ? "destaque" : ""}">
+            ${p.destaque ? `<div class="badge">DESTAQUE</div>` : ""}
             <b>${p.nome}</b>
             <p>${p.descricao}</p>
             💰 ${p.preco}
