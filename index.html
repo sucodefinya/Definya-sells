@@ -14,6 +14,22 @@ body{
     overflow-x:hidden;
 }
 
+/* 🔴 FUNDO ANIMADO */
+.particle{
+    position:fixed;
+    width:2px;
+    height:2px;
+    background:#ff2a2a;
+    border-radius:50%;
+    opacity:0.4;
+    animation: floatUp linear infinite;
+}
+
+@keyframes floatUp{
+    from{ transform:translateY(100vh); }
+    to{ transform:translateY(-10vh); }
+}
+
 /* SPLASH */
 #splash{
     position:fixed;
@@ -25,26 +41,6 @@ body{
     align-items:center;
     flex-direction:column;
     z-index:9999;
-}
-
-/* logo */
-#splash img{
-    width:320px;
-}
-
-/* partículas splash */
-.red-particle{
-    position:absolute;
-    width:4px;
-    height:4px;
-    background:#ff2a2a;
-    border-radius:50%;
-    animation:explode 0.8s linear forwards;
-}
-
-@keyframes explode{
-    from{ transform:translate(0,0); opacity:1; }
-    to{ transform:translate(var(--x), var(--y)); opacity:0; }
 }
 
 /* loading */
@@ -61,7 +57,7 @@ body{
     height:100%;
     width:0%;
     background:#ff2a2a;
-    box-shadow:0 0 10px #ff2a2a;
+    box-shadow:0 0 10px #ff2a2a,0 0 20px #ff0000;
 }
 
 .loading-text{
@@ -76,6 +72,7 @@ body{
     padding:20px;
 }
 
+/* HEADER */
 .header{
     display:flex;
     justify-content:space-between;
@@ -114,7 +111,7 @@ h2{
     color:#ff2a2a;
 }
 
-/* card */
+/* CARD */
 .card{
     background:#0a0a0f;
     padding:15px;
@@ -122,11 +119,53 @@ h2{
     border-radius:12px;
     border:1px solid rgba(255,255,255,0.06);
     position:relative;
+
+    opacity:0;
+    transform:translateY(40px);
+    transition:0.6s;
+}
+
+.card.show{
+    opacity:1;
+    transform:translateY(0);
 }
 
 .card:hover{
-    transform:translateY(-4px);
-    border:1px solid rgba(255,0,0,0.4);
+    transform:translateY(-5px) scale(1.02);
+}
+
+/* 🔥 DESTAQUE */
+.destaque{
+    border-color:#ff3c00;
+    animation: glowPulse 2s infinite;
+}
+
+@keyframes glowPulse{
+    0%{ box-shadow:0 0 10px rgba(255,60,0,0.4); }
+    50%{ box-shadow:0 0 25px rgba(255,120,0,0.8); }
+    100%{ box-shadow:0 0 10px rgba(255,60,0,0.4); }
+}
+
+.badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+    padding:4px 10px;
+    border-radius:8px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.destaque .badge{
+    background:linear-gradient(45deg,#ff2a2a,#ff7a00);
+    box-shadow:0 0 10px #ff3c00;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+    0%{ transform:scale(1); }
+    50%{ transform:scale(1.1); }
+    100%{ transform:scale(1); }
 }
 
 img{
@@ -134,33 +173,7 @@ img{
     border-radius:10px;
 }
 
-/* raridade */
-.badge{
-    position:absolute;
-    top:10px;
-    right:10px;
-    padding:4px 8px;
-    border-radius:6px;
-    font-size:12px;
-    font-weight:bold;
-}
-
-.comum{ border-color:#6b7280; }
-.incomum{ border-color:#22c55e; }
-.raro{ border-color:#3b82f6; }
-.epico{ border-color:#a855f7; }
-.lendario{
-    border-color:#facc15;
-    box-shadow:0 0 15px rgba(250,204,21,0.5);
-}
-
-.comum .badge{ background:#6b7280; }
-.incomum .badge{ background:#22c55e; }
-.raro .badge{ background:#3b82f6; }
-.epico .badge{ background:#a855f7; }
-.lendario .badge{ background:#facc15; color:#000; }
-
-/* preço com imagem */
+/* preço */
 .price{
     display:flex;
     align-items:center;
@@ -183,11 +196,13 @@ img{
     color:#ff2a2a;
     border-radius:10px;
     text-decoration:none;
+    box-shadow:0 0 10px rgba(255,0,0,0.4);
 }
 
 .buy-btn:hover{
     background:#ff2a2a;
     color:#000;
+    box-shadow:0 0 20px #ff2a2a;
 }
 </style>
 </head>
@@ -196,7 +211,7 @@ img{
 
 <!-- SPLASH -->
 <div id="splash">
-    <img src="InShot_20260415_234327721.png">
+    <img src="InShot_20260415_234327721.png" width="300">
 
     <div class="loading-bar">
         <div class="loading-fill" id="fill"></div>
@@ -227,13 +242,26 @@ const client = supabase.createClient(
   "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-/* FORMATAR NUMERO */
+/* partículas fundo */
+setInterval(()=>{
+    const p = document.createElement("div");
+    p.classList.add("particle");
+
+    let size = Math.random()*3+1;
+    p.style.width = size+"px";
+    p.style.height = size+"px";
+    p.style.left = Math.random()*100+"vw";
+    p.style.animationDuration = (5+Math.random()*5)+"s";
+
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),10000);
+},200);
+
+/* formatar numero */
 function formatarNumero(num){
     if(!num) return "5599999999999";
     num = num.replace(/\D/g,"");
-    if(!num.startsWith("55")){
-        num = "55" + num;
-    }
+    if(!num.startsWith("55")) num = "55"+num;
     return num;
 }
 
@@ -251,17 +279,33 @@ const loading = setInterval(()=>{
         clearInterval(loading);
 
         setTimeout(()=>{
-            splash.style.opacity = "0";
-            setTimeout(()=> splash.remove(),500);
+            splash.style.opacity="0";
+            splash.style.transition="0.5s";
+            setTimeout(()=>splash.remove(),500);
         },300);
     }
 
-    fill.style.width = progress + "%";
-    text.innerText = Math.floor(progress) + "%";
+    fill.style.width = progress+"%";
+    text.innerText = Math.floor(progress)+"%";
 },120);
 
+/* observer animação */
+function animar(){
+    const cards = document.querySelectorAll(".card");
+
+    const obs = new IntersectionObserver(entries=>{
+        entries.forEach(e=>{
+            if(e.isIntersecting){
+                e.target.classList.add("show");
+            }
+        });
+    });
+
+    cards.forEach(c=>obs.observe(c));
+}
+
 /* carregar */
-async function carregarDestaques(){
+async function carregar(){
 
     const { data } = await client
         .from("produtos")
@@ -273,12 +317,11 @@ async function carregarDestaques(){
 
     box.innerHTML = data.map(item=>{
 
-        const raridade = item.raridade || "comum";
         const numero = formatarNumero(item.whatsapp);
 
         return `
-        <div class="card ${raridade}">
-            <div class="badge">${raridade}</div>
+        <div class="card destaque">
+            <div class="badge">DESTAQUE</div>
 
             <h3 style="color:#ff2a2a">${item.nome}</h3>
 
@@ -297,9 +340,11 @@ async function carregarDestaques(){
         </div>
         `;
     }).join("");
+
+    animar();
 }
 
-carregarDestaques();
+carregar();
 </script>
 
 </body>
