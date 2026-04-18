@@ -3,24 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogo Neon</title>
+<title>Catálogo</title>
 
 <style>
+:root{
+    --main:#ff2a2a;
+    --soft:rgba(255,0,0,0.3);
+    --bg:#000;
+    --card:#0a0a0f;
+    --text:#e5e7eb;
+}
+
 body{
     margin:0;
     font-family:Arial;
-    background:#000;
-    color:#e5e7eb;
+    background:var(--bg);
+    color:var(--text);
     overflow-x:hidden;
 }
 
-/* 🌌 glow base */
+/* 🔥 glow */
 body::before{
     content:"";
     position:fixed;
     width:600px;
     height:600px;
-    background: radial-gradient(circle, rgba(0,255,255,0.06), transparent 60%);
+    background: radial-gradient(circle, rgba(255,40,0,0.15), transparent 60%);
     top:-200px;
     left:-200px;
     z-index:-3;
@@ -31,28 +39,25 @@ body::after{
     position:fixed;
     width:600px;
     height:600px;
-    background: radial-gradient(circle, rgba(160,0,255,0.12), transparent 60%);
+    background: radial-gradient(circle, rgba(255,0,0,0.1), transparent 60%);
     bottom:-200px;
     right:-200px;
     z-index:-3;
 }
 
-/* 🌬️ VENTO DIGITAL */
+/* 🌬️ vento */
 .wind{
     position:fixed;
-    top:0;
-    left:0;
     width:100%;
     height:100%;
     background: repeating-linear-gradient(
         90deg,
-        rgba(255,255,255,0.03) 0px,
+        rgba(255,0,0,0.05) 0px,
         transparent 2px,
         transparent 6px
     );
     animation: windMove 6s linear infinite;
     z-index:-2;
-    pointer-events:none;
 }
 
 @keyframes windMove{
@@ -60,16 +65,15 @@ body::after{
     to{ transform:translateX(-40px); }
 }
 
-/* 💜 partículas */
+/* 🔴 partículas */
 .particle{
     position:fixed;
     bottom:-10px;
     border-radius:50%;
-    background:#b026ff;
-    box-shadow:0 0 10px #b026ff;
+    background:var(--main);
+    box-shadow:0 0 12px var(--main);
     z-index:-1;
     animation: floatUp linear forwards;
-    pointer-events:none;
 }
 
 @keyframes floatUp{
@@ -90,19 +94,22 @@ body::after{
     align-items:center;
 }
 
+/* título */
 h1{
-    color:#00ffff;
+    color:var(--main);
+    text-shadow:0 0 12px var(--soft);
 }
 
 .section-title{
     text-align:center;
     margin-top:30px;
-    color:#ff4d00;
+    color:var(--main);
+    text-shadow:0 0 10px var(--soft);
 }
 
-/* 🧊 CARD BASE */
+/* card */
 .card{
-    background:#0a0a0f;
+    background:var(--card);
     padding:15px;
     margin:15px 0;
     border-radius:12px;
@@ -113,10 +120,15 @@ h1{
     transition:all 0.6s ease;
 }
 
-/* 🎬 quando entra na tela (NETFLIX EFFECT) */
 .card.show{
     opacity:1;
     transform:translateY(0);
+}
+
+.card:hover{
+    border-color:var(--main);
+    box-shadow:0 0 20px var(--soft);
+    transform:translateY(-5px) scale(1.02);
 }
 
 img{
@@ -125,6 +137,7 @@ img{
     margin:10px 0;
 }
 
+/* preço */
 .price{
     color:#00ff88;
     font-weight:bold;
@@ -136,15 +149,18 @@ img{
     margin-top:10px;
     padding:10px;
     text-align:center;
-    border:1px solid #00ff88;
-    color:#00ff88;
+    border:1px solid var(--main);
+    color:var(--main);
     border-radius:10px;
     text-decoration:none;
+    box-shadow:0 0 10px var(--soft);
+    transition:0.2s;
 }
 
 .buy-btn:hover{
-    background:#00ff88;
+    background:var(--main);
     color:#000;
+    box-shadow:0 0 20px var(--main);
 }
 </style>
 </head>
@@ -156,7 +172,7 @@ img{
 <div class="container">
 
     <div class="header">
-        <h1>📦 CATÁLOGO NEON</h1>
+        <h1>📦 CATÁLOGO</h1>
     </div>
 
     <h2 class="section-title">🔥 MAIS PROCURADOS</h2>
@@ -170,34 +186,29 @@ img{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-const supabaseUrl = "https://dbqleycdrkdhxrozsmup.supabase.co";
-const supabaseAnonKey = "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis";
+const client = supabase.createClient(
+  "https://dbqleycdrkdhxrozsmup.supabase.co",
+  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
+);
 
-const client = supabase.createClient(supabaseUrl, supabaseAnonKey);
+/* partículas */
+setInterval(() => {
+    const p = document.createElement("div");
+    p.classList.add("particle");
 
-/* 💜 partículas contínuas */
-function createParticles(){
-    setInterval(() => {
+    let size = Math.random() * 4 + 1;
 
-        const p = document.createElement("div");
-        p.classList.add("particle");
+    p.style.width = size + "px";
+    p.style.height = size + "px";
+    p.style.left = Math.random() * 100 + "vw";
+    p.style.animationDuration = (6 + Math.random()*6) + "s";
 
-        let size = Math.random() * 4 + 1.5;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(), 12000);
 
-        p.style.width = size + "px";
-        p.style.height = size + "px";
-        p.style.left = Math.random() * 100 + "vw";
-        p.style.animationDuration = (6 + Math.random()*6) + "s";
+}, 250);
 
-        document.body.appendChild(p);
-
-        setTimeout(()=>p.remove(), 12000);
-
-    }, 250);
-}
-createParticles();
-
-/* card */
+/* render */
 function renderCard(item){
 
     const whatsapp = item.whatsapp
@@ -206,7 +217,7 @@ function renderCard(item){
 
     return `
         <div class="card">
-            <h3 style="color:#00ffff">${item.nome}</h3>
+            <h3 style="color:#ff2a2a">${item.nome}</h3>
 
             ${item.imagem ? `<img src="${item.imagem}">` : ""}
 
@@ -223,7 +234,7 @@ function renderCard(item){
     `;
 }
 
-/* 🎬 efeito Netflix scroll */
+/* animação scroll */
 function observerSetup(){
     const cards = document.querySelectorAll(".card");
 
@@ -233,13 +244,12 @@ function observerSetup(){
                 entry.target.classList.add("show");
             }
         });
-    }, {
-        threshold: 0.15
-    });
+    }, { threshold:0.15 });
 
     cards.forEach(card => observer.observe(card));
 }
 
+/* carregar */
 async function carregar(){
 
     const d = await client
@@ -260,7 +270,7 @@ async function carregar(){
     document.getElementById("todos").innerHTML =
         t.data?.map(renderCard).join("") || "<p>Sem produtos</p>";
 
-    observerSetup(); // ativa animação
+    observerSetup();
 }
 
 carregar();
