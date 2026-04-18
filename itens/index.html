@@ -89,7 +89,7 @@ select{
     box-shadow:0 0 18px rgba(250,204,21,0.35);
 }
 
-/* ✨ PARTICULAS LENDARIO (SUAVE E BONITO) */
+/* ✨ PARTICULAS LENDARIO */
 .lendario::before{
     content:"";
     position:absolute;
@@ -153,9 +153,9 @@ select{
 }
 
 .price img{
-    width:18px;
-    height:18px;
-    filter: drop-shadow(0 0 6px rgba(0,255,150,0.7));
+    width:24px;
+    height:24px;
+    filter: drop-shadow(0 0 8px rgba(0,255,150,0.9));
 }
 
 /* BOTÃO */
@@ -216,7 +216,7 @@ const client = supabase.createClient(
 
 const WHATSAPP_PADRAO = "5599999999999";
 
-/* 🔧 FORMATAR NÚMERO */
+/* FORMATAR NÚMERO */
 function formatarNumero(num){
     if(!num) return WHATSAPP_PADRAO;
 
