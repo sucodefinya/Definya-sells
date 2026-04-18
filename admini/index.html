@@ -86,10 +86,6 @@ img{
     margin-top:10px;
 }
 
-#preview img{
-    max-height:200px;
-}
-
 .removeImg{
     margin-top:8px;
     background:#ef4444;
@@ -107,7 +103,6 @@ img{
     border-radius:10px;
 }
 
-/* raridade cores */
 .raridade{
     margin-top:5px;
     font-weight:bold;
@@ -139,6 +134,9 @@ img{
     <input id="nome" placeholder="Nome do item">
     <textarea id="descricao" placeholder="Descrição"></textarea>
     <input id="preco" placeholder="Preço">
+
+    <!-- 📱 WHATSAPP -->
+    <input id="whatsapp" placeholder="WhatsApp (com ou sem +55)">
 
     <!-- 🔥 RARIDADE -->
     <select id="raridade">
@@ -177,6 +175,21 @@ const client = supabase.createClient(
 
 let imagemFile = null;
 
+/* 🔥 FORMATAR WHATSAPP */
+function formatarNumero(num){
+    if(!num) return "";
+
+    // remove tudo que não for número
+    num = num.replace(/\D/g, "");
+
+    // adiciona 55 se não tiver
+    if(!num.startsWith("55")){
+        num = "55" + num;
+    }
+
+    return num;
+}
+
 /* LOG */
 function log(msg){
     const el = document.getElementById("logs");
@@ -185,14 +198,13 @@ function log(msg){
     el.scrollTop = el.scrollHeight;
 }
 
-log("📄 Admin Itens carregado");
-
 /* PREVIEW */
 function atualizarPreview(){
     const nome = document.getElementById("nome").value || "Nome do item";
     const descricao = document.getElementById("descricao").value || "Descrição...";
     const preco = document.getElementById("preco").value || "0.00";
     const raridade = document.getElementById("raridade").value;
+    const whatsapp = document.getElementById("whatsapp").value;
 
     let imgHTML = "";
 
@@ -206,11 +218,12 @@ function atualizarPreview(){
         ${imgHTML}
         <p>${descricao}</p>
         💰 R$ ${preco}
+        📱 ${whatsapp || "Sem número"}
         ${raridade ? `<div class="raridade ${raridade}">${raridade.toUpperCase()}</div>` : ""}
     `;
 }
 
-["nome","descricao","preco","raridade"].forEach(id=>{
+["nome","descricao","preco","raridade","whatsapp"].forEach(id=>{
     document.getElementById(id).addEventListener("input", atualizarPreview);
 });
 
@@ -219,7 +232,7 @@ document.getElementById("imagemInput").addEventListener("change",(e)=>{
     imagemFile = e.target.files[0];
 
     if(!imagemFile){
-        limparPreviewImg();
+        document.getElementById("preview").innerHTML = "";
         atualizarPreview();
         return;
     }
@@ -235,20 +248,14 @@ document.getElementById("imagemInput").addEventListener("change",(e)=>{
     };
 
     reader.readAsDataURL(imagemFile);
-
-    log("🖼️ imagem selecionada");
     atualizarPreview();
 });
 
 function removerImagem(){
     imagemFile = null;
     document.getElementById("imagemInput").value = "";
-    limparPreviewImg();
-    atualizarPreview();
-}
-
-function limparPreviewImg(){
     document.getElementById("preview").innerHTML = "";
+    atualizarPreview();
 }
 
 /* UPLOAD */
@@ -281,17 +288,23 @@ async function publicar(){
     const preco = document.getElementById("preco").value;
     const raridade = document.getElementById("raridade").value;
 
+    let whatsapp = document.getElementById("whatsapp").value;
+    whatsapp = formatarNumero(whatsapp);
+
     if(!raridade){
-        alert("Escolha a raridade do item!");
+        alert("Escolha a raridade!");
         return;
     }
-
-    log("🚀 publicando item...");
 
     const img = await uploadImagem();
 
     const { error } = await client.from("itens").insert([{
-        nome, descricao, preco, imagem: img, raridade
+        nome,
+        descricao,
+        preco,
+        imagem: img,
+        raridade,
+        whatsapp
     }]);
 
     if(error){
@@ -305,6 +318,8 @@ async function publicar(){
     document.getElementById("descricao").value = "";
     document.getElementById("preco").value = "";
     document.getElementById("raridade").value = "";
+    document.getElementById("whatsapp").value = "";
+
     removerImagem();
     document.getElementById("previewCard").innerHTML = "";
 
@@ -329,6 +344,7 @@ async function carregar(){
             ${p.imagem ? `<img src="${p.imagem}">` : ""}
             <p>${p.descricao}</p>
             💰 R$ ${p.preco}
+            📱 ${p.whatsapp || "Sem número"}
             ${p.raridade ? `<div class="raridade ${p.raridade}">${p.raridade.toUpperCase()}</div>` : ""}
 
             <button class="delBtn" onclick="del('${p.id}')">🗑 Excluir</button>
@@ -342,7 +358,6 @@ async function carregar(){
 /* DELETE */
 async function del(id){
     await client.from("itens").delete().eq("id",id);
-    log("🗑 deletado");
     carregar();
 }
 
@@ -361,4 +376,4 @@ carregar();
 </script>
 
 </body>
-</html>
+    </html>
