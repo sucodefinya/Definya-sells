@@ -6,6 +6,11 @@
 <title>Admin Itens</title>
 
 <style>
+:root{
+    --main:#ff2a2a;
+    --soft:rgba(255,0,0,0.3);
+}
+
 body{
     margin:0;
     font-family:Arial;
@@ -50,7 +55,7 @@ button{
 }
 
 .back{
-    background:#00ffff;
+    background:var(--main);
     color:#000;
 }
 
@@ -60,10 +65,11 @@ button{
 }
 
 .add{
-    background:#22c55e;
+    background:var(--main);
     width:100%;
     font-weight:bold;
     margin-top:10px;
+    box-shadow:0 0 10px var(--soft);
 }
 
 .card{
@@ -92,17 +98,21 @@ img{
     color:#fff;
 }
 
+/* 🔴 LOGS NEON */
 #logs{
     margin-top:15px;
-    background:#000;
+    background:#050000;
     padding:10px;
     font-family:monospace;
     font-size:12px;
     height:150px;
     overflow:auto;
     border-radius:10px;
+    border:1px solid var(--main);
+    box-shadow:0 0 10px var(--soft);
 }
 
+/* RARIDADE */
 .raridade{
     margin-top:5px;
     font-weight:bold;
@@ -155,13 +165,15 @@ img{
     <h3>👀 Preview</h3>
     <div id="previewCard" class="card"></div>
 
-    <button class="add" onclick="publicar()">PUBLICAR ITEM</button>
+    <!-- 🔴 LOGS AQUI -->
+    <h3>📜 Logs</h3>
+    <div id="logs"></div>
 
+    <!-- 📦 ITENS -->
     <h3>📦 Itens</h3>
     <div id="lista"></div>
 
-    <h3>📜 Logs</h3>
-    <div id="logs"></div>
+    <button class="add" onclick="publicar()">PUBLICAR ITEM</button>
 
 </div>
 
@@ -175,18 +187,13 @@ const client = supabase.createClient(
 
 let imagemFile = null;
 
-/* 🔥 FORMATAR WHATSAPP */
+/* FORMATAR WHATSAPP */
 function formatarNumero(num){
     if(!num) return "";
-
-    // remove tudo que não for número
     num = num.replace(/\D/g, "");
-
-    // adiciona 55 se não tiver
     if(!num.startsWith("55")){
         num = "55" + num;
     }
-
     return num;
 }
 
@@ -197,6 +204,8 @@ function log(msg){
     el.innerHTML += `[${t}] ${msg}<br>`;
     el.scrollTop = el.scrollHeight;
 }
+
+log("📄 Admin carregado");
 
 /* PREVIEW */
 function atualizarPreview(){
@@ -248,6 +257,7 @@ document.getElementById("imagemInput").addEventListener("change",(e)=>{
     };
 
     reader.readAsDataURL(imagemFile);
+    log("🖼️ imagem selecionada");
     atualizarPreview();
 });
 
@@ -295,6 +305,8 @@ async function publicar(){
         alert("Escolha a raridade!");
         return;
     }
+
+    log("🚀 publicando item...");
 
     const img = await uploadImagem();
 
@@ -358,6 +370,7 @@ async function carregar(){
 /* DELETE */
 async function del(id){
     await client.from("itens").delete().eq("id",id);
+    log("🗑 deletado");
     carregar();
 }
 
@@ -376,4 +389,4 @@ carregar();
 </script>
 
 </body>
-    </html>
+</html>
