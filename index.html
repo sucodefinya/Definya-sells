@@ -14,55 +14,30 @@ body{
     overflow-x:hidden;
 }
 
-/* 🔴 FUNDO ANIMADO */
-.particle{
+/* 🔥 PARTICULAS FUNDO */
+#bgParticles{
     position:fixed;
-    width:2px;
-    height:2px;
-    background:#ff2a2a;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    z-index:-1;
+    pointer-events:none;
+    overflow:hidden;
+}
+
+.bg-particle{
+    position:absolute;
     border-radius:50%;
-    opacity:0.4;
-    animation: floatUp linear infinite;
+    background: radial-gradient(circle, #ff2a2a, transparent);
+    opacity:0.25;
+    filter:blur(1px);
+    animation: floatUp linear forwards;
 }
 
 @keyframes floatUp{
     from{ transform:translateY(100vh); }
     to{ transform:translateY(-10vh); }
-}
-
-/* SPLASH */
-#splash{
-    position:fixed;
-    width:100%;
-    height:100vh;
-    background:#000;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    z-index:9999;
-}
-
-/* loading */
-.loading-bar{
-    width:220px;
-    height:4px;
-    background:#111;
-    margin-top:20px;
-    border-radius:10px;
-    overflow:hidden;
-}
-
-.loading-fill{
-    height:100%;
-    width:0%;
-    background:#ff2a2a;
-    box-shadow:0 0 10px #ff2a2a,0 0 20px #ff0000;
-}
-
-.loading-text{
-    margin-top:8px;
-    color:#ff2a2a;
 }
 
 /* layout */
@@ -72,7 +47,7 @@ body{
     padding:20px;
 }
 
-/* HEADER */
+/* header */
 .header{
     display:flex;
     justify-content:space-between;
@@ -83,7 +58,6 @@ body{
     max-width:260px;
 }
 
-/* botão */
 .admin-btn{
     padding:8px 14px;
     border:1px solid #ff2a2a;
@@ -134,18 +108,13 @@ h2{
     transform:translateY(-5px) scale(1.02);
 }
 
-/* 🔥 DESTAQUE */
+/* 🔥 DESTAQUE (SEM PULSAR) */
 .destaque{
     border-color:#ff3c00;
-    animation: glowPulse 2s infinite;
+    box-shadow:0 0 18px rgba(255,60,0,0.5);
 }
 
-@keyframes glowPulse{
-    0%{ box-shadow:0 0 10px rgba(255,60,0,0.4); }
-    50%{ box-shadow:0 0 25px rgba(255,120,0,0.8); }
-    100%{ box-shadow:0 0 10px rgba(255,60,0,0.4); }
-}
-
+/* badge */
 .badge{
     position:absolute;
     top:10px;
@@ -154,23 +123,15 @@ h2{
     border-radius:8px;
     font-size:12px;
     font-weight:bold;
+    background:#ff3c00;
+    color:#000;
 }
 
-.destaque .badge{
-    background:linear-gradient(45deg,#ff2a2a,#ff7a00);
-    box-shadow:0 0 10px #ff3c00;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse{
-    0%{ transform:scale(1); }
-    50%{ transform:scale(1.1); }
-    100%{ transform:scale(1); }
-}
-
+/* imagem */
 img{
     width:100%;
     border-radius:10px;
+    margin:10px 0;
 }
 
 /* preço */
@@ -186,7 +147,7 @@ img{
     width:22px;
 }
 
-/* botão comprar */
+/* botão */
 .buy-btn{
     display:block;
     margin-top:10px;
@@ -196,29 +157,20 @@ img{
     color:#ff2a2a;
     border-radius:10px;
     text-decoration:none;
-    box-shadow:0 0 10px rgba(255,0,0,0.4);
+    box-shadow:0 0 10px rgba(255,0,0,0.3);
 }
 
 .buy-btn:hover{
     background:#ff2a2a;
     color:#000;
-    box-shadow:0 0 20px #ff2a2a;
 }
 </style>
 </head>
 
 <body>
 
-<!-- SPLASH -->
-<div id="splash">
-    <img src="InShot_20260415_234327721.png" width="300">
-
-    <div class="loading-bar">
-        <div class="loading-fill" id="fill"></div>
-    </div>
-
-    <div class="loading-text" id="text">0%</div>
-</div>
+<!-- PARTICULAS -->
+<div id="bgParticles"></div>
 
 <div class="container">
 
@@ -229,7 +181,7 @@ img{
 
     <a class="btn" href="catalogo">📦 CATÁLOGO</a>
 
-    <h2>🔥 MAIS PROCURADOS</h2>
+    <h2>🔥 OS MAIS PROCURADOS</h2>
     <div id="destaques"></div>
 
 </div>
@@ -243,57 +195,30 @@ const client = supabase.createClient(
 );
 
 /* partículas fundo */
+const bg = document.getElementById("bgParticles");
+
 setInterval(()=>{
     const p = document.createElement("div");
-    p.classList.add("particle");
+    p.classList.add("bg-particle");
 
-    let size = Math.random()*3+1;
+    let size = Math.random()*4 + 2;
+
     p.style.width = size+"px";
     p.style.height = size+"px";
     p.style.left = Math.random()*100+"vw";
-    p.style.animationDuration = (5+Math.random()*5)+"s";
+    p.style.animationDuration = (6 + Math.random()*6)+"s";
 
-    document.body.appendChild(p);
-    setTimeout(()=>p.remove(),10000);
-},200);
+    bg.appendChild(p);
 
-/* formatar numero */
-function formatarNumero(num){
-    if(!num) return "5599999999999";
-    num = num.replace(/\D/g,"");
-    if(!num.startsWith("55")) num = "55"+num;
-    return num;
-}
+    setTimeout(()=>p.remove(),12000);
 
-/* loading */
-let progress = 0;
-const fill = document.getElementById("fill");
-const text = document.getElementById("text");
-const splash = document.getElementById("splash");
+}, 300);
 
-const loading = setInterval(()=>{
-    progress += Math.random()*10;
-
-    if(progress >= 100){
-        progress = 100;
-        clearInterval(loading);
-
-        setTimeout(()=>{
-            splash.style.opacity="0";
-            splash.style.transition="0.5s";
-            setTimeout(()=>splash.remove(),500);
-        },300);
-    }
-
-    fill.style.width = progress+"%";
-    text.innerText = Math.floor(progress)+"%";
-},120);
-
-/* observer animação */
+/* animação entrada */
 function animar(){
     const cards = document.querySelectorAll(".card");
 
-    const obs = new IntersectionObserver(entries=>{
+    const observer = new IntersectionObserver(entries=>{
         entries.forEach(e=>{
             if(e.isIntersecting){
                 e.target.classList.add("show");
@@ -301,12 +226,11 @@ function animar(){
         });
     });
 
-    cards.forEach(c=>obs.observe(c));
+    cards.forEach(c=>observer.observe(c));
 }
 
-/* carregar */
-async function carregar(){
-
+/* carregar destaques */
+async function carregarDestaques(){
     const { data } = await client
         .from("produtos")
         .select("*")
@@ -315,11 +239,7 @@ async function carregar(){
 
     const box = document.getElementById("destaques");
 
-    box.innerHTML = data.map(item=>{
-
-        const numero = formatarNumero(item.whatsapp);
-
-        return `
+    box.innerHTML = data.map(item=>`
         <div class="card destaque">
             <div class="badge">DESTAQUE</div>
 
@@ -334,17 +254,16 @@ async function carregar(){
                 R$ ${parseFloat(item.preco).toFixed(2)}
             </div>
 
-            <a class="buy-btn" href="https://wa.me/${numero}" target="_blank">
+            <a class="buy-btn" href="https://wa.me/${item.whatsapp}" target="_blank">
                 🛒 Comprar
             </a>
         </div>
-        `;
-    }).join("");
+    `).join("");
 
     animar();
 }
 
-carregar();
+carregarDestaques();
 </script>
 
 </body>
