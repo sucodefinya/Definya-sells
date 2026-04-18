@@ -17,13 +17,10 @@ body{
 /* 🔥 PARTICULAS FUNDO */
 #bgParticles{
     position:fixed;
-    top:0;
-    left:0;
     width:100%;
     height:100%;
     z-index:-1;
     pointer-events:none;
-    overflow:hidden;
 }
 
 .bg-particle{
@@ -31,7 +28,6 @@ body{
     border-radius:50%;
     background: radial-gradient(circle, #ff2a2a, transparent);
     opacity:0.25;
-    filter:blur(1px);
     animation: floatUp linear forwards;
 }
 
@@ -108,7 +104,7 @@ h2{
     transform:translateY(-5px) scale(1.02);
 }
 
-/* 🔥 DESTAQUE (SEM PULSAR) */
+/* 🔥 destaque */
 .destaque{
     border-color:#ff3c00;
     box-shadow:0 0 18px rgba(255,60,0,0.5);
@@ -169,7 +165,6 @@ img{
 
 <body>
 
-<!-- PARTICULAS -->
 <div id="bgParticles"></div>
 
 <div class="container">
@@ -194,7 +189,15 @@ const client = supabase.createClient(
   "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-/* partículas fundo */
+/* formatar numero */
+function formatarNumero(num){
+    if(!num) return "5599999999999";
+    num = num.replace(/\D/g,"");
+    if(!num.startsWith("55")) num = "55"+num;
+    return num;
+}
+
+/* partículas */
 const bg = document.getElementById("bgParticles");
 
 setInterval(()=>{
@@ -211,10 +214,9 @@ setInterval(()=>{
     bg.appendChild(p);
 
     setTimeout(()=>p.remove(),12000);
-
 }, 300);
 
-/* animação entrada */
+/* animação */
 function animar(){
     const cards = document.querySelectorAll(".card");
 
@@ -229,17 +231,33 @@ function animar(){
     cards.forEach(c=>observer.observe(c));
 }
 
-/* carregar destaques */
+/* 🔥 CARREGAR DAS DUAS TABELAS */
 async function carregarDestaques(){
-    const { data } = await client
-        .from("produtos")
-        .select("*")
-        .eq("destaque", true)
-        .limit(3);
+
+    const [itensRes, produtosRes] = await Promise.all([
+        client.from("itens").select("*").eq("destaque", true),
+        client.from("produtos").select("*").eq("destaque", true)
+    ]);
+
+    const itens = itensRes.data || [];
+    const produtos = produtosRes.data || [];
+
+    const todos = [...itens, ...produtos];
 
     const box = document.getElementById("destaques");
 
-    box.innerHTML = data.map(item=>`
+    if(todos.length === 0){
+        box.innerHTML = "<p>Nenhum destaque</p>";
+        return;
+    }
+
+    box.innerHTML = todos.map(item=>{
+
+        const numero = formatarNumero(item.whatsapp);
+
+        const link = `https://wa.me/${numero}?text=${encodeURIComponent("Olá! Quero comprar: " + item.nome)}`;
+
+        return `
         <div class="card destaque">
             <div class="badge">DESTAQUE</div>
 
@@ -247,18 +265,19 @@ async function carregarDestaques(){
 
             ${item.imagem ? `<img src="${item.imagem}">` : ""}
 
-            <p>${item.descricao}</p>
+            <p>${item.descricao || ""}</p>
 
             <div class="price">
                 <img src="/price.png">
-                R$ ${parseFloat(item.preco).toFixed(2)}
+                R$ ${parseFloat(item.preco || 0).toFixed(2)}
             </div>
 
-            <a class="buy-btn" href="https://wa.me/${item.whatsapp}" target="_blank">
+            <a class="buy-btn" href="${link}" target="_blank">
                 🛒 Comprar
             </a>
         </div>
-    `).join("");
+        `;
+    }).join("");
 
     animar();
 }
