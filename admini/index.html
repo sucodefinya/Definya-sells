@@ -32,7 +32,7 @@ body{
     padding:20px;
 }
 
-input, textarea{
+input, textarea, select{
     width:100%;
     padding:12px;
     margin:6px 0;
@@ -106,6 +106,18 @@ img{
     overflow:auto;
     border-radius:10px;
 }
+
+/* raridade cores */
+.raridade{
+    margin-top:5px;
+    font-weight:bold;
+}
+
+.comum{color:#9ca3af;}
+.incomum{color:#22c55e;}
+.raro{color:#3b82f6;}
+.epico{color:#a855f7;}
+.lendario{color:#facc15;}
 </style>
 </head>
 
@@ -127,6 +139,16 @@ img{
     <input id="nome" placeholder="Nome do item">
     <textarea id="descricao" placeholder="Descrição"></textarea>
     <input id="preco" placeholder="Preço">
+
+    <!-- 🔥 RARIDADE -->
+    <select id="raridade">
+        <option value="">Escolher raridade</option>
+        <option value="comum">Comum</option>
+        <option value="incomum">Incomum</option>
+        <option value="raro">Raro</option>
+        <option value="epico">Épico</option>
+        <option value="lendario">Lendário</option>
+    </select>
 
     <input type="file" id="imagemInput">
 
@@ -155,6 +177,7 @@ const client = supabase.createClient(
 
 let imagemFile = null;
 
+/* LOG */
 function log(msg){
     const el = document.getElementById("logs");
     const t = new Date().toLocaleTimeString();
@@ -169,6 +192,7 @@ function atualizarPreview(){
     const nome = document.getElementById("nome").value || "Nome do item";
     const descricao = document.getElementById("descricao").value || "Descrição...";
     const preco = document.getElementById("preco").value || "0.00";
+    const raridade = document.getElementById("raridade").value;
 
     let imgHTML = "";
 
@@ -182,10 +206,11 @@ function atualizarPreview(){
         ${imgHTML}
         <p>${descricao}</p>
         💰 R$ ${preco}
+        ${raridade ? `<div class="raridade ${raridade}">${raridade.toUpperCase()}</div>` : ""}
     `;
 }
 
-["nome","descricao","preco"].forEach(id=>{
+["nome","descricao","preco","raridade"].forEach(id=>{
     document.getElementById(id).addEventListener("input", atualizarPreview);
 });
 
@@ -251,16 +276,22 @@ async function uploadImagem(){
 /* PUBLICAR */
 async function publicar(){
 
-    log("🚀 publicando item...");
-
     const nome = document.getElementById("nome").value;
     const descricao = document.getElementById("descricao").value;
     const preco = document.getElementById("preco").value;
+    const raridade = document.getElementById("raridade").value;
+
+    if(!raridade){
+        alert("Escolha a raridade do item!");
+        return;
+    }
+
+    log("🚀 publicando item...");
 
     const img = await uploadImagem();
 
     const { error } = await client.from("itens").insert([{
-        nome, descricao, preco, imagem: img
+        nome, descricao, preco, imagem: img, raridade
     }]);
 
     if(error){
@@ -273,6 +304,7 @@ async function publicar(){
     document.getElementById("nome").value = "";
     document.getElementById("descricao").value = "";
     document.getElementById("preco").value = "";
+    document.getElementById("raridade").value = "";
     removerImagem();
     document.getElementById("previewCard").innerHTML = "";
 
@@ -297,6 +329,7 @@ async function carregar(){
             ${p.imagem ? `<img src="${p.imagem}">` : ""}
             <p>${p.descricao}</p>
             💰 R$ ${p.preco}
+            ${p.raridade ? `<div class="raridade ${p.raridade}">${p.raridade.toUpperCase()}</div>` : ""}
 
             <button class="delBtn" onclick="del('${p.id}')">🗑 Excluir</button>
         </div>
@@ -328,4 +361,4 @@ carregar();
 </script>
 
 </body>
-  </html>
+</html>
