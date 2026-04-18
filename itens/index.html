@@ -73,31 +73,39 @@ select{
     overflow:hidden;
 }
 
-/* CORES RARIDADE */
+/* RARIDADE */
 .comum{ border-color:#6b7280; }
 .incomum{ border-color:#22c55e; }
 .raro{ border-color:#3b82f6; }
 .epico{ border-color:#a855f7; }
+
+/* 🔥 LENDARIO MELHORADO */
 .lendario{
     border-color:#facc15;
-    box-shadow:0 0 20px rgba(250,204,21,0.4);
+    box-shadow:0 0 25px rgba(250,204,21,0.5);
 }
 
-/* PARTICULAS LENDARIO */
-.lendario::after{
-    content:"";
+/* ✨ FAÍSCAS */
+.spark{
     position:absolute;
-    width:100%;
-    height:100%;
-    background:radial-gradient(circle, rgba(255,215,0,0.2) 2px, transparent 2px);
-    background-size:20px 20px;
-    animation: sparkle 3s linear infinite;
+    width:4px;
+    height:4px;
+    background:#facc15;
+    border-radius:50%;
+    box-shadow:0 0 8px #facc15;
     pointer-events:none;
+    animation: subir 3s linear forwards;
 }
 
-@keyframes sparkle{
-    from{ background-position:0 0; }
-    to{ background-position:50px 50px; }
+@keyframes subir{
+    from{
+        transform:translateY(0);
+        opacity:1;
+    }
+    to{
+        transform:translateY(-120px);
+        opacity:0;
+    }
 }
 
 .card img{
@@ -170,7 +178,6 @@ select{
     <a href="/catalogo" class="back">⬅ Voltar</a>
 </div>
 
-<!-- FILTRO -->
 <div class="filter">
     <select id="filtro" onchange="carregar()">
         <option value="">Todas raridades</option>
@@ -194,9 +201,34 @@ const client = supabase.createClient(
   "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-const WHATSAPP_PADRAO = "5599999999999";
+/* FORMATAR NUMERO */
+function formatarNumero(num){
+    if(!num) return "";
+    num = num.replace(/\D/g,"");
+    if(!num.startsWith("55")){
+        num = "55"+num;
+    }
+    return num;
+}
 
-/* carregar */
+/* PARTICULAS LENDARIO */
+function gerarSpark(card){
+
+    setInterval(()=>{
+        const p = document.createElement("div");
+        p.classList.add("spark");
+
+        p.style.left = Math.random()*100 + "%";
+        p.style.bottom = "0px";
+
+        card.appendChild(p);
+
+        setTimeout(()=>p.remove(),3000);
+
+    },500);
+}
+
+/* CARREGAR */
 async function carregar(){
 
     const filtro = document.getElementById("filtro").value;
@@ -225,15 +257,20 @@ async function carregar(){
     data.forEach(item=>{
 
         const raridade = item.raridade || "comum";
+        const numero = formatarNumero(item.whatsapp);
 
         const msg = encodeURIComponent(
             "Olá! Quero comprar: " + item.nome
         );
 
-        const link = `https://wa.me/${WHATSAPP_PADRAO}?text=${msg}`;
+        const link = numero
+            ? `https://wa.me/${numero}?text=${msg}`
+            : "#";
+
+        const id = "card-"+item.id;
 
         lista.innerHTML += `
-        <div class="card ${raridade}">
+        <div class="card ${raridade}" id="${id}">
             <div class="badge">${raridade}</div>
 
             ${item.imagem ? `<img src="${item.imagem}">` : ""}
@@ -247,6 +284,13 @@ async function carregar(){
             </a>
         </div>
         `;
+
+        if(raridade === "lendario"){
+            setTimeout(()=>{
+                gerarSpark(document.getElementById(id));
+            },100);
+        }
+
     });
 }
 
