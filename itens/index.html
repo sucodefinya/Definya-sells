@@ -3,222 +3,181 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Itens - Loja</title>
+<title>Admin Itens</title>
 
 <style>
 :root{
-    --bg:#000;
-    --card:#0a0a0f;
-    --text:#e5e7eb;
+    --main:#ff2a2a;
+    --bg:#05060a;
+    --card:#0b1220;
+    --soft:rgba(255,0,0,0.25);
 }
 
 body{
     margin:0;
     font-family:Arial;
     background:var(--bg);
-    color:var(--text);
+    color:#e2e8f0;
 }
 
-/* HEADER */
-.header{
+/* TOPO */
+.topbar{
     display:flex;
     justify-content:space-between;
-    align-items:center;
-    padding:15px 20px;
-    background:#0a0a0f;
+    padding:15px;
+    background:#0b1220;
 }
 
-.back{
-    border:1px solid #ff2a2a;
-    color:#ff2a2a;
-    padding:6px 12px;
-    border-radius:10px;
-    text-decoration:none;
-}
-
-/* FILTRO */
-.filter{
-    padding:10px 20px;
-}
-
-select{
-    width:100%;
-    padding:10px;
-    border-radius:10px;
-    background:#111827;
-    color:#fff;
-    border:none;
-}
-
-/* GRID */
+/* CONTAINER */
 .container{
-    max-width:1000px;
+    max-width:900px;
     margin:auto;
     padding:20px;
 }
 
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-    gap:15px;
+/* INPUTS */
+input, textarea, select{
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    background:#111827;
+    border:none;
+    color:#fff;
+    border-radius:10px;
+}
+
+/* BOTÕES */
+button{
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.back{
+    background:var(--main);
+    color:#000;
+}
+
+.logout{
+    background:#ef4444;
+    color:#fff;
+}
+
+.add{
+    width:100%;
+    margin-top:15px;
+    background:transparent;
+    border:1px solid var(--main);
+    color:var(--main);
+    box-shadow:0 0 10px var(--soft);
+    font-weight:bold;
+}
+
+.add:hover{
+    background:var(--main);
+    color:#000;
 }
 
 /* CARD */
 .card{
-    position:relative;
     background:var(--card);
-    border-radius:12px;
-    padding:15px;
-    border:1px solid rgba(255,255,255,0.05);
-    overflow:hidden;
-    transition:0.25s;
+    padding:12px;
+    margin-top:12px;
+    border-radius:10px;
 }
 
-.card:hover{
-    transform:translateY(-5px) scale(1.02);
+/* LOG */
+#logs{
+    margin-top:15px;
+    background:#030303;
+    padding:10px;
+    font-family:monospace;
+    font-size:12px;
+    height:150px;
+    overflow:auto;
+    border-radius:10px;
+}
+
+/* DELETE */
+.delBtn{
+    background:#ef4444;
+    color:#fff;
+    margin-top:10px;
 }
 
 /* RARIDADE */
-.comum{ border-color:#6b7280; }
-.incomum{ border-color:#22c55e; }
-.raro{ border-color:#3b82f6; }
-.epico{ border-color:#a855f7; }
-
-.lendario{
-    border-color:#facc15;
-    box-shadow:0 0 18px rgba(250,204,21,0.35);
-}
-
-/* ✨ PARTICULAS LENDARIO */
-.lendario::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:
-        radial-gradient(circle at 25% 30%, rgba(255,215,0,0.7) 1px, transparent 2px),
-        radial-gradient(circle at 75% 60%, rgba(255,255,200,0.6) 1px, transparent 2px),
-        radial-gradient(circle at 50% 80%, rgba(255,215,0,0.5) 1px, transparent 2px);
-    animation: sparkle 3s linear infinite;
-    opacity:0.5;
-    pointer-events:none;
-}
-
-@keyframes sparkle{
-    0%{ transform:translateY(0); }
-    100%{ transform:translateY(-15px); }
-}
-
-.card img{
-    width:100%;
-    border-radius:10px;
-}
-
-/* TEXT */
-.nome{
-    font-weight:bold;
+.raridade{
     margin-top:5px;
-}
-
-.desc{
-    font-size:14px;
-    color:#9ca3af;
-}
-
-/* BADGE */
-.badge{
-    position:absolute;
-    top:10px;
-    right:10px;
-    padding:4px 8px;
-    border-radius:6px;
-    font-size:12px;
     font-weight:bold;
-    text-transform:uppercase;
 }
 
-.comum .badge{ background:#6b7280; }
-.incomum .badge{ background:#22c55e; }
-.raro .badge{ background:#3b82f6; }
-.epico .badge{ background:#a855f7; }
-.lendario .badge{ background:#facc15; color:#000; }
-
-/* 💸 PREÇO COM IMAGEM */
-.price{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    color:#00ff88;
-    font-weight:bold;
-    margin-top:5px;
-}
-
-.price img{
-    width:24px;
-    height:24px;
-    filter: drop-shadow(0 0 8px rgba(0,255,150,0.9));
-}
-
-/* BOTÃO */
-.buy{
-    display:block;
-    margin-top:10px;
-    padding:10px;
-    text-align:center;
-    border-radius:10px;
-    border:1px solid #ff2a2a;
-    color:#ff2a2a;
-    text-decoration:none;
-    box-shadow:0 0 10px rgba(255,0,0,0.3);
-}
-
-.buy:hover{
-    background:#ff2a2a;
-    color:#000;
-    box-shadow:0 0 20px #ff2a2a;
-}
-
-.empty{
-    text-align:center;
-    margin-top:40px;
-}
+.comum{color:#9ca3af;}
+.incomum{color:#22c55e;}
+.raro{color:#3b82f6;}
+.epico{color:#a855f7;}
+.lendario{color:#facc15;}
 </style>
 </head>
 
 <body>
 
-<div class="header">
-    <h2>📦 ITENS</h2>
-    <a href="/catalogo" class="back">⬅ Voltar</a>
-</div>
-
-<div class="filter">
-    <select id="filtro" onchange="carregar()">
-        <option value="">Todas raridades</option>
-        <option value="comum">Comum</option>
-        <option value="incomum">Incomum</option>
-        <option value="raro">Raro</option>
-        <option value="epico">Épico</option>
-        <option value="lendario">Lendário</option>
-    </select>
+<div class="topbar">
+    <h3>📦 Admin Itens</h3>
+    <div>
+        <button class="back" onclick="goAdmin()">Admin</button>
+        <button class="logout" onclick="logout()">Sair</button>
+    </div>
 </div>
 
 <div class="container">
-    <div class="grid" id="lista"></div>
+
+<h3>➕ Adicionar Item</h3>
+
+<input id="nome" placeholder="Nome do item">
+<textarea id="descricao" placeholder="Descrição"></textarea>
+<input id="preco" placeholder="Preço">
+
+<!-- 🔥 INPUT SÓ NÚMERO -->
+<input id="whatsapp" placeholder="WhatsApp (11999999999)" 
+       inputmode="numeric" pattern="[0-9]*" maxlength="13">
+
+<select id="raridade">
+<option value="">Escolher raridade</option>
+<option value="comum">Comum</option>
+<option value="incomum">Incomum</option>
+<option value="raro">Raro</option>
+<option value="epico">Épico</option>
+<option value="lendario">Lendário</option>
+</select>
+
+<button class="add" onclick="publicar()">PUBLICAR ITEM</button>
+
+<h3>📜 Logs</h3>
+<div id="logs"></div>
+
+<h3>📦 Itens</h3>
+<div id="lista"></div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 const client = supabase.createClient(
-  "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
+"https://dbqleycdrkdhxrozsmup.supabase.co",
+"sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-const WHATSAPP_PADRAO = "5599999999999";
+/* 🔥 BLOQUEAR LETRAS NO INPUT */
+document.getElementById("whatsapp").addEventListener("input", function(){
+    this.value = this.value.replace(/\D/g,"");
+});
 
-/* FORMATAR NÚMERO */
-function formatarNumero(num){
-    if(!num) return WHATSAPP_PADRAO;
+/* VALIDAR */
+function validarWhatsapp(num){
+
+    if(!num) return null;
 
     num = num.replace(/\D/g,"");
 
@@ -226,70 +185,109 @@ function formatarNumero(num){
         num = "55" + num;
     }
 
+    if(num.length < 12 || num.length > 13){
+        return null;
+    }
+
     return num;
 }
 
-/* carregar */
-async function carregar(){
+/* LOG */
+function log(msg){
+    const el = document.getElementById("logs");
+    const t = new Date().toLocaleTimeString();
+    el.innerHTML += `[${t}] ${msg}<br>`;
+    el.scrollTop = el.scrollHeight;
+}
 
-    const filtro = document.getElementById("filtro").value;
+/* PUBLICAR */
+async function publicar(){
 
-    let query = client.from("itens").select("*");
+    const nome = document.getElementById("nome").value;
+    const descricao = document.getElementById("descricao").value;
+    const preco = document.getElementById("preco").value;
 
-    if(filtro){
-        query = query.eq("raridade", filtro);
+    const whatsappInput = document.getElementById("whatsapp").value;
+    const whatsapp = validarWhatsapp(whatsappInput);
+
+    const raridade = document.getElementById("raridade").value;
+
+    if(!nome || !preco){
+        alert("Preenche nome e preço");
+        return;
     }
 
-    const { data, error } = await query.order("id",{ascending:false});
+    if(!raridade){
+        alert("Escolhe a raridade");
+        return;
+    }
+
+    if(!whatsapp){
+        alert("Número inválido");
+        return;
+    }
+
+    const { error } = await client.from("itens").insert([{
+        nome, descricao, preco, raridade, whatsapp
+    }]);
+
+    if(error){
+        log("❌ erro: "+error.message);
+        return;
+    }
+
+    log("✅ item publicado");
+
+    document.getElementById("nome").value = "";
+    document.getElementById("descricao").value = "";
+    document.getElementById("preco").value = "";
+    document.getElementById("whatsapp").value = "";
+
+    carregar();
+}
+
+/* CARREGAR */
+async function carregar(){
+
+    const { data } = await client.from("itens").select("*");
 
     const lista = document.getElementById("lista");
     lista.innerHTML = "";
 
-    if(error){
-        lista.innerHTML = "<p class='empty'>Erro</p>";
-        return;
-    }
-
-    if(!data || data.length === 0){
-        lista.innerHTML = "<p class='empty'>Nenhum item</p>";
-        return;
-    }
-
-    data.forEach(item=>{
-
-        const raridade = item.raridade || "comum";
-        const numero = formatarNumero(item.whatsapp);
-
-        const msg = encodeURIComponent(
-            "Olá! Quero comprar: " + item.nome
-        );
-
-        const link = `https://wa.me/${numero}?text=${msg}`;
-
+    data.forEach(p=>{
         lista.innerHTML += `
-        <div class="card ${raridade}">
-            <div class="badge">${raridade}</div>
+        <div class="card">
+            <b>${p.nome}</b>
+            <p>${p.descricao}</p>
+            💰 ${p.preco}
+            <div class="raridade ${p.raridade}">${p.raridade}</div>
 
-            ${item.imagem ? `<img src="${item.imagem}">` : ""}
-
-            <div class="nome">${item.nome}</div>
-            <div class="desc">${item.descricao || ""}</div>
-
-            <div class="price">
-                <img src="/price.png">
-                R$ ${item.preco}
-            </div>
-
-            <a href="${link}" target="_blank" class="buy">
-                🛒 Comprar
-            </a>
+            <button class="delBtn" onclick="del('${p.id}')">
+                Excluir
+            </button>
         </div>
         `;
     });
+}
+
+/* DELETE */
+async function del(id){
+    await client.from("itens").delete().eq("id",id);
+    carregar();
+}
+
+/* NAV */
+function goAdmin(){
+    window.location.href="/admin";
+}
+
+async function logout(){
+    await client.auth.signOut();
+    window.location.href="/index.html";
 }
 
 carregar();
 </script>
 
 </body>
-</html>
+    </html>
