@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Links</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#05060a;
+    color:#e2e8f0;
+}
+
+/* TOPO */
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    padding:15px;
+    background:#0b1220;
+}
+
+.top-actions{
+    display:flex;
+    gap:10px;
+}
+
+button{
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.goAdmin{ background:#00ffff; color:#000; }
+.goItens{ background:#22c55e; color:#000; }
+.logout{ background:#ef4444; color:#fff; }
+
+/* CONTAINER */
+.container{
+    max-width:700px;
+    margin:auto;
+    padding:20px;
+}
+
+/* INPUTS */
+input, select{
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    background:#111827;
+    border:none;
+    color:#fff;
+    border-radius:10px;
+}
+
+/* BOTÃO */
+.save{
+    width:100%;
+    margin-top:10px;
+    background:#ff2a2a;
+    color:#000;
+    font-weight:bold;
+}
+
+/* CARD */
+.card{
+    background:#0b1220;
+    padding:12px;
+    margin-top:12px;
+    border-radius:10px;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+}
+
+.del{ background:#ef4444; color:#fff; }
+.edit{ background:#facc15; color:#000; }
+
+/* LOG */
+#logs{
+    margin-top:15px;
+    background:#000;
+    padding:10px;
+    height:120px;
+    overflow:auto;
+    border-radius:10px;
+    font-size:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <h3>🔗 Admin Links</h3>
+
+    <div class="top-actions">
+        <button class="goAdmin" onclick="goAdmin()">Admin</button>
+        <button class="goItens" onclick="goItens()">Itens</button>
+        <button class="logout" onclick="logout()">Sair</button>
+    </div>
+</div>
+
+<div class="container">
+
+<h3>➕ Adicionar / Editar Link</h3>
+
+<select id="tipo">
+    <option value="">Escolher tipo</option>
+    <option value="youtube">YouTube</option>
+    <option value="coinhub">CoinHub</option>
+</select>
+
+<input id="url" placeholder="https://...">
+
+<button class="save" onclick="salvar()">SALVAR LINK</button>
+
+<h3>🔗 Links salvos</h3>
+<div id="lista"></div>
+
+<h3>📜 Logs</h3>
+<div id="logs"></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const client = supabase.createClient(
+  "https://dbqleycdrkdhxrozsmup.supabase.co",
+  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
+);
+
+let editId = null;
+
+/* LOG */
+function log(msg){
+    const el = document.getElementById("logs");
+    const t = new Date().toLocaleTimeString();
+    el.innerHTML += `[${t}] ${msg}<br>`;
+    el.scrollTop = el.scrollHeight;
+}
+
+/* SALVAR */
+async function salvar(){
+
+    const tipo = document.getElementById("tipo").value;
+    const url = document.getElementById("url").value;
+
+    if(!tipo || !url){
+        alert("Preenche tudo");
+        return;
+    }
+
+    if(editId){
+        await client.from("links")
+        .update({ tipo, url })
+        .eq("id", editId);
+
+        log("✏️ link atualizado");
+        editId = null;
+
+    }else{
+
+        await client.from("links")
+        .insert([{ tipo, url }]);
+
+        log("✅ link criado");
+    }
+
+    document.getElementById("tipo").value = "";
+    document.getElementById("url").value = "";
+
+    carregar();
+}
+
+/* CARREGAR */
+async function carregar(){
+
+    const { data } = await client
+        .from("links")
+        .select("*");
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    data.forEach(l=>{
+        lista.innerHTML += `
+        <div class="card">
+            <b>${l.tipo.toUpperCase()}</b>
+            <p>${l.url}</p>
+
+            <div class="actions">
+                <button class="edit" onclick="editar('${l.id}','${l.tipo}','${l.url}')">
+                    ✏️ Editar
+                </button>
+                <button class="del" onclick="del('${l.id}')">
+                    🗑 Excluir
+                </button>
+            </div>
+        </div>
+        `;
+    });
+
+    log("🔗 carregados: " + data.length);
+}
+
+/* EDITAR */
+function editar(id, tipo, url){
+    document.getElementById("tipo").value = tipo;
+    document.getElementById("url").value = url;
+
+    editId = id;
+}
+
+/* DELETE */
+async function del(id){
+    await client.from("links").delete().eq("id", id);
+    log("🗑 deletado");
+    carregar();
+}
+
+/* NAV */
+function goAdmin(){
+    window.location.href="/admin/";
+}
+
+function goItens(){
+    window.location.href="/admini";
+}
+
+async function logout(){
+    await client.auth.signOut();
+    window.location.href="/index.html";
+}
+
+carregar();
+</script>
+
+</body>
+  </html>
