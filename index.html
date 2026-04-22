@@ -14,7 +14,7 @@ body{
     overflow-x:hidden;
 }
 
-/* 🔥 PARTICULAS FUNDO */
+/* PARTICULAS */
 #bgParticles{
     position:fixed;
     width:100%;
@@ -75,36 +75,49 @@ body{
 }
 
 /* título */
-h2{
-    text-align:center;
-    margin-top:25px;
+.section{
+    margin-top:30px;
+}
+
+.section h2{
     color:#ff2a2a;
+    margin-bottom:10px;
+}
+
+/* SCROLL HORIZONTAL */
+.scroll{
+    display:flex;
+    gap:15px;
+    overflow-x:auto;
+    padding-bottom:10px;
+}
+
+.scroll::-webkit-scrollbar{
+    height:6px;
+}
+
+.scroll::-webkit-scrollbar-thumb{
+    background:#ff2a2a;
+    border-radius:10px;
 }
 
 /* CARD */
 .card{
+    min-width:240px;
+    max-width:240px;
     background:#0a0a0f;
-    padding:15px;
-    margin:15px 0;
+    padding:12px;
     border-radius:12px;
     border:1px solid rgba(255,255,255,0.06);
     position:relative;
-
-    opacity:0;
-    transform:translateY(40px);
-    transition:0.6s;
-}
-
-.card.show{
-    opacity:1;
-    transform:translateY(0);
+    flex-shrink:0;
 }
 
 .card:hover{
-    transform:translateY(-5px) scale(1.02);
+    transform:scale(1.03);
 }
 
-/* 🔥 destaque */
+/* destaque */
 .destaque{
     border-color:#ff3c00;
     box-shadow:0 0 18px rgba(255,60,0,0.5);
@@ -113,47 +126,45 @@ h2{
 /* badge */
 .badge{
     position:absolute;
-    top:10px;
-    right:10px;
-    padding:4px 10px;
-    border-radius:8px;
-    font-size:12px;
-    font-weight:bold;
+    top:8px;
+    right:8px;
+    padding:4px 8px;
+    border-radius:6px;
+    font-size:11px;
     background:#ff3c00;
     color:#000;
 }
 
-/* imagem */
+/* img */
 img{
     width:100%;
     border-radius:10px;
-    margin:10px 0;
+    margin:8px 0;
 }
 
 /* preço */
 .price{
     display:flex;
     align-items:center;
-    gap:6px;
+    gap:5px;
     color:#00ff88;
     font-weight:bold;
 }
 
 .price img{
-    width:22px;
+    width:18px;
 }
 
 /* botão */
 .buy-btn{
     display:block;
-    margin-top:10px;
-    padding:10px;
+    margin-top:8px;
+    padding:8px;
     text-align:center;
     border:1px solid #ff2a2a;
     color:#ff2a2a;
-    border-radius:10px;
+    border-radius:8px;
     text-decoration:none;
-    box-shadow:0 0 10px rgba(255,0,0,0.3);
 }
 
 .buy-btn:hover{
@@ -176,8 +187,17 @@ img{
 
     <a class="btn" href="catalogo">📦 CATÁLOGO</a>
 
-    <h2>🔥 OS MAIS PROCURADOS</h2>
-    <div id="destaques"></div>
+    <!-- CONTAS -->
+    <div id="contasSection" class="section" style="display:none;">
+        <h2>🔥 CONTAS EM DESTAQUE</h2>
+        <div id="contasBox" class="scroll"></div>
+    </div>
+
+    <!-- ITENS -->
+    <div id="itensSection" class="section" style="display:none;">
+        <h2>🔥 ITENS EM DESTAQUE</h2>
+        <div id="itensBox" class="scroll"></div>
+    </div>
 
 </div>
 
@@ -189,7 +209,7 @@ const client = supabase.createClient(
   "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-/* formatar numero */
+/* numero */
 function formatarNumero(num){
     if(!num) return "5599999999999";
     num = num.replace(/\D/g,"");
@@ -216,23 +236,36 @@ setInterval(()=>{
     setTimeout(()=>p.remove(),12000);
 }, 300);
 
-/* animação */
-function animar(){
-    const cards = document.querySelectorAll(".card");
+/* render card */
+function criarCard(item){
+    const numero = formatarNumero(item.whatsapp);
 
-    const observer = new IntersectionObserver(entries=>{
-        entries.forEach(e=>{
-            if(e.isIntersecting){
-                e.target.classList.add("show");
-            }
-        });
-    });
+    const link = `https://wa.me/${numero}?text=${encodeURIComponent("Olá! Quero comprar: " + item.nome)}`;
 
-    cards.forEach(c=>observer.observe(c));
+    return `
+    <div class="card destaque">
+        <div class="badge">DESTAQUE</div>
+
+        <h4 style="color:#ff2a2a">${item.nome}</h4>
+
+        ${item.imagem ? `<img src="${item.imagem}">` : ""}
+
+        <p style="font-size:13px;">${item.descricao || ""}</p>
+
+        <div class="price">
+            <img src="/price.png">
+            R$ ${parseFloat(item.preco || 0).toFixed(2)}
+        </div>
+
+        <a class="buy-btn" href="${link}" target="_blank">
+            🛒 Comprar
+        </a>
+    </div>
+    `;
 }
 
-/* 🔥 CARREGAR DAS DUAS TABELAS */
-async function carregarDestaques(){
+/* carregar */
+async function carregar(){
 
     const [itensRes, produtosRes] = await Promise.all([
         client.from("itens").select("*").eq("destaque", true),
@@ -242,47 +275,24 @@ async function carregarDestaques(){
     const itens = itensRes.data || [];
     const produtos = produtosRes.data || [];
 
-    const todos = [...itens, ...produtos];
+    // CONTAS
+    if(produtos.length > 0){
+        document.getElementById("contasSection").style.display = "block";
 
-    const box = document.getElementById("destaques");
-
-    if(todos.length === 0){
-        box.innerHTML = "<p>Nenhum destaque</p>";
-        return;
+        document.getElementById("contasBox").innerHTML =
+            produtos.map(criarCard).join("");
     }
 
-    box.innerHTML = todos.map(item=>{
+    // ITENS
+    if(itens.length > 0){
+        document.getElementById("itensSection").style.display = "block";
 
-        const numero = formatarNumero(item.whatsapp);
-
-        const link = `https://wa.me/${numero}?text=${encodeURIComponent("Olá! Quero comprar: " + item.nome)}`;
-
-        return `
-        <div class="card destaque">
-            <div class="badge">DESTAQUE</div>
-
-            <h3 style="color:#ff2a2a">${item.nome}</h3>
-
-            ${item.imagem ? `<img src="${item.imagem}">` : ""}
-
-            <p>${item.descricao || ""}</p>
-
-            <div class="price">
-                <img src="/price.png">
-                R$ ${parseFloat(item.preco || 0).toFixed(2)}
-            </div>
-
-            <a class="buy-btn" href="${link}" target="_blank">
-                🛒 Comprar
-            </a>
-        </div>
-        `;
-    }).join("");
-
-    animar();
+        document.getElementById("itensBox").innerHTML =
+            itens.map(criarCard).join("");
+    }
 }
 
-carregarDestaques();
+carregar();
 </script>
 
 </body>
