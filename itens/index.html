@@ -19,7 +19,6 @@ body{
     color:var(--text);
 }
 
-/* HEADER */
 .header{
     display:flex;
     justify-content:space-between;
@@ -36,7 +35,6 @@ body{
     text-decoration:none;
 }
 
-/* FILTRO */
 .filter{
     padding:10px 20px;
 }
@@ -50,7 +48,6 @@ select{
     border:none;
 }
 
-/* GRID */
 .container{
     max-width:1000px;
     margin:auto;
@@ -63,14 +60,12 @@ select{
     gap:15px;
 }
 
-/* CARD */
 .card{
     position:relative;
-    background:var(--card);
+    background:#0a0a0f;
     border-radius:12px;
     padding:15px;
     border:1px solid rgba(255,255,255,0.05);
-    overflow:hidden;
     transition:0.25s;
 }
 
@@ -83,48 +78,21 @@ select{
 .incomum{ border-color:#22c55e; }
 .raro{ border-color:#3b82f6; }
 .epico{ border-color:#a855f7; }
-
 .lendario{
     border-color:#facc15;
     box-shadow:0 0 18px rgba(250,204,21,0.35);
 }
 
-/* ✨ PARTICULAS LENDARIO */
-.lendario::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:
-        radial-gradient(circle at 25% 30%, rgba(255,215,0,0.7) 1px, transparent 2px),
-        radial-gradient(circle at 75% 60%, rgba(255,255,200,0.6) 1px, transparent 2px),
-        radial-gradient(circle at 50% 80%, rgba(255,215,0,0.5) 1px, transparent 2px);
-    animation: sparkle 3s linear infinite;
-    opacity:0.5;
-    pointer-events:none;
-}
-
-@keyframes sparkle{
-    0%{ transform:translateY(0); }
-    100%{ transform:translateY(-15px); }
-}
-
 .card img{
     width:100%;
+    height:140px;
+    object-fit:cover;
     border-radius:10px;
 }
 
-/* TEXT */
-.nome{
-    font-weight:bold;
-    margin-top:5px;
-}
+.nome{ font-weight:bold; margin-top:5px; }
+.desc{ font-size:14px; color:#9ca3af; }
 
-.desc{
-    font-size:14px;
-    color:#9ca3af;
-}
-
-/* BADGE */
 .badge{
     position:absolute;
     top:10px;
@@ -142,7 +110,6 @@ select{
 .epico .badge{ background:#a855f7; }
 .lendario .badge{ background:#facc15; color:#000; }
 
-/* 💸 PREÇO COM IMAGEM */
 .price{
     display:flex;
     align-items:center;
@@ -153,12 +120,10 @@ select{
 }
 
 .price img{
-    width:24px;
-    height:24px;
-    filter: drop-shadow(0 0 8px rgba(0,255,150,0.9));
+    width:20px;
+    height:20px;
 }
 
-/* BOTÃO */
 .buy{
     display:block;
     margin-top:10px;
@@ -168,13 +133,11 @@ select{
     border:1px solid #ff2a2a;
     color:#ff2a2a;
     text-decoration:none;
-    box-shadow:0 0 10px rgba(255,0,0,0.3);
 }
 
 .buy:hover{
     background:#ff2a2a;
     color:#000;
-    box-shadow:0 0 20px #ff2a2a;
 }
 
 .empty{
@@ -216,11 +179,11 @@ const client = supabase.createClient(
 
 const WHATSAPP_PADRAO = "5599999999999";
 
-/* FORMATAR NÚMERO */
+/* FORMATAR NÚMERO (AGORA FUNCIONA COM NUMBER TBM) */
 function formatarNumero(num){
     if(!num) return WHATSAPP_PADRAO;
 
-    num = num.replace(/\D/g,"");
+    num = String(num).replace(/\D/g,"");
 
     if(!num.startsWith("55")){
         num = "55" + num;
@@ -246,7 +209,7 @@ async function carregar(){
     lista.innerHTML = "";
 
     if(error){
-        lista.innerHTML = "<p class='empty'>Erro</p>";
+        lista.innerHTML = "<p class='empty'>Erro ao carregar</p>";
         return;
     }
 
@@ -261,23 +224,25 @@ async function carregar(){
         const numero = formatarNumero(item.whatsapp);
 
         const msg = encodeURIComponent(
-            "Olá! Quero comprar: " + item.nome
+            `Olá! Quero comprar: ${item.nome}`
         );
 
         const link = `https://wa.me/${numero}?text=${msg}`;
+
+        const img = item.imagem ? item.imagem : "default.png";
 
         lista.innerHTML += `
         <div class="card ${raridade}">
             <div class="badge">${raridade}</div>
 
-            ${item.imagem ? `<img src="${item.imagem}">` : ""}
+            <img src="${img}">
 
             <div class="nome">${item.nome}</div>
             <div class="desc">${item.descricao || ""}</div>
 
             <div class="price">
-                <img src="/price.png">
-                R$ ${item.preco}
+                <img src="price.png">
+                R$ ${parseFloat(item.preco || 0).toFixed(2)}
             </div>
 
             <a href="${link}" target="_blank" class="buy">
