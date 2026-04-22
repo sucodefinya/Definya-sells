@@ -20,7 +20,6 @@ body{
     color:#e2e8f0;
 }
 
-/* TOPO */
 .topbar{
     display:flex;
     justify-content:space-between;
@@ -28,14 +27,12 @@ body{
     background:#0b1220;
 }
 
-/* CONTAINER */
 .container{
     max-width:900px;
     margin:auto;
     padding:20px;
 }
 
-/* INPUTS */
 input, textarea, select{
     width:100%;
     padding:12px;
@@ -46,7 +43,6 @@ input, textarea, select{
     border-radius:10px;
 }
 
-/* BOTÕES */
 button{
     padding:10px;
     border:none;
@@ -54,15 +50,8 @@ button{
     cursor:pointer;
 }
 
-.back{
-    background:var(--main);
-    color:#000;
-}
-
-.logout{
-    background:#ef4444;
-    color:#fff;
-}
+.back{ background:var(--main); color:#000; }
+.logout{ background:#ef4444; color:#fff; }
 
 .add{
     width:100%;
@@ -79,7 +68,6 @@ button{
     color:#000;
 }
 
-/* CARD */
 .card{
     background:var(--card);
     padding:12px;
@@ -89,7 +77,6 @@ button{
     position:relative;
 }
 
-/* DESTAQUE */
 .destaque{
     border:1px solid #ff3c00;
     box-shadow:0 0 15px rgba(255,60,0,0.5);
@@ -107,29 +94,16 @@ button{
     font-weight:bold;
 }
 
-/* BOTÕES ITEM */
 .item-actions{
     display:flex;
     gap:8px;
     margin-top:10px;
 }
 
-.destacarBtn{
-    background:#facc15;
-    color:#000;
-}
+.destacarBtn{ background:#facc15; color:#000; }
+.removerDestaqueBtn{ background:#6b7280; color:#fff; }
+.delBtn{ background:#ef4444; color:#fff; }
 
-.removerDestaqueBtn{
-    background:#6b7280;
-    color:#fff;
-}
-
-.delBtn{
-    background:#ef4444;
-    color:#fff;
-}
-
-/* LOG */
 #logs{
     margin-top:15px;
     background:#030303;
@@ -142,7 +116,6 @@ button{
     border:1px solid rgba(255,0,0,0.2);
 }
 
-/* RARIDADE */
 .raridade{
     margin-top:5px;
     font-weight:bold;
@@ -173,7 +146,9 @@ button{
 <input id="nome" placeholder="Nome do item">
 <textarea id="descricao" placeholder="Descrição"></textarea>
 <input id="preco" placeholder="Preço">
-<input id="whatsapp" placeholder="WhatsApp">
+
+<!-- 🔥 INPUT CORRIGIDO -->
+<input id="whatsapp" placeholder="WhatsApp (somente números)" inputmode="numeric">
 
 <select id="raridade">
 <option value="">Escolher raridade</option>
@@ -202,10 +177,15 @@ const client = supabase.createClient(
 "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-/* FORMATAR NUMERO */
+/* 🔥 BLOQUEAR LETRA EM TEMPO REAL */
+document.getElementById("whatsapp").addEventListener("input", (e)=>{
+    e.target.value = e.target.value.replace(/\D/g,"");
+});
+
+/* FORMATAR */
 function formatarNumero(num){
     if(!num) return "";
-    num = num.replace(/\\D/g,"");
+    num = num.replace(/\D/g,"");
     if(!num.startsWith("55")) num = "55"+num;
     return num;
 }
@@ -225,40 +205,52 @@ async function publicar(){
     const descricao = document.getElementById("descricao").value;
     const preco = document.getElementById("preco").value;
     const raridade = document.getElementById("raridade").value;
-    let whatsapp = formatarNumero(document.getElementById("whatsapp").value);
+    let whatsapp = document.getElementById("whatsapp").value;
 
-    if(!raridade){
-        alert("Escolhe a raridade");
+    /* 🔥 VALIDAÇÃO */
+    if(!nome || !preco || !raridade){
+        alert("Preenche tudo");
         return;
     }
 
+    if(!whatsapp || whatsapp.length < 10){
+        alert("Número inválido");
+        return;
+    }
+
+    whatsapp = formatarNumero(whatsapp);
+
+    log("📡 enviando...");
+
     const { error } = await client.from("itens").insert([{
-        nome,descricao,preco,raridade,whatsapp,destaque:false
+        nome,
+        descricao,
+        preco,
+        raridade,
+        whatsapp: Number(whatsapp), // 🔥 garante número
+        destaque:false
     }]);
 
     if(error){
-        log("erro: "+error.message);
+        log("❌ erro: "+error.message);
         return;
     }
 
-    log("item publicado");
+    log("✅ item publicado");
+
+    document.getElementById("nome").value = "";
+    document.getElementById("descricao").value = "";
+    document.getElementById("preco").value = "";
+    document.getElementById("whatsapp").value = "";
+
     carregar();
 }
 
-/* 🔥 TOGGLE DESTAQUE */
+/* DESTAQUE */
 async function toggleDestaque(id, atual){
-
-    const { error } = await client
-        .from("itens")
-        .update({ destaque: !atual })
-        .eq("id", id);
-
-    if(error){
-        log("erro ao atualizar destaque");
-        return;
-    }
-
-    log(atual ? "❌ removido do destaque" : "⭐ item destacado");
+    await client.from("itens")
+    .update({ destaque: !atual })
+    .eq("id", id);
 
     carregar();
 }
@@ -278,16 +270,13 @@ async function carregar(){
         lista.innerHTML += `
         <div class="card ${p.destaque ? "destaque" : ""}">
             ${p.destaque ? `<div class="badge">DESTAQUE</div>` : ""}
+
             <b>${p.nome}</b>
             <p>${p.descricao}</p>
             💰 ${p.preco}
-            ${p.raridade ? `<div class="raridade ${p.raridade}">${p.raridade}</div>` : ""}
 
             <div class="item-actions">
-                <button 
-                    class="${p.destaque ? "removerDestaqueBtn" : "destacarBtn"}"
-                    onclick="toggleDestaque('${p.id}', ${p.destaque})"
-                >
+                <button onclick="toggleDestaque('${p.id}', ${p.destaque})">
                     ${p.destaque ? "❌ Tirar destaque" : "⭐ Destacar"}
                 </button>
 
@@ -303,7 +292,6 @@ async function carregar(){
 /* DELETE */
 async function del(id){
     await client.from("itens").delete().eq("id",id);
-    log("🗑 deletado");
     carregar();
 }
 
