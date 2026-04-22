@@ -58,6 +58,11 @@ button{
     background:#00ffff;
     color:#000;
 }
+
+.goLinks{
+    background:#ff2a2a;
+    color:#000;
+}
   
 .add{  
     background:#22c55e;  
@@ -126,7 +131,8 @@ img{
     <h3>🔐 Admin</h3>  
 
     <div class="top-actions">
-        <button class="goItens" onclick="goItens()">📦 Admin Itens</button>
+        <button class="goItens" onclick="goItens()">📦 Itens</button>
+        <button class="goLinks" onclick="goLinks()">🔗 Links</button>
         <button class="logout" onclick="logout()">🚪 Sair</button>  
     </div>
 </div>  
@@ -166,6 +172,18 @@ const client = supabase.createClient(
 );  
   
 let imagemFile = null;  
+
+/* FORMATAR WHATSAPP */
+function formatarNumero(num){
+    if(!num) return "";
+    num = num.replace(/\D/g,"");
+
+    if(!num.startsWith("55")){
+        num = "55" + num;
+    }
+
+    return num;
+}
   
 function log(msg){  
     const el = document.getElementById("logs");  
@@ -176,7 +194,7 @@ function log(msg){
 
 log("📄 Admin carregado");
 
-/* PREVIEW DINÂMICO */
+/* PREVIEW */
 function atualizarPreview(){
     const nome = document.getElementById("nome").value || "Nome do produto";
     const descricao = document.getElementById("descricao").value || "Descrição...";
@@ -199,7 +217,6 @@ function atualizarPreview(){
     `;
 }
 
-/* INPUTS */
 ["nome","descricao","preco"].forEach(id=>{
     document.getElementById(id).addEventListener("input", atualizarPreview);
 });
@@ -235,7 +252,6 @@ function removerImagem(){
     document.getElementById("imagemInput").value = "";
     limparPreviewImagem();
     atualizarPreview();
-    log("🗑️ imagem removida");
 }
 
 function limparPreviewImagem(){
@@ -272,7 +288,7 @@ async function publicar(){
     const nome = document.getElementById("nome").value;  
     const descricao = document.getElementById("descricao").value;  
     const preco = document.getElementById("preco").value;  
-    const whatsapp = document.getElementById("whatsapp").value;  
+    let whatsapp = formatarNumero(document.getElementById("whatsapp").value);  
   
     const img = await uploadImagem();  
   
@@ -316,7 +332,7 @@ async function carregar(){
             <div class="actions">
                 <button class="delBtn" onclick="del('${p.id}')">🗑 Excluir</button>
                 <button class="favBtn" onclick="fav('${p.id}', ${p.destaque})">
-                    ⭐ ${p.destaque ? "Remover" : "Favoritar"}
+                    ⭐ ${p.destaque ? "Remover" : "Destacar"}
                 </button>
             </div>
         </div>
@@ -329,7 +345,6 @@ async function carregar(){
 /* DELETE */
 async function del(id){
     await client.from("produtos").delete().eq("id",id);
-    log("🗑 deletado");
     carregar();
 }
 
@@ -338,7 +353,7 @@ async function fav(id, atual){
     const { data } = await client.from("produtos").select("*").eq("destaque", true);
 
     if(!atual && data.length >= 3){
-        alert("Limite de 3 favoritos");
+        alert("Limite de 3 destaques");
         return;
     }
 
@@ -352,6 +367,10 @@ async function fav(id, atual){
 /* NAV */
 function goItens(){
     window.location.href = "/admini";
+}
+
+function goLinks(){
+    window.location.href = "/admin/addlink/";
 }
 
 /* LOGOUT */
