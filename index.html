@@ -54,7 +54,7 @@ body{
     max-width:260px;
 }
 
-/* 🔴 BOTÕES */
+/* botões */
 .admin-btn{
     padding:8px 14px;
     border:1px solid #ff2a2a;
@@ -97,37 +97,32 @@ body{
 .link-btn:hover{
     background:#00ffff;
     color:#000;
-    box-shadow:0 0 20px #00ffff;
 }
 
-/* título */
+/* títulos */
 h2{
     color:#ff2a2a;
     margin-top:30px;
 }
 
-/* SCROLL */
+/* scroll */
 .scroll{
     display:flex;
     gap:15px;
     overflow-x:auto;
-    padding-bottom:10px;
-    scroll-behavior:smooth;
 }
 
-/* CARD */
+/* card */
 .card{
     min-width:240px;
     background:#0a0a0f;
     padding:15px;
     border-radius:12px;
     border:1px solid rgba(255,255,255,0.06);
-    position:relative;
-    transition:0.3s;
 }
 
 .card:hover{
-    transform:translateY(-6px) scale(1.03);
+    transform:translateY(-5px);
 }
 
 /* destaque */
@@ -136,26 +131,23 @@ h2{
     box-shadow:0 0 15px rgba(255,60,0,0.4);
 }
 
-/* badge */
 .badge{
     position:absolute;
     top:10px;
     right:10px;
-    padding:4px 8px;
     background:#ff3c00;
     color:#000;
+    padding:4px 8px;
     border-radius:6px;
     font-size:12px;
-    font-weight:bold;
 }
 
-/* 🔥 IMAGEM (CORRIGIDO) */
+/* imagens */
 .card img{
     width:100%;
     height:140px;
     object-fit:cover;
     border-radius:10px;
-    margin:10px 0;
 }
 
 /* preço */
@@ -167,10 +159,8 @@ h2{
     font-weight:bold;
 }
 
-/* 🔥 IMG DO PREÇO FIXA */
 .price img{
     width:20px;
-    height:20px;
 }
 
 /* botão */
@@ -199,7 +189,6 @@ h2{
 <div class="container">
 
     <div class="header">
-        <!-- 🔥 VOLTAMOS PRA SUA LOGO ORIGINAL -->
         <img src="InShot_20260415_234108748.png" class="logo">
         <a class="admin-btn" href="admin/loginadm/">Admin</a>
     </div>
@@ -233,115 +222,97 @@ function formatarNumero(num){
 }
 
 /* partículas */
-const bg = document.getElementById("bgParticles");
-
 setInterval(()=>{
     const p = document.createElement("div");
     p.classList.add("bg-particle");
 
-    let size = Math.random()*4 + 2;
-
-    p.style.width = size+"px";
-    p.style.height = size+"px";
+    p.style.width = (Math.random()*4+2)+"px";
+    p.style.height = p.style.width;
     p.style.left = Math.random()*100+"vw";
-    p.style.animationDuration = (6 + Math.random()*6)+"s";
+    p.style.animationDuration = (6+Math.random()*6)+"s";
 
-    bg.appendChild(p);
+    document.body.appendChild(p);
     setTimeout(()=>p.remove(),12000);
-}, 300);
+},300);
 
-/* 🔗 LINKS CORRIGIDO */
+/* 🔗 LINKS */
 async function carregarLinks(){
     const { data } = await client.from("links").select("*");
 
-    if(!data || data.length === 0) return;
+    if(!data) return;
 
-    document.getElementById("linksBox").innerHTML = `
-        <div class="links">
-            ${data.map(l=>`
+    let html = `<div class="links">`;
+
+    data.forEach(l=>{
+        if(l.tipo === "youtube"){
+            html += `
                 <a class="link-btn" href="${l.url}" target="_blank">
-                    🔗 ${l.nome || l.titulo || "LINK"}
+                    ▶️ YouTube
                 </a>
-            `).join("")}
-        </div>
-    `;
+            `;
+        }
+
+        if(l.tipo === "coinhub"){
+            html += `
+                <div style="border:1px solid #00ffff;padding:12px;border-radius:10px;">
+                    <b>💸 QUER PAGAR BARATO?</b><br>
+                    COMPRE PELA COINS HUB
+                    <br><br>
+                    <a class="link-btn" href="${l.url}" target="_blank">
+                        🚀 ENTRAR
+                    </a>
+                </div>
+            `;
+        }
+    });
+
+    html += `</div>`;
+    document.getElementById("linksBox").innerHTML = html;
 }
 
 /* CONTAS */
 async function carregarContas(){
-    const { data } = await client
-        .from("produtos")
-        .select("*")
-        .eq("destaque", true);
+    const { data } = await client.from("produtos").select("*").eq("destaque", true);
 
-    if(!data || data.length === 0){
-        document.getElementById("contasBox").style.display = "none";
-        return;
-    }
+    if(!data || data.length === 0) return;
 
     document.getElementById("contasBox").innerHTML = data.map(item=>{
-        const img = item.imagem || "default.png";
-        const numero = formatarNumero(item.whatsapp);
-
         return `
         <div class="card destaque">
-            <div class="badge">DESTAQUE</div>
-
             <h4>${item.nome}</h4>
-
-            <img src="${img}">
-
+            <img src="${item.imagem || "default.png"}">
             <p>${item.descricao || ""}</p>
-
             <div class="price">
                 <img src="price.png">
                 R$ ${parseFloat(item.preco || 0).toFixed(2)}
             </div>
-
-            <a class="buy-btn" href="https://wa.me/${numero}" target="_blank">
+            <a class="buy-btn" href="https://wa.me/${formatarNumero(item.whatsapp)}">
                 Comprar
             </a>
-        </div>
-        `;
+        </div>`;
     }).join("");
 }
 
 /* ITENS */
 async function carregarItens(){
-    const { data } = await client
-        .from("itens")
-        .select("*")
-        .eq("destaque", true);
+    const { data } = await client.from("itens").select("*").eq("destaque", true);
 
-    if(!data || data.length === 0){
-        document.getElementById("itensBox").style.display = "none";
-        return;
-    }
+    if(!data || data.length === 0) return;
 
     document.getElementById("itensBox").innerHTML = data.map(item=>{
-        const img = item.imagem || "default.png";
-        const numero = formatarNumero(item.whatsapp);
-
         return `
         <div class="card destaque">
-            <div class="badge">DESTAQUE</div>
-
             <h4>${item.nome}</h4>
-
-            <img src="${img}">
-
+            <img src="${item.imagem || "default.png"}">
             <p>${item.descricao || ""}</p>
-
             <div class="price">
                 <img src="price.png">
                 R$ ${parseFloat(item.preco || 0).toFixed(2)}
             </div>
-
-            <a class="buy-btn" href="https://wa.me/${numero}" target="_blank">
+            <a class="buy-btn" href="https://wa.me/${formatarNumero(item.whatsapp)}">
                 Comprar
             </a>
-        </div>
-        `;
+        </div>`;
     }).join("");
 }
 
