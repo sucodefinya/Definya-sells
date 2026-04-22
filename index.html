@@ -11,37 +11,16 @@ body{
     font-family:Arial;
     background:#000;
     color:#e5e7eb;
-    overflow-x:hidden;
 }
 
-/* partículas */
-#bgParticles{
-    position:fixed;
-    width:100%;
-    height:100%;
-    z-index:-1;
-    pointer-events:none;
-}
-
-.bg-particle{
-    position:absolute;
-    border-radius:50%;
-    background: radial-gradient(circle, #ff2a2a, transparent);
-    opacity:0.25;
-    animation: floatUp linear forwards;
-}
-
-@keyframes floatUp{
-    from{ transform:translateY(100vh); }
-    to{ transform:translateY(-10vh); }
-}
-
+/* container */
 .container{
     max-width:900px;
     margin:auto;
     padding:20px;
 }
 
+/* header */
 .header{
     display:flex;
     justify-content:space-between;
@@ -61,126 +40,77 @@ body{
     text-decoration:none;
 }
 
-.btn{
-    display:block;
-    text-align:center;
-    padding:12px;
-    margin:20px 0;
-    background:#0a0a0f;
-    color:#ff2a2a;
-    border:1px solid rgba(255,0,0,0.3);
-    border-radius:10px;
-    text-decoration:none;
-}
-
-/* links */
+/* 🔗 LINKS */
 .links{
     display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-    margin-bottom:20px;
+    flex-direction:column;
+    gap:12px;
+    margin:20px 0;
 }
 
-.link-btn{
-    padding:10px 14px;
-    border:1px solid #00ffff;
-    color:#00ffff;
-    border-radius:10px;
+/* 🔴 YOUTUBE BONITO */
+.youtube-card{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px;
+    border-radius:12px;
+    background:#0a0a0f;
+    border:1px solid rgba(255,0,0,0.3);
     text-decoration:none;
+    color:#fff;
+}
+
+.youtube-icon{
+    width:40px;
+    height:40px;
+    background:red;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+}
+
+/* 💰 COINHUB CARD */
+.coinhub-card{
+    padding:15px;
+    border-radius:12px;
+    background:#0a0a0f;
+    border:1px solid #00ffff;
+    box-shadow:0 0 15px rgba(0,255,255,0.2);
+}
+
+.coinhub-title{
     font-weight:bold;
+    margin-bottom:5px;
+    color:#00ffff;
 }
 
-.link-btn.coin{
-    border-color:#facc15;
-    color:#facc15;
-}
-
-/* título */
-.section{
-    margin-top:30px;
-}
-
-.section h2{
-    color:#ff2a2a;
+.coinhub-sub{
+    font-size:14px;
     margin-bottom:10px;
 }
 
-/* scroll */
-.scroll{
-    display:flex;
-    gap:15px;
-    overflow-x:auto;
-    padding-bottom:10px;
-}
-
-/* card */
-.card{
-    min-width:240px;
-    background:#0a0a0f;
-    padding:15px;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,0.06);
-    position:relative;
-}
-
-.card img{
-    width:100%;
-    height:140px;
-    object-fit:cover;
-    border-radius:10px;
-    margin:10px 0;
-}
-
-/* destaque */
-.destaque{
-    border-color:#ff3c00;
-    box-shadow:0 0 15px rgba(255,60,0,0.4);
-}
-
-.badge{
-    position:absolute;
-    top:10px;
-    right:10px;
-    padding:4px 8px;
-    background:#ff3c00;
-    color:#000;
-    border-radius:6px;
-    font-size:12px;
-    font-weight:bold;
-}
-
-/* preço */
-.price{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    color:#00ff88;
-    font-weight:bold;
-}
-
-/* 🔥 corrigido */
-.price img{
-    width:18px;
-    height:18px;
-}
-
 /* botão */
-.buy-btn{
-    display:block;
-    margin-top:10px;
-    padding:10px;
-    text-align:center;
-    border:1px solid #ff2a2a;
-    color:#ff2a2a;
+.link-btn{
+    display:inline-block;
+    padding:10px 14px;
     border-radius:10px;
     text-decoration:none;
+    font-weight:bold;
+    border:1px solid #00ffff;
+    color:#00ffff;
+}
+
+.link-btn:hover{
+    background:#00ffff;
+    color:#000;
 }
 </style>
 </head>
 
 <body>
-
-<div id="bgParticles"></div>
 
 <div class="container">
 
@@ -189,19 +119,7 @@ body{
         <a class="admin-btn" href="admin/loginadm/">Admin</a>
     </div>
 
-    <a class="btn" href="catalogo">📦 CATÁLOGO</a>
-
     <div id="linksBox"></div>
-
-    <div id="contasSection" class="section" style="display:none;">
-        <h2>🔥 CONTAS EM DESTAQUE</h2>
-        <div id="contasBox" class="scroll"></div>
-    </div>
-
-    <div id="itensSection" class="section" style="display:none;">
-        <h2>🔥 ITENS EM DESTAQUE</h2>
-        <div id="itensBox" class="scroll"></div>
-    </div>
 
 </div>
 
@@ -213,104 +131,56 @@ const client = supabase.createClient(
   "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-/* partículas */
-setInterval(()=>{
-    const p = document.createElement("div");
-    p.classList.add("bg-particle");
-
-    let size = Math.random()*4 + 2;
-
-    p.style.width = size+"px";
-    p.style.height = size+"px";
-    p.style.left = Math.random()*100+"vw";
-    p.style.animationDuration = (6 + Math.random()*6)+"s";
-
-    document.getElementById("bgParticles").appendChild(p);
-    setTimeout(()=>p.remove(),12000);
-}, 300);
-
-/* LINKS */
+/* LINKS BONITOS */
 async function carregarLinks(){
     const { data } = await client.from("links").select("*");
 
     if(!data || data.length === 0) return;
 
-    document.getElementById("linksBox").innerHTML = `
-        <div class="links">
-            ${data.map(l=>{
-                if(l.tipo === "youtube"){
-                    return `<a class="link-btn" href="${l.url}" target="_blank">▶️ YouTube</a>`;
-                }
-                if(l.tipo === "coinhub"){
-                    return `<a class="link-btn coin" href="${l.url}" target="_blank">💰 CoinHub</a>`;
-                }
-            }).join("")}
-        </div>
-    `;
+    let html = `<div class="links">`;
+
+    data.forEach(l=>{
+
+        /* YOUTUBE */
+        if(l.tipo === "youtube"){
+            html += `
+                <a href="${l.url}" target="_blank" class="youtube-card">
+                    <div class="youtube-icon">▶</div>
+                    <div>
+                        <div style="font-weight:bold;">YouTube</div>
+                        <div style="font-size:13px; opacity:0.7;">Acessar canal</div>
+                    </div>
+                </a>
+            `;
+        }
+
+        /* COINHUB */
+        if(l.tipo === "coinhub"){
+            html += `
+                <div class="coinhub-card">
+                    <div class="coinhub-title">
+                        💸 QUER PAGAR BARATO?
+                    </div>
+
+                    <div class="coinhub-sub">
+                        COMPRE PELA COINS HUB
+                    </div>
+
+                    <a href="${l.url}" target="_blank" class="link-btn">
+                         ENTRAR
+                    </a>
+                </div>
+            `;
+        }
+
+    });
+
+    html += `</div>`;
+
+    document.getElementById("linksBox").innerHTML = html;
 }
 
-/* CONTAS */
-async function carregarContas(){
-    const { data } = await client.from("produtos").select("*").eq("destaque", true);
-
-    if(!data || data.length === 0) return;
-
-    document.getElementById("contasSection").style.display = "block";
-
-    document.getElementById("contasBox").innerHTML = data.map(item=>`
-        <div class="card destaque">
-            <div class="badge">DESTAQUE</div>
-
-            <h4>${item.nome}</h4>
-            <img src="${item.imagem || 'default.png'}">
-
-            <p>${item.descricao || ""}</p>
-
-            <div class="price">
-                <img src="price.png">
-                R$ ${parseFloat(item.preco || 0).toFixed(2)}
-            </div>
-
-            <a class="buy-btn" href="https://wa.me/${item.whatsapp}" target="_blank">
-                Comprar
-            </a>
-        </div>
-    `).join("");
-}
-
-/* ITENS */
-async function carregarItens(){
-    const { data } = await client.from("itens").select("*").eq("destaque", true);
-
-    if(!data || data.length === 0) return;
-
-    document.getElementById("itensSection").style.display = "block";
-
-    document.getElementById("itensBox").innerHTML = data.map(item=>`
-        <div class="card destaque">
-            <div class="badge">DESTAQUE</div>
-
-            <h4>${item.nome}</h4>
-            <img src="${item.imagem || 'default.png'}">
-
-            <p>${item.descricao || ""}</p>
-
-            <div class="price">
-                <img src="price.png">
-                R$ ${parseFloat(item.preco || 0).toFixed(2)}
-            </div>
-
-            <a class="buy-btn" href="https://wa.me/${item.whatsapp}" target="_blank">
-                Comprar
-            </a>
-        </div>
-    `).join("");
-}
-
-/* INIT */
 carregarLinks();
-carregarContas();
-carregarItens();
 </script>
 
 </body>
