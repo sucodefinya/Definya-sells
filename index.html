@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Home Neon</title>
+<title>Home Neon PRO</title>
 
 <style>
 body{
@@ -19,7 +19,6 @@ body{
     width:100%;
     height:100%;
     z-index:-1;
-    pointer-events:none;
 }
 
 .bg-particle{
@@ -41,7 +40,7 @@ body{
     padding:20px;
 }
 
-/* header */
+/* HEADER */
 .header{
     display:flex;
     justify-content:space-between;
@@ -50,6 +49,7 @@ body{
 
 .logo{
     max-width:260px;
+    filter: drop-shadow(0 0 10px red);
 }
 
 .admin-btn{
@@ -58,19 +58,21 @@ body{
     color:#ff2a2a;
     border-radius:10px;
     text-decoration:none;
+    box-shadow:0 0 10px rgba(255,0,0,0.3);
 }
 
-/* botão catálogo */
+/* BOTÃO CATÁLOGO */
 .btn{
     display:block;
     text-align:center;
-    padding:12px;
+    padding:14px;
     margin:20px 0;
     background:#0a0a0f;
     color:#ff2a2a;
     border:1px solid rgba(255,0,0,0.3);
-    border-radius:10px;
+    border-radius:12px;
     text-decoration:none;
+    box-shadow:0 0 15px rgba(255,0,0,0.2);
 }
 
 /* LINKS */
@@ -89,8 +91,9 @@ body{
     border-radius:12px;
     background:#0a0a0f;
     border:1px solid rgba(255,0,0,0.3);
-    text-decoration:none;
     color:#fff;
+    text-decoration:none;
+    box-shadow:0 0 15px rgba(255,0,0,0.2);
 }
 
 .youtube-icon{
@@ -103,34 +106,41 @@ body{
     justify-content:center;
 }
 
+/* COIN HUB */
 .coinhub-card{
     padding:15px;
     border-radius:12px;
-    background:#0a0a0f;
     border:1px solid #00ffff;
-    box-shadow:0 0 15px rgba(0,255,255,0.2);
+    box-shadow:0 0 20px rgba(0,255,255,0.4);
+    background: radial-gradient(circle at top, rgba(0,255,255,0.1), transparent);
 }
 
+/* BOTÃO LINK */
 .link-btn{
     display:inline-block;
     padding:10px 14px;
     border-radius:10px;
-    text-decoration:none;
     font-weight:bold;
     border:1px solid #00ffff;
     color:#00ffff;
+    text-decoration:none;
+    box-shadow:0 0 10px rgba(0,255,255,0.5);
 }
 
-/* seção */
+/* SECTION */
 .section{
     margin-top:30px;
 }
 
-.section h2{
+h2{
+    text-shadow:0 0 10px rgba(255,0,0,0.6);
+}
+
+.red{
     color:#ff2a2a;
 }
 
-/* scroll */
+/* SCROLL */
 .scroll{
     display:flex;
     gap:15px;
@@ -138,14 +148,21 @@ body{
     padding-bottom:10px;
 }
 
-/* card */
+/* CARD */
 .card{
     min-width:240px;
-    background:#0a0a0f;
     padding:15px;
     border-radius:12px;
-    border:1px solid rgba(255,255,255,0.06);
-    position:relative;
+    background: linear-gradient(180deg,#0a0a0f,#050507);
+    border:1px solid rgba(255,0,0,0.2);
+    backdrop-filter:blur(6px);
+    box-shadow:0 0 10px rgba(255,0,0,0.2);
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 0 25px rgba(255,0,0,0.6);
 }
 
 .card img{
@@ -155,24 +172,26 @@ body{
     border-radius:10px;
 }
 
-/* destaque */
+/* DESTAQUE */
 .destaque{
     border-color:#ff3c00;
-    box-shadow:0 0 15px rgba(255,60,0,0.4);
+    box-shadow:0 0 20px rgba(255,60,0,0.5);
 }
 
+/* BADGE */
 .badge{
     position:absolute;
     top:10px;
     right:10px;
-    background:#ff3c00;
-    color:#000;
+    background:#ff2a2a;
+    color:#fff;
     padding:4px 8px;
     border-radius:6px;
     font-size:12px;
+    box-shadow:0 0 10px rgba(255,0,0,0.7);
 }
 
-/* preço */
+/* PREÇO */
 .price{
     display:flex;
     align-items:center;
@@ -181,21 +200,17 @@ body{
     font-weight:bold;
 }
 
-.price img{
-    width:18px;
-    height:18px;
-}
-
-/* botão comprar */
+/* BOTÃO COMPRAR */
 .buy-btn{
     display:block;
     margin-top:10px;
     padding:10px;
     text-align:center;
-    border:1px solid #ff2a2a;
-    color:#ff2a2a;
     border-radius:10px;
     text-decoration:none;
+    background:linear-gradient(45deg,#ff2a2a,#ff0000);
+    color:#fff;
+    box-shadow:0 0 15px rgba(255,0,0,0.5);
 }
 </style>
 </head>
@@ -207,7 +222,7 @@ body{
 <div class="container">
 
     <div class="header">
-        <img src="InShot_20260415_234108748.png" class="logo">
+        <img src="logo.png" class="logo">
         <a class="admin-btn" href="admin/loginadm/">Admin</a>
     </div>
 
@@ -218,13 +233,13 @@ body{
 
     <!-- CONTAS -->
     <div id="contasSection" class="section" style="display:none;">
-        <h2>🔥 CONTAS EM DESTAQUE</h2>
+        <h2>🔥 CONTAS <span class="red">EM DESTAQUE</span></h2>
         <div id="contasBox" class="scroll"></div>
     </div>
 
     <!-- ITENS -->
     <div id="itensSection" class="section" style="display:none;">
-        <h2>🔥 ITENS EM DESTAQUE</h2>
+        <h2>🔥 ITENS <span class="red">EM DESTAQUE</span></h2>
         <div id="itensBox" class="scroll"></div>
     </div>
 
@@ -234,8 +249,8 @@ body{
 
 <script>
 const client = supabase.createClient(
-  "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
+  "COLE_SUA_URL_AQUI",
+  "COLE_SUA_KEY_AQUI"
 );
 
 /* partículas */
@@ -299,11 +314,9 @@ async function carregarContas(){
             <h4>${p.nome}</h4>
             <img src="${p.imagem || "default.png"}">
             <p>${p.descricao || ""}</p>
-            <div class="price">
-                <img src="price.png"> R$ ${parseFloat(p.preco).toFixed(2)}
-            </div>
+            <div class="price">💰 R$ ${parseFloat(p.preco).toFixed(2)}</div>
             <a class="buy-btn" href="https://wa.me/${p.whatsapp}">
-                Comprar
+                COMPRAR
             </a>
         </div>
     `).join("");
@@ -322,11 +335,9 @@ async function carregarItens(){
             <h4>${p.nome}</h4>
             <img src="${p.imagem || "default.png"}">
             <p>${p.descricao || ""}</p>
-            <div class="price">
-                <img src="price.png"> R$ ${parseFloat(p.preco).toFixed(2)}
-            </div>
+            <div class="price">💰 R$ ${parseFloat(p.preco).toFixed(2)}</div>
             <a class="buy-btn" href="https://wa.me/${p.whatsapp}">
-                Comprar
+                COMPRAR
             </a>
         </div>
     `).join("");
@@ -339,4 +350,4 @@ carregarItens();
 </script>
 
 </body>
-</html>
+    </html>
