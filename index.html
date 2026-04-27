@@ -67,13 +67,17 @@ body{
     display:flex;
     justify-content:space-between;
     align-items:center;
+    text-decoration:none;
+    color:#fff;
 }
 
-/* YOUTUBE */
+/* LINKS */
 .youtube{
     display:flex;
     gap:12px;
     align-items:center;
+    text-decoration:none;
+    color:#fff;
 }
 
 .youtube-icon{
@@ -84,6 +88,25 @@ body{
     display:flex;
     align-items:center;
     justify-content:center;
+}
+
+/* BOTÃO COINHUB */
+.coin-btn{
+    display:block;
+    text-align:center;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #00ffff;
+    color:#00ffff;
+    text-decoration:none;
+    font-weight:bold;
+    transition:0.3s;
+}
+
+.coin-btn:hover{
+    background:#00ffff;
+    color:#000;
+    box-shadow:0 0 15px #00ffff;
 }
 
 /* SECTION */
@@ -157,7 +180,7 @@ body{
     font-weight:bold;
 }
 
-/* BOTÃO */
+/* BOTÃO COMPRAR */
 .buy{
     display:block;
     margin-top:10px;
@@ -218,13 +241,13 @@ body{
 </div>
 
 <!-- CATÁLOGO -->
-<div class="card catalogo">
+<a href="catalogo/" class="card catalogo">
 <div>
 <b>📦 CATÁLOGO</b><br>
 <small>Confira nossos produtos</small>
 </div>
 ➜
-</div>
+</a>
 
 <!-- LINKS -->
 <div id="linksBox"></div>
@@ -274,21 +297,26 @@ if(!data) return;
 let html = "";
 
 data.forEach(l=>{
+
 if(l.tipo==="youtube"){
 html += `
-<div class="card youtube">
+<a href="${l.url}" target="_blank" class="card youtube">
 <div class="youtube-icon">▶</div>
-<div><b>YouTube</b><br><small>Acessar canal</small></div>
-</div>`;
+<div>
+<b>YouTube</b><br>
+<small>Acessar canal</small>
+</div>
+</a>`;
 }
 
 if(l.tipo==="coinhub"){
 html += `
 <div class="card">
-💸 COMPRE MAIS BARATO<br><br>
-<a href="${l.url}" target="_blank">ENTRAR</a>
+<b>💸 COMPRE MAIS BARATO</b><br><br>
+<a href="${l.url}" target="_blank" class="coin-btn">🚀 ENTRAR</a>
 </div>`;
 }
+
 });
 
 document.getElementById("linksBox").innerHTML = html;
