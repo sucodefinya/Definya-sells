@@ -29,7 +29,7 @@ body{
 
 .logo{
     max-width:240px;
-    filter: drop-shadow(0 0 15px #ff2a2a);
+    filter: drop-shadow(0 0 12px rgba(255,0,0,0.6));
 }
 
 .admin-btn{
@@ -38,58 +38,37 @@ body{
     border:1px solid #ff2a2a;
     color:#ff2a2a;
     text-decoration:none;
-    box-shadow:0 0 10px rgba(255,0,0,0.5);
 }
 
-/* CARD */
+/* CARD BASE */
 .card{
     background: linear-gradient(145deg,#0a0a0f,#050505);
     border-radius:16px;
     padding:15px;
-    border:1px solid rgba(255,0,0,0.3);
-    box-shadow:
-        inset 0 0 10px rgba(255,255,255,0.03),
-        0 0 15px rgba(255,0,0,0.25);
+    border:1px solid rgba(255,255,255,0.06);
     margin-bottom:15px;
-}
-
-/* YOUTUBE */
-.youtube{
-    display:flex;
-    gap:12px;
-    align-items:center;
-}
-
-.youtube-icon{
-    width:50px;
-    height:50px;
-    background:red;
-    border-radius:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
 }
 
 /* BANNER */
 .banner{
-    background:#081010;
-    border:1px solid #00ffff;
-    border-radius:16px;
-    padding:15px;
-    box-shadow:0 0 25px rgba(0,255,255,0.4);
     display:flex;
     justify-content:space-between;
     align-items:center;
+    border:1px solid #00ffff;
+    border-radius:16px;
+    padding:15px;
+    background:#081010;
+    box-shadow:0 0 20px rgba(0,255,255,0.2);
 }
 
 .banner img{
-    width:120px;
+    width:100px;
 }
 
 /* TITULO */
 .section-title{
-    font-size:20px;
     margin:25px 0 10px;
+    font-size:20px;
 }
 
 .section-title span{
@@ -109,9 +88,14 @@ body{
     background: linear-gradient(145deg,#0a0a0f,#050505);
     border-radius:16px;
     padding:12px;
-    border:1px solid rgba(255,0,0,0.3);
-    box-shadow:0 0 20px rgba(255,0,0,0.25);
-    position:relative;
+    border:1px solid rgba(255,255,255,0.06);
+    box-shadow:0 0 15px rgba(255,0,0,0.15);
+    transition:0.3s;
+}
+
+.produto:hover{
+    transform:translateY(-5px);
+    box-shadow:0 0 25px rgba(255,0,0,0.35);
 }
 
 .produto img{
@@ -121,23 +105,18 @@ body{
     border-radius:12px;
 }
 
-/* BADGE */
 .badge{
     position:absolute;
-    top:10px;
-    right:10px;
     background:#ff2a2a;
     padding:5px 10px;
     border-radius:8px;
 }
 
-/* PREÇO */
 .price{
     color:#00ff88;
     font-weight:bold;
 }
 
-/* BOTÃO */
 .buy{
     display:block;
     text-align:center;
@@ -145,8 +124,8 @@ body{
     padding:10px;
     background:#ff2a2a;
     border-radius:10px;
-    color:#fff;
     text-decoration:none;
+    color:#fff;
 }
 
 /* FOOTER */
@@ -154,12 +133,8 @@ body{
     display:flex;
     justify-content:space-around;
     margin-top:30px;
-    padding:15px;
     border-top:1px solid rgba(255,255,255,0.1);
-}
-
-.footer div{
-    text-align:center;
+    padding:15px;
     font-size:12px;
 }
 
@@ -167,36 +142,46 @@ body{
 .skeleton{
     position:relative;
     overflow:hidden;
-    background:#0a0a0f;
+    border-radius:16px;
+    background: linear-gradient(145deg,#0b0b10,#060606);
 }
 
 .skeleton::after{
     content:"";
     position:absolute;
     top:0;
-    left:-100%;
-    width:100%;
+    left:-150%;
+    width:120%;
     height:100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-    animation: shimmer 1.5s infinite;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    animation: shimmer 1.6s infinite;
 }
 
 @keyframes shimmer{
-    100%{ left:100%; }
+    100%{ left:150%; }
 }
 
 .skel-img{
     width:100%;
     height:140px;
-    border-radius:12px;
     background:#111;
+    border-radius:12px;
+    margin-bottom:10px;
 }
 
-.skel-text{
-    height:12px;
-    margin:8px 0;
-    border-radius:6px;
+.skel-title{
+    height:14px;
+    width:70%;
     background:#111;
+    border-radius:6px;
+    margin-bottom:8px;
+}
+
+.skel-price{
+    height:12px;
+    width:40%;
+    background:#111;
+    border-radius:6px;
 }
 </style>
 </head>
@@ -212,16 +197,10 @@ body{
 
 <div class="card">📦 CATÁLOGO</div>
 
-<div class="card youtube">
-<div class="youtube-icon">▶</div>
-<div><b>YouTube</b><br><small>Acessar canal</small></div>
-</div>
-
 <div class="banner">
 <div>
-<b>💸 QUER PAGAR BARATO?</b><br>
-COMPRE PELA <span style="color:#00ffff">COINS HUB</span><br>
-<button>ENTRAR</button>
+<b>💸 PAGUE MAIS BARATO</b><br>
+Use Coins Hub
 </div>
 <img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png">
 </div>
@@ -230,26 +209,32 @@ COMPRE PELA <span style="color:#00ffff">COINS HUB</span><br>
 
 <div id="contasBox" class="scroll">
 
-<!-- SKELETON -->
+<!-- skeleton -->
 <div class="produto skeleton">
 <div class="skel-img"></div>
-<div class="skel-text"></div>
-<div class="skel-text"></div>
+<div class="skel-title"></div>
+<div class="skel-price"></div>
 </div>
 
 <div class="produto skeleton">
 <div class="skel-img"></div>
-<div class="skel-text"></div>
-<div class="skel-text"></div>
+<div class="skel-title"></div>
+<div class="skel-price"></div>
+</div>
+
+<div class="produto skeleton">
+<div class="skel-img"></div>
+<div class="skel-title"></div>
+<div class="skel-price"></div>
 </div>
 
 </div>
 
 <div class="footer">
-<div>🛡️<br>Compra segura</div>
-<div>⚡<br>Entrega rápida</div>
-<div>⭐<br>Qualidade</div>
-<div>🎧<br>Suporte</div>
+<div>🛡️ Compra segura</div>
+<div>⚡ Entrega rápida</div>
+<div>⭐ Qualidade</div>
+<div>🎧 Suporte</div>
 </div>
 
 </div>
@@ -267,15 +252,22 @@ const { data } = await client.from("produtos").select("*").eq("destaque", true);
 
 if(!data) return;
 
-document.getElementById("contasBox").innerHTML = data.map(p=>`
+const box = document.getElementById("contasBox");
+box.style.opacity = "0";
+
+box.innerHTML = data.map(p=>`
 <div class="produto">
-<div class="badge">DESTAQUE</div>
 <h4>${p.nome}</h4>
 <img src="${p.imagem || '/default.png'}" onerror="this.src='/default.png'">
 <div class="price">R$ ${parseFloat(p.preco).toFixed(2)}</div>
 <a class="buy" href="https://wa.me/${p.whatsapp}">COMPRAR</a>
 </div>
 `).join("");
+
+setTimeout(()=>{
+    box.style.transition="0.4s";
+    box.style.opacity="1";
+},100);
 }
 
 carregarContas();
