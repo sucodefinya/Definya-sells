@@ -188,7 +188,10 @@ body{
 <div class="container">
 
     <div class="header">
-        <img src="https://via.placeholder.com/200x60?text=LOGO" class="logo">
+        <!-- CORRIGIDO AQUI -->
+        <img src="/logo.png" class="logo"
+             onerror="this.src='https://via.placeholder.com/200x60?text=LOGO'">
+             
         <a class="admin-btn" href="admin/loginadm/">Admin</a>
     </div>
 
@@ -264,9 +267,14 @@ async function carregarContas(){
         <div class="card">
             <div class="badge">DESTAQUE</div>
             <h4>${p.nome}</h4>
-            <img src="${p.imagem || "https://via.placeholder.com/300"}">
+            
+            <!-- CORRIGIDO AQUI -->
+            <img src="${p.imagem || '/default.png'}"
+                 onerror="this.src='/default.png'">
+                 
             <p>${p.descricao || ""}</p>
             <div class="price">R$ ${parseFloat(p.preco).toFixed(2)}</div>
+            
             <a class="buy-btn" href="https://wa.me/${p.whatsapp}">
                 COMPRAR
             </a>
