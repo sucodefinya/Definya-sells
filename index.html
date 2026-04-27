@@ -9,31 +9,11 @@
 body{
     margin:0;
     font-family:Arial;
-    background:#000;
-    color:#e5e7eb;
+    background:#050505;
+    color:#fff;
 }
 
-/* partículas */
-#bgParticles{
-    position:fixed;
-    width:100%;
-    height:100%;
-    z-index:-1;
-}
-
-.bg-particle{
-    position:absolute;
-    border-radius:50%;
-    background: radial-gradient(circle, #ff2a2a, transparent);
-    opacity:0.25;
-    animation: floatUp linear forwards;
-}
-
-@keyframes floatUp{
-    from{ transform:translateY(100vh); }
-    to{ transform:translateY(-10vh); }
-}
-
+/* CONTAINER */
 .container{
     max-width:900px;
     margin:auto;
@@ -48,81 +28,71 @@ body{
 }
 
 .logo{
-    max-width:200px;
-    filter: drop-shadow(0 0 10px red);
+    max-width:240px;
+    filter: drop-shadow(0 0 15px #ff2a2a);
 }
 
 .admin-btn{
-    padding:8px 14px;
+    padding:10px 16px;
+    border-radius:12px;
     border:1px solid #ff2a2a;
     color:#ff2a2a;
-    border-radius:10px;
     text-decoration:none;
+    box-shadow:0 0 10px rgba(255,0,0,0.5);
 }
 
-/* BOTÃO */
-.btn{
-    display:block;
-    text-align:center;
-    padding:14px;
-    margin:20px 0;
-    background:#0a0a0f;
-    color:#ff2a2a;
+/* CARD */
+.card{
+    background: linear-gradient(145deg,#0a0a0f,#050505);
+    border-radius:16px;
+    padding:15px;
     border:1px solid rgba(255,0,0,0.3);
-    border-radius:12px;
-    text-decoration:none;
+    box-shadow:
+        inset 0 0 10px rgba(255,255,255,0.03),
+        0 0 15px rgba(255,0,0,0.25);
+    margin-bottom:15px;
 }
 
-/* LINKS */
-.links{
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-}
-
-.youtube-card{
+/* YOUTUBE */
+.youtube{
     display:flex;
     gap:12px;
-    padding:12px;
-    border-radius:12px;
-    background:#0a0a0f;
-    border:1px solid rgba(255,0,0,0.3);
-    text-decoration:none;
-    color:#fff;
+    align-items:center;
 }
 
 .youtube-icon{
-    width:40px;
-    height:40px;
+    width:50px;
+    height:50px;
     background:red;
-    border-radius:10px;
+    border-radius:12px;
     display:flex;
     align-items:center;
     justify-content:center;
 }
 
-.coinhub-card{
+/* BANNER */
+.banner{
+    background:#081010;
+    border:1px solid #00ffff;
+    border-radius:16px;
     padding:15px;
-    border-radius:12px;
-    border:1px solid #00ffff;
-    box-shadow:0 0 20px rgba(0,255,255,0.4);
+    box-shadow:0 0 25px rgba(0,255,255,0.4);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
-.link-btn{
-    display:inline-block;
-    padding:10px 14px;
-    border-radius:10px;
-    border:1px solid #00ffff;
-    color:#00ffff;
-    text-decoration:none;
+.banner img{
+    width:120px;
 }
 
-/* SECTION */
-.section{
-    margin-top:30px;
+/* TITULO */
+.section-title{
+    font-size:20px;
+    margin:25px 0 10px;
 }
 
-.red{
+.section-title span{
     color:#ff2a2a;
 }
 
@@ -133,21 +103,22 @@ body{
     overflow-x:auto;
 }
 
-/* CARD */
-.card{
-    min-width:240px;
-    padding:15px;
-    border-radius:12px;
-    background:#0a0a0f;
-    border:1px solid rgba(255,0,0,0.2);
+/* PRODUTO */
+.produto{
+    min-width:250px;
+    background: linear-gradient(145deg,#0a0a0f,#050505);
+    border-radius:16px;
+    padding:12px;
+    border:1px solid rgba(255,0,0,0.3);
+    box-shadow:0 0 20px rgba(255,0,0,0.25);
     position:relative;
 }
 
-.card img{
+.produto img{
     width:100%;
     height:140px;
     object-fit:cover;
-    border-radius:10px;
+    border-radius:12px;
 }
 
 /* BADGE */
@@ -156,9 +127,8 @@ body{
     top:10px;
     right:10px;
     background:#ff2a2a;
-    color:#fff;
-    padding:4px 8px;
-    border-radius:6px;
+    padding:5px 10px;
+    border-radius:8px;
 }
 
 /* PREÇO */
@@ -168,41 +138,119 @@ body{
 }
 
 /* BOTÃO */
-.buy-btn{
+.buy{
     display:block;
+    text-align:center;
     margin-top:10px;
     padding:10px;
-    text-align:center;
     background:#ff2a2a;
-    color:#fff;
     border-radius:10px;
+    color:#fff;
     text-decoration:none;
+}
+
+/* FOOTER */
+.footer{
+    display:flex;
+    justify-content:space-around;
+    margin-top:30px;
+    padding:15px;
+    border-top:1px solid rgba(255,255,255,0.1);
+}
+
+.footer div{
+    text-align:center;
+    font-size:12px;
+}
+
+/* SKELETON */
+.skeleton{
+    position:relative;
+    overflow:hidden;
+    background:#0a0a0f;
+}
+
+.skeleton::after{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-100%;
+    width:100%;
+    height:100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer{
+    100%{ left:100%; }
+}
+
+.skel-img{
+    width:100%;
+    height:140px;
+    border-radius:12px;
+    background:#111;
+}
+
+.skel-text{
+    height:12px;
+    margin:8px 0;
+    border-radius:6px;
+    background:#111;
 }
 </style>
 </head>
 
 <body>
 
-<div id="bgParticles"></div>
-
 <div class="container">
 
-    <div class="header">
-        <!-- CORRIGIDO AQUI -->
-        <img src="/logo.png" class="logo"
-             onerror="this.src='https://via.placeholder.com/200x60?text=LOGO'">
-             
-        <a class="admin-btn" href="admin/loginadm/">Admin</a>
-    </div>
+<div class="header">
+<img src="/logo.png" class="logo" onerror="this.src='https://via.placeholder.com/200x60'">
+<a class="admin-btn">Admin</a>
+</div>
 
-    <a class="btn" href="catalogo">📦 CATÁLOGO</a>
+<div class="card">📦 CATÁLOGO</div>
 
-    <div id="linksBox"></div>
+<div class="card youtube">
+<div class="youtube-icon">▶</div>
+<div><b>YouTube</b><br><small>Acessar canal</small></div>
+</div>
 
-    <div id="contasSection" class="section" style="display:none;">
-        <h2>🔥 CONTAS <span class="red">EM DESTAQUE</span></h2>
-        <div id="contasBox" class="scroll"></div>
-    </div>
+<div class="banner">
+<div>
+<b>💸 QUER PAGAR BARATO?</b><br>
+COMPRE PELA <span style="color:#00ffff">COINS HUB</span><br>
+<button>ENTRAR</button>
+</div>
+<img src="https://cdn-icons-png.flaticon.com/512/3212/3212608.png">
+</div>
+
+<div class="section-title">🔥 CONTAS <span>EM DESTAQUE</span></div>
+
+<div id="contasBox" class="scroll">
+
+<!-- SKELETON -->
+<div class="produto skeleton">
+<div class="skel-img"></div>
+<div class="skel-text"></div>
+<div class="skel-text"></div>
+</div>
+
+<div class="produto skeleton">
+<div class="skel-img"></div>
+<div class="skel-text"></div>
+<div class="skel-text"></div>
+</div>
+
+</div>
+
+<div class="footer">
+<div>🛡️<br>Compra segura</div>
+<div>⚡<br>Entrega rápida</div>
+<div>⭐<br>Qualidade</div>
+<div>🎧<br>Suporte</div>
+</div>
 
 </div>
 
@@ -210,80 +258,26 @@ body{
 
 <script>
 const client = supabase.createClient(
-  "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
+"https://dbqleycdrkdhxrozsmup.supabase.co",
+"sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
 );
 
-/* partículas */
-setInterval(()=>{
-    const p = document.createElement("div");
-    p.classList.add("bg-particle");
-    p.style.width = (Math.random()*4+2)+"px";
-    p.style.height = p.style.width;
-    p.style.left = Math.random()*100+"vw";
-    p.style.animationDuration = (6+Math.random()*6)+"s";
-    document.getElementById("bgParticles").appendChild(p);
-    setTimeout(()=>p.remove(),12000);
-},300);
-
-/* LINKS */
-async function carregarLinks(){
-    const { data } = await client.from("links").select("*");
-    if(!data) return;
-
-    let html = `<div class="links">`;
-
-    data.forEach(l=>{
-        if(l.tipo === "youtube"){
-            html += `
-            <a href="${l.url}" target="_blank" class="youtube-card">
-                <div class="youtube-icon">▶</div>
-                <div><b>YouTube</b><br><small>Acessar canal</small></div>
-            </a>`;
-        }
-
-        if(l.tipo === "coinhub"){
-            html += `
-            <div class="coinhub-card">
-                💸 COMPRE MAIS BARATO<br><br>
-                <a href="${l.url}" target="_blank" class="link-btn">ENTRAR</a>
-            </div>`;
-        }
-    });
-
-    html += `</div>`;
-    document.getElementById("linksBox").innerHTML = html;
-}
-
-/* CONTAS */
 async function carregarContas(){
-    const { data } = await client.from("produtos").select("*").eq("destaque", true);
+const { data } = await client.from("produtos").select("*").eq("destaque", true);
 
-    if(!data || data.length === 0) return;
+if(!data) return;
 
-    document.getElementById("contasSection").style.display = "block";
-
-    document.getElementById("contasBox").innerHTML = data.map(p=>`
-        <div class="card">
-            <div class="badge">DESTAQUE</div>
-            <h4>${p.nome}</h4>
-            
-            <!-- CORRIGIDO AQUI -->
-            <img src="${p.imagem || '/default.png'}"
-                 onerror="this.src='/default.png'">
-                 
-            <p>${p.descricao || ""}</p>
-            <div class="price">R$ ${parseFloat(p.preco).toFixed(2)}</div>
-            
-            <a class="buy-btn" href="https://wa.me/${p.whatsapp}">
-                COMPRAR
-            </a>
-        </div>
-    `).join("");
+document.getElementById("contasBox").innerHTML = data.map(p=>`
+<div class="produto">
+<div class="badge">DESTAQUE</div>
+<h4>${p.nome}</h4>
+<img src="${p.imagem || '/default.png'}" onerror="this.src='/default.png'">
+<div class="price">R$ ${parseFloat(p.preco).toFixed(2)}</div>
+<a class="buy" href="https://wa.me/${p.whatsapp}">COMPRAR</a>
+</div>
+`).join("");
 }
 
-/* INIT */
-carregarLinks();
 carregarContas();
 </script>
 
