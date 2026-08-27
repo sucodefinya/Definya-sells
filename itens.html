@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Itens - Loja</title>
+
+<style>
+:root{
+    --bg:#000;
+    --card:#0a0a0f;
+    --text:#e5e7eb;
+}
+
+body{
+    margin:0;
+    font-family:Arial;
+    background:var(--bg);
+    color:var(--text);
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 20px;
+    background:#0a0a0f;
+}
+
+.back{
+    border:1px solid #ff2a2a;
+    color:#ff2a2a;
+    padding:6px 12px;
+    border-radius:10px;
+    text-decoration:none;
+}
+
+.filter{
+    padding:10px 20px;
+}
+
+select{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    background:#111827;
+    color:#fff;
+    border:none;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    padding:20px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+    gap:15px;
+}
+
+.card{
+    position:relative;
+    background:#0a0a0f;
+    border-radius:12px;
+    padding:15px;
+    border:1px solid rgba(255,255,255,0.05);
+    transition:0.25s;
+}
+
+.card:hover{
+    transform:translateY(-5px) scale(1.02);
+}
+
+/* RARIDADE */
+.comum{ border-color:#6b7280; }
+.incomum{ border-color:#22c55e; }
+.raro{ border-color:#3b82f6; }
+.epico{ border-color:#a855f7; }
+.lendario{
+    border-color:#facc15;
+    box-shadow:0 0 18px rgba(250,204,21,0.35);
+}
+
+.card img{
+    width:100%;
+    height:140px;
+    object-fit:cover;
+    border-radius:10px;
+}
+
+.nome{ font-weight:bold; margin-top:5px; }
+.desc{ font-size:14px; color:#9ca3af; }
+
+.badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+    padding:4px 8px;
+    border-radius:6px;
+    font-size:12px;
+    font-weight:bold;
+    text-transform:uppercase;
+}
+
+.comum .badge{ background:#6b7280; }
+.incomum .badge{ background:#22c55e; }
+.raro .badge{ background:#3b82f6; }
+.epico .badge{ background:#a855f7; }
+.lendario .badge{ background:#facc15; color:#000; }
+
+.price{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:#00ff88;
+    font-weight:bold;
+    margin-top:5px;
+}
+
+.price img{
+    width:20px;
+    height:20px;
+}
+
+.buy{
+    display:block;
+    margin-top:10px;
+    padding:10px;
+    text-align:center;
+    border-radius:10px;
+    border:1px solid #ff2a2a;
+    color:#ff2a2a;
+    text-decoration:none;
+}
+
+.buy:hover{
+    background:#ff2a2a;
+    color:#000;
+}
+
+.empty{
+    text-align:center;
+    margin-top:40px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h2>📦 ITENS</h2>
+    <a href="/catalogo" class="back">⬅ Voltar</a>
+</div>
+
+<div class="filter">
+    <select id="filtro" onchange="carregar()">
+        <option value="">Todas raridades</option>
+        <option value="comum">Comum</option>
+        <option value="incomum">Incomum</option>
+        <option value="raro">Raro</option>
+        <option value="epico">Épico</option>
+        <option value="lendario">Lendário</option>
+    </select>
+</div>
+
+<div class="container">
+    <div class="grid" id="lista"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const client = supabase.createClient(
+  "https://dbqleycdrkdhxrozsmup.supabase.co",
+  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
+);
+
+const WHATSAPP_PADRAO = "5599999999999";
+
+/* FORMATAR NÚMERO (AGORA FUNCIONA COM NUMBER TBM) */
+function formatarNumero(num){
+    if(!num) return WHATSAPP_PADRAO;
+
+    num = String(num).replace(/\D/g,"");
+
+    if(!num.startsWith("55")){
+        num = "55" + num;
+    }
+
+    return num;
+}
+
+/* carregar */
+async function carregar(){
+
+    const filtro = document.getElementById("filtro").value;
+
+    let query = client.from("itens").select("*");
+
+    if(filtro){
+        query = query.eq("raridade", filtro);
+    }
+
+    const { data, error } = await query.order("id",{ascending:false});
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    if(error){
+        lista.innerHTML = "<p class='empty'>Erro ao carregar</p>";
+        return;
+    }
+
+    if(!data || data.length === 0){
+        lista.innerHTML = "<p class='empty'>Nenhum item</p>";
+        return;
+    }
+
+    data.forEach(item=>{
+
+        const raridade = item.raridade || "comum";
+        const numero = formatarNumero(item.whatsapp);
+
+        const msg = encodeURIComponent(
+            `Olá! Quero comprar: ${item.nome}`
+        );
+
+        const link = `https://wa.me/${numero}?text=${msg}`;
+
+        const img = item.imagem ? item.imagem : "default.png";
+
+        lista.innerHTML += `
+        <div class="card ${raridade}">
+            <div class="badge">${raridade}</div>
+
+            <img src="${img}">
+
+            <div class="nome">${item.nome}</div>
+            <div class="desc">${item.descricao || ""}</div>
+
+            <div class="price">
+                <img src="price.png">
+                R$ ${parseFloat(item.preco || 0).toFixed(2)}
+            </div>
+
+            <a href="${link}" target="_blank" class="buy">
+                🛒 Comprar
+            </a>
+        </div>
+        `;
+    });
+}
+
+carregar();
+</script>
+
+</body>
+</html>
