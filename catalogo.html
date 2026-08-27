@@ -3,300 +3,181 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Catálogo</title>
+<title>Catálogo Definya</title>
 
 <style>
-:root{
-    --main:#ff2a2a;
-    --soft:rgba(255,0,0,0.3);
-    --bg:#000;
-    --card:#0a0a0f;
-    --text:#e5e7eb;
-}
-
 body{
     margin:0;
     font-family:Arial;
-    background:var(--bg);
-    color:var(--text);
+    background:#05060a;
+    color:#e2e8f0;
     overflow-x:hidden;
 }
 
-/* glow */
+/* 🔴 FUNDO GLOW */
 body::before{
     content:"";
     position:fixed;
-    width:600px;
-    height:600px;
-    background: radial-gradient(circle, rgba(255,40,0,0.15), transparent 60%);
+    width:500px;
+    height:500px;
+    background: radial-gradient(circle, rgba(255,50,0,0.15), transparent 60%);
     top:-200px;
     left:-200px;
-    z-index:-3;
+    z-index:-2;
 }
 
 body::after{
     content:"";
     position:fixed;
-    width:600px;
-    height:600px;
-    background: radial-gradient(circle, rgba(255,0,0,0.1), transparent 60%);
+    width:500px;
+    height:500px;
+    background: radial-gradient(circle, rgba(255,0,0,0.08), transparent 60%);
     bottom:-200px;
     right:-200px;
-    z-index:-3;
-}
-
-/* vento */
-.wind{
-    position:fixed;
-    width:100%;
-    height:100%;
-    background: repeating-linear-gradient(
-        90deg,
-        rgba(255,0,0,0.05) 0px,
-        transparent 2px,
-        transparent 6px
-    );
-    animation: windMove 6s linear infinite;
     z-index:-2;
 }
 
-@keyframes windMove{
-    from{ transform:translateX(0); }
-    to{ transform:translateX(-40px); }
+/* ANIMAÇÃO */
+.fade-in{
+    opacity:0;
+    transform:translateY(20px);
+    animation:fadeIn 0.8s ease forwards;
 }
 
-/* partículas */
-.particle{
-    position:fixed;
-    bottom:-10px;
-    border-radius:50%;
-    background:var(--main);
-    box-shadow:0 0 12px var(--main);
-    z-index:-1;
-    animation: floatUp linear forwards;
+@keyframes fadeIn{
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
 }
 
-@keyframes floatUp{
-    from{ transform:translateY(0); }
-    to{ transform:translateY(-120vh); }
-}
-
-/* layout */
 .container{
     max-width:900px;
     margin:auto;
     padding:20px;
 }
 
-.header{
+/* TOPO */
+.topbar{
     display:flex;
     justify-content:space-between;
     align-items:center;
+    margin-bottom:20px;
 }
 
-h1{
-    color:var(--main);
-    text-shadow:0 0 12px var(--soft);
-}
-
-.section-title{
-    text-align:center;
-    margin-top:30px;
-    color:var(--main);
-    text-shadow:0 0 10px var(--soft);
-}
-
-/* card */
-.card{
-    background:var(--card);
-    padding:15px;
-    margin:15px 0;
-    border-radius:12px;
-    border:1px solid rgba(255,255,255,0.06);
-
-    opacity:0;
-    transform:translateY(50px);
-    transition:all 0.6s ease;
-}
-
-.card.show{
-    opacity:1;
-    transform:translateY(0);
-}
-
-.card:hover{
-    border-color:var(--main);
-    box-shadow:0 0 20px var(--soft);
-    transform:translateY(-5px) scale(1.02);
-}
-
-img{
-    width:100%;
-    border-radius:10px;
-    margin:10px 0;
-}
-
-/* 💸 PREÇO COM IMAGEM */
-.price{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    color:#00ff88;
-    font-weight:bold;
-}
-
-.price img{
-    width:24px;
-    height:24px;
-    filter: drop-shadow(0 0 8px rgba(0,255,150,0.9));
-}
-
-/* botão */
-.buy-btn{
-    display:block;
-    margin-top:10px;
-    padding:10px;
-    text-align:center;
-    border:1px solid var(--main);
-    color:var(--main);
-    border-radius:10px;
+.back{
+    padding:8px 14px;
+    border:1px solid #ff2a2a;
+    color:#ff2a2a;
     text-decoration:none;
-    box-shadow:0 0 10px var(--soft);
+    border-radius:10px;
+    box-shadow:0 0 8px rgba(255,0,0,0.4);
     transition:0.2s;
 }
 
-.buy-btn:hover{
-    background:var(--main);
+.back:hover{
+    background:#ff2a2a;
     color:#000;
-    box-shadow:0 0 20px var(--main);
+}
+
+/* LOGO */
+.logo{
+    display:block;
+    margin:20px auto 30px auto;
+    max-width:360px;
+    width:100%;
+    filter: drop-shadow(0 0 15px rgba(255,0,0,0.5));
+}
+
+/* IMAGEM DOS CARDS */
+.card-img{
+    width:100%;
+    max-height:120px;
+    object-fit:contain;
+    margin-bottom:10px;
+    filter: drop-shadow(0 0 10px rgba(255,0,0,0.4));
+}
+
+/* CARDS */
+.card{
+    background:#0b1220;
+    padding:20px;
+    margin:15px 0;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.05);
+    transition:0.25s;
+}
+
+.card:hover{
+    transform:scale(1.04);
+    border-color:#ff2a2a;
+    box-shadow:0 0 20px rgba(255,0,0,0.3);
+}
+
+a{
+    text-decoration:none;
+    color:inherit;
+}
+
+/* BOTÃO */
+.btn{
+    display:block;
+    margin-top:10px;
+    padding:12px;
+    text-align:center;
+    border-radius:10px;
+    border:1px solid #ff2a2a;
+    color:#ff2a2a;
+    box-shadow:0 0 10px rgba(255,0,0,0.4);
+    transition:0.2s;
+}
+
+.btn:hover{
+    background:#ff2a2a;
+    color:#000;
+}
+
+/* TEXTO */
+.sub{
+    color:#94a3b8;
+    font-size:14px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="wind"></div>
+<div class="container fade-in">
 
-<div class="container">
-
-    <div class="header">
-        <h1>📦 CATÁLOGO</h1>
+    <!-- TOPO -->
+    <div class="topbar">
+        <a href="/index.html" class="back">⬅ Voltar</a>
     </div>
 
-    <h2 class="section-title">🔥 MAIS PROCURADOS</h2>
-    <div id="destaques"></div>
+    <!-- LOGO -->
+    <img src="InShot_20260415_232237061.png" class="logo fade-in">
 
-    <h2 class="section-title">📦 TODOS OS PRODUTOS</h2>
-    <div id="todos"></div>
+    <!-- UPADORES -->
+    <div class="card fade-in" style="animation-delay:0.2s;">
+        <img src="InShot_20260415_233141446.png" class="card-img">
+        <p class="sub">Serviços de melhoria de conta, skills e progressão.</p>
+        <a class="btn" href="skill/index.html">Acessar</a>
+    </div>
+
+    <!-- CONTAS -->
+    <div class="card fade-in" style="animation-delay:0.4s;">
+        <img src="InShot_20260415_232954727.png" class="card-img">
+        <a class="btn" href="dashboard/index.html">Acessar</a>
+    </div>
+
+    <!-- ITENS -->
+    <div class="card fade-in" style="animation-delay:0.6s;">
+        <img src="InShot_20260415_233237975.png" class="card-img">
+        <p class="sub">Encontre os itens que você procura.</p>
+        <a class="btn" href="itens/index.html">Acessar</a>
+    </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-const client = supabase.createClient(
-  "https://dbqleycdrkdhxrozsmup.supabase.co",
-  "sb_publishable_FWn_AbD03PebLf2NLt5CZQ_iFkM7fis"
-);
-
-/* FORMATAR NÚMERO */
-function formatarNumero(num){
-    if(!num) return "5599999999999";
-
-    num = num.replace(/\D/g,"");
-
-    if(!num.startsWith("55")){
-        num = "55" + num;
-    }
-
-    return num;
-}
-
-/* partículas */
-setInterval(() => {
-    const p = document.createElement("div");
-    p.classList.add("particle");
-
-    let size = Math.random() * 4 + 1;
-
-    p.style.width = size + "px";
-    p.style.height = size + "px";
-    p.style.left = Math.random() * 100 + "vw";
-    p.style.animationDuration = (6 + Math.random()*6) + "s";
-
-    document.body.appendChild(p);
-    setTimeout(()=>p.remove(), 12000);
-
-}, 250);
-
-/* render */
-function renderCard(item){
-
-    const numero = formatarNumero(item.whatsapp);
-
-    const whatsapp = `https://wa.me/${numero}?text=${encodeURIComponent("Olá! Tenho interesse no produto: " + item.nome)}`;
-
-    return `
-        <div class="card">
-            <h3 style="color:#ff2a2a">${item.nome}</h3>
-
-            ${item.imagem ? `<img src="${item.imagem}">` : ""}
-
-            <p>${item.descricao}</p>
-
-            <div class="price">
-                <img src="/price.png">
-                R$ ${parseFloat(item.preco).toFixed(2)}
-            </div>
-
-            <a class="buy-btn" href="${whatsapp}" target="_blank">
-                🛒 Comprar
-            </a>
-        </div>
-    `;
-}
-
-/* animação */
-function observerSetup(){
-    const cards = document.querySelectorAll(".card");
-
-    const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-            if(entry.isIntersecting){
-                entry.target.classList.add("show");
-            }
-        });
-    }, { threshold:0.15 });
-
-    cards.forEach(card => observer.observe(card));
-}
-
-/* carregar */
-async function carregar(){
-
-    const d = await client
-        .from("produtos")
-        .select("*")
-        .eq("destaque", true)
-        .limit(5);
-
-    document.getElementById("destaques").innerHTML =
-        d.data?.map(renderCard).join("") || "<p>Nenhum destaque</p>";
-
-    const t = await client
-        .from("produtos")
-        .select("*")
-        .eq("destaque", false)
-        .order("id", { ascending:false });
-
-    document.getElementById("todos").innerHTML =
-        t.data?.map(renderCard).join("") || "<p>Sem produtos</p>";
-
-    observerSetup();
-}
-
-carregar();
-</script>
-
 </body>
-  </html>
+</html>
